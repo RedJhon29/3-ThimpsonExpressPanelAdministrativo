@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Si es un archivo o directorio real, servirlo directamente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirigir todo a public/index.php
+RewriteRule ^(.*)$ public/index.php [QSA,L]
