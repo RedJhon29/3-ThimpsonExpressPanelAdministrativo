@@ -4,7 +4,7 @@
  * Todas las peticiones pasan por aquí vía .htaccess
  */
 
-require_once __DIR__ . '/config/app.php';
+require_once __DIR__ . '/Configuracion/app.php';
 
 // URI actual
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -19,85 +19,85 @@ if (strpos($uri, $projectPrefix) === 0) {
 // Router: mapear rutas → Controlador@método
 $routes = [
     // Dashboard
-    '/'                         => ['DashboardController', 'index'],
-    '/dashboard'                => ['DashboardController', 'index'],
+    '/'                         => ['dashboardController', 'index'],
+    '/dashboard'                => ['dashboardController', 'index'],
 
     // Pedidos
-    '/orders'                   => ['OrderController', 'index'],
-    '/orders/detail'            => ['OrderController', 'detail'],
+    '/orders'                   => ['orderController', 'index'],
+    '/orders/detail'            => ['orderController', 'detail'],
 
     // Riders
-    '/riders'                   => ['RiderController', 'index'],
-    '/riders/detail'            => ['RiderController', 'detail'],
-    '/riders/tracking'          => ['RiderController', 'tracking'],
+    '/riders'                   => ['riderController', 'index'],
+    '/riders/detail'            => ['riderController', 'detail'],
+    '/riders/tracking'          => ['riderController', 'tracking'],
 
     // Servicios
-    '/services'                 => ['ServiceController', 'index'],
+    '/services'                 => ['serviceController', 'index'],
 
     // Marketplace
-    '/marketplace'              => ['MarketplaceController', 'index'],
+    '/marketplace'              => ['marketplaceController', 'index'],
 
     // CMS
-    '/cms'                      => ['CmsController', 'index'],
-    '/landing-editor'           => ['LandingEditorController', 'index'],
+    '/cms'                      => ['cmsController', 'index'],
+    '/landing-editor'           => ['landingEditorController', 'index'],
 
     // Chatbot
-    '/chatbot'                  => ['ChatbotController', 'index'],
+    '/chatbot'                  => ['chatbotController', 'index'],
 
     // Clientes
-    '/clients'                  => ['ClientController', 'index'],
+    '/clients'                  => ['clientController', 'index'],
 
     // Finanzas
-    '/finance'                  => ['FinanceController', 'index'],
+    '/finance'                  => ['financeController', 'index'],
 
     // Conversaciones
-    '/conversations'            => ['ConversationController', 'index'],
+    '/conversations'            => ['conversationController', 'index'],
 
     // Suscriptores
-    '/subscribers'              => ['SubscriberController', 'index'],
+    '/subscribers'              => ['subscriberController', 'index'],
 
     // Reviews
-    '/reviews'                  => ['ReviewController', 'index'],
+    '/reviews'                  => ['reviewController', 'index'],
 
     // Ratings
-    '/ratings'                  => ['RatingController', 'index'],
+    '/ratings'                  => ['ratingController', 'index'],
 
     // Promociones
-    '/promotions'               => ['PromotionController', 'index'],
+    '/promotions'               => ['promotionController', 'index'],
 
     // Zonas
-    '/zones'                    => ['ZoneController', 'index'],
+    '/zones'                    => ['zoneController', 'index'],
 
     // Notificaciones
-    '/notifications'            => ['NotificationController', 'index'],
+    '/notifications'            => ['notificationController', 'index'],
 
     // Reportes
-    '/reports'                  => ['ReportController', 'index'],
+    '/reports'                  => ['reportController', 'index'],
 
     // Auditoría
-    '/audit'                    => ['AuditController', 'index'],
+    '/audit'                    => ['auditController', 'index'],
 
     // Configuración
-    '/settings'                 => ['SettingsController', 'index'],
+    '/settings'                 => ['settingsController', 'index'],
 
     // Usuarios Admin
-    '/admin-users'              => ['AdminUserController', 'index'],
+    '/admin-users'              => ['adminUserController', 'index'],
 
     // Dispositivos
-    '/devices'                  => ['DeviceController', 'index'],
+    '/devices'                  => ['deviceController', 'index'],
 
     // Soporte
-    '/support'                  => ['SupportController', 'index'],
+    '/support'                  => ['supportController', 'index'],
 
     // Suscripciones
-    '/subscriptions'            => ['SubscriptionController', 'index'],
+    '/subscriptions'            => ['subscriptionController', 'index'],
 
     // Pricing
-    '/pricing'                  => ['PricingController', 'index'],
+    '/pricing'                  => ['pricingController', 'index'],
 
     // WhatsApp
-    '/whatsapp'                 => ['WhatsappController', 'index'],
-    '/openwa'                   => ['OpenwaController', 'index'],
+    '/whatsapp'                 => ['whatsappController', 'index'],
+    '/openwa'                   => ['openwaController', 'index'],
 ];
 
 // Buscar coincidencia exacta
@@ -132,9 +132,9 @@ if ($controller === null) {
     http_response_code(404);
     $pageTitle = '404 - No encontrado';
     $activeMenu = '';
-    include VIEW_PATH . '/layouts/admin-header.php';
-    include VIEW_PATH . '/errors/404.php';
-    include VIEW_PATH . '/layouts/admin-footer.php';
+    include VIEW_PATH . '/Plantillas/adminHeader.php';
+    include VIEW_PATH . '/Errores/404.php';
+    include VIEW_PATH . '/Plantillas/adminFooter.php';
     exit;
 }
 
