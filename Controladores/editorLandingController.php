@@ -1,5 +1,5 @@
 <?php
-class landingEditorController {
+class editorLandingController {
     public function index() {
         $pageTitle = 'Editor de Landing';
         $activeMenu = 'landing-editor';

@@ -1,9 +1,9 @@
 <?php
-class orderController {
+class pedidoController {
     public function index() {
         $pageTitle = 'Gestión de Pedidos';
         $activeMenu = 'orders';
-        $orders = Order::all();
+        $orders = Pedido::all();
         include VIEW_PATH . '/Pedidos/index.php';
     }
     public function detail() {

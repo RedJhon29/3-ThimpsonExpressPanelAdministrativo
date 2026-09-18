@@ -1,9 +1,9 @@
 <?php
-class conversationController {
+class conversacionController {
     public function index() {
         $pageTitle = 'Conversaciones';
         $activeMenu = 'conversations';
-        $conversations = Conversation::all();
+        $conversations = Conversacion::all();
         include VIEW_PATH . '/Conversaciones/index.php';
     }
 }

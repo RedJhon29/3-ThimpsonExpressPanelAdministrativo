@@ -1,9 +1,9 @@
 <?php
-class serviceController {
+class servicioController {
     public function index() {
         $pageTitle = 'Servicios';
         $activeMenu = 'services';
-        $services = Service::all();
+        $services = Servicio::all();
         include VIEW_PATH . '/Servicios/index.php';
     }
 }

@@ -1,10 +1,10 @@
 <?php
-class cmsController {
+class gestorContenidoController {
     public function index() {
         $pageTitle = 'CMS';
         $activeMenu = 'cms';
-        $banners = Cms::getBanners();
-        $faqs = Cms::getFaqs();
+        $banners = GestorContenido::getBanners();
+        $faqs = GestorContenido::getFaqs();
         include VIEW_PATH . '/Cms/index.php';
     }
 }

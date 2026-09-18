@@ -1,9 +1,9 @@
 <?php
-class deviceController {
+class dispositivoController {
     public function index() {
         $pageTitle = 'Dispositivos';
         $activeMenu = 'devices';
-        $devices = Device::all();
+        $devices = Dispositivo::all();
         include VIEW_PATH . '/Dispositivos/index.php';
     }
 }

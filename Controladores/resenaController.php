@@ -1,9 +1,9 @@
 <?php
-class reviewController {
+class resenaController {
     public function index() {
         $pageTitle = 'Reseñas';
         $activeMenu = 'reviews';
-        $reviews = Rating::all();
+        $reviews = Calificacion::all();
         include VIEW_PATH . '/Resenas/index.php';
     }
 }

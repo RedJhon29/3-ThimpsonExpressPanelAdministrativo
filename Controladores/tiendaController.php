@@ -1,9 +1,9 @@
 <?php
-class marketplaceController {
+class tiendaController {
     public function index() {
         $pageTitle = 'Marketplace';
         $activeMenu = 'marketplace';
-        $businesses = Business::all();
+        $businesses = Negocio::all();
         include VIEW_PATH . '/Marketplace/index.php';
     }
 }

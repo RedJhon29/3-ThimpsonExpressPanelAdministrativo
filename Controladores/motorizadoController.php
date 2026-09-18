@@ -1,9 +1,9 @@
 <?php
-class riderController {
+class motorizadoController {
     public function index() {
         $pageTitle = 'Gestión de Riders';
         $activeMenu = 'riders';
-        $riders = Rider::all();
+        $riders = Motorizado::all();
         include VIEW_PATH . '/Riders/index.php';
     }
     public function detail() {
@@ -14,7 +14,7 @@ class riderController {
     public function tracking() {
         $pageTitle = 'Tracking en Vivo';
         $activeMenu = 'riders';
-        $riders = Rider::all();
+        $riders = Motorizado::all();
         include VIEW_PATH . '/Riders/tracking.php';
     }
 }

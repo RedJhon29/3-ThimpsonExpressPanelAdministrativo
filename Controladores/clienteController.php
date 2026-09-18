@@ -1,9 +1,9 @@
 <?php
-class clientController {
+class clienteController {
     public function index() {
         $pageTitle = 'Clientes';
         $activeMenu = 'clients';
-        $clients = Client::all();
+        $clients = Cliente::all();
         include VIEW_PATH . '/Clientes/index.php';
     }
 }

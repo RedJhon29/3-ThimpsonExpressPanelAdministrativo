@@ -1,9 +1,9 @@
 <?php
-class auditController {
+class auditoriaController {
     public function index() {
         $pageTitle = 'Auditoría';
         $activeMenu = 'audit';
-        $logs = Audit::all();
+        $logs = Auditoria::all();
         include VIEW_PATH . '/Auditoria/index.php';
     }
 }

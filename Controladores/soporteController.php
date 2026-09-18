@@ -1,9 +1,9 @@
 <?php
-class supportController {
+class soporteController {
     public function index() {
         $pageTitle = 'Soporte';
         $activeMenu = 'support';
-        $tickets = Support::all();
+        $tickets = Soporte::all();
         include VIEW_PATH . '/Soporte/index.php';
     }
 }

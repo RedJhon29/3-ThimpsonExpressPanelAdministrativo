@@ -19,81 +19,81 @@ if (strpos($uri, $projectPrefix) === 0) {
 // Router: mapear rutas → Controlador@método
 $routes = [
     // Dashboard
-    '/'                         => ['dashboardController', 'index'],
-    '/dashboard'                => ['dashboardController', 'index'],
+    '/'                         => ['panelController', 'index'],
+    '/dashboard'                => ['panelController', 'index'],
 
     // Pedidos
-    '/orders'                   => ['orderController', 'index'],
-    '/orders/detail'            => ['orderController', 'detail'],
+    '/orders'                   => ['pedidoController', 'index'],
+    '/orders/detail'            => ['pedidoController', 'detail'],
 
     // Riders
-    '/riders'                   => ['riderController', 'index'],
-    '/riders/detail'            => ['riderController', 'detail'],
-    '/riders/tracking'          => ['riderController', 'tracking'],
+    '/riders'                   => ['motorizadoController', 'index'],
+    '/riders/detail'            => ['motorizadoController', 'detail'],
+    '/riders/tracking'          => ['motorizadoController', 'tracking'],
 
     // Servicios
-    '/services'                 => ['serviceController', 'index'],
+    '/services'                 => ['servicioController', 'index'],
 
     // Marketplace
-    '/marketplace'              => ['marketplaceController', 'index'],
+    '/marketplace'              => ['tiendaController', 'index'],
 
     // CMS
-    '/cms'                      => ['cmsController', 'index'],
-    '/landing-editor'           => ['landingEditorController', 'index'],
+    '/cms'                      => ['gestorContenidoController', 'index'],
+    '/landing-editor'           => ['editorLandingController', 'index'],
 
     // Chatbot
-    '/chatbot'                  => ['chatbotController', 'index'],
+    '/chatbot'                  => ['asistenteVirtualController', 'index'],
 
     // Clientes
-    '/clients'                  => ['clientController', 'index'],
+    '/clients'                  => ['clienteController', 'index'],
 
     // Finanzas
-    '/finance'                  => ['financeController', 'index'],
+    '/finance'                  => ['finanzaController', 'index'],
 
     // Conversaciones
-    '/conversations'            => ['conversationController', 'index'],
+    '/conversations'            => ['conversacionController', 'index'],
 
     // Suscriptores
-    '/subscribers'              => ['subscriberController', 'index'],
+    '/subscribers'              => ['suscriptorController', 'index'],
 
     // Reviews
-    '/reviews'                  => ['reviewController', 'index'],
+    '/reviews'                  => ['resenaController', 'index'],
 
     // Ratings
-    '/ratings'                  => ['ratingController', 'index'],
+    '/ratings'                  => ['calificacionController', 'index'],
 
     // Promociones
-    '/promotions'               => ['promotionController', 'index'],
+    '/promotions'               => ['promocionController', 'index'],
 
     // Zonas
-    '/zones'                    => ['zoneController', 'index'],
+    '/zones'                    => ['zonaController', 'index'],
 
     // Notificaciones
-    '/notifications'            => ['notificationController', 'index'],
+    '/notifications'            => ['notificacionController', 'index'],
 
     // Reportes
-    '/reports'                  => ['reportController', 'index'],
+    '/reports'                  => ['reporteController', 'index'],
 
     // Auditoría
-    '/audit'                    => ['auditController', 'index'],
+    '/audit'                    => ['auditoriaController', 'index'],
 
     // Configuración
-    '/settings'                 => ['settingsController', 'index'],
+    '/settings'                 => ['configuracionController', 'index'],
 
     // Usuarios Admin
-    '/admin-users'              => ['adminUserController', 'index'],
+    '/admin-users'              => ['usuarioAdminController', 'index'],
 
     // Dispositivos
-    '/devices'                  => ['deviceController', 'index'],
+    '/devices'                  => ['dispositivoController', 'index'],
 
     // Soporte
-    '/support'                  => ['supportController', 'index'],
+    '/support'                  => ['soporteController', 'index'],
 
     // Suscripciones
-    '/subscriptions'            => ['subscriptionController', 'index'],
+    '/subscriptions'            => ['suscripcionController', 'index'],
 
     // Pricing
-    '/pricing'                  => ['pricingController', 'index'],
+    '/pricing'                  => ['precioController', 'index'],
 
     // WhatsApp
     '/whatsapp'                 => ['whatsappController', 'index'],
@@ -132,9 +132,9 @@ if ($controller === null) {
     http_response_code(404);
     $pageTitle = '404 - No encontrado';
     $activeMenu = '';
-    include VIEW_PATH . '/Plantillas/adminHeader.php';
+    include VIEW_PATH . '/Plantillas/encabezadoAdmin.php';
     include VIEW_PATH . '/Errores/404.php';
-    include VIEW_PATH . '/Plantillas/adminFooter.php';
+    include VIEW_PATH . '/Plantillas/pieAdmin.php';
     exit;
 }
 

@@ -1,5 +1,5 @@
 <?php
-class reportController {
+class reporteController {
     public function index() {
         $pageTitle = 'Reportes';
         $activeMenu = 'reports';

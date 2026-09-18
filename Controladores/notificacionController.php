@@ -1,10 +1,10 @@
 <?php
-class notificationController {
+class notificacionController {
     public function index() {
         $pageTitle = 'Notificaciones';
         $activeMenu = 'notifications';
-        $notifications = Notification::all();
-        $rules = Notification::getRules();
+        $notifications = Notificacion::all();
+        $rules = Notificacion::getRules();
         include VIEW_PATH . '/Notificaciones/index.php';
     }
 }

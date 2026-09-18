@@ -1,11 +1,11 @@
 <?php
-class ratingController {
+class calificacionController {
     public function index() {
         $pageTitle = 'Calificaciones';
         $activeMenu = 'ratings';
-        $ratings = Rating::all();
-        $breakdown = Rating::breakdown();
-        $average = Rating::average();
+        $ratings = Calificacion::all();
+        $breakdown = Calificacion::breakdown();
+        $average = Calificacion::average();
         include VIEW_PATH . '/Calificaciones/index.php';
     }
 }

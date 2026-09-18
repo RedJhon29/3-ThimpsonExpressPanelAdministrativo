@@ -1,9 +1,9 @@
 <?php
-class settingsController {
+class configuracionController {
     public function index() {
         $pageTitle = 'Configuración';
         $activeMenu = 'settings';
-        $settings = Settings::getAll();
+        $settings = Configuracion::getAll();
         include VIEW_PATH . '/Configuracion/index.php';
     }
 }

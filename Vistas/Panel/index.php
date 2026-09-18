@@ -1,5 +1,5 @@
-<?php include VIEW_PATH . '/Plantillas/adminHeader.php'; ?>
-<?php include VIEW_PATH . '/Plantillas/adminSidebar.php'; ?>
+<?php include VIEW_PATH . '/Plantillas/encabezadoAdmin.php'; ?>
+<?php include VIEW_PATH . '/Plantillas/barraLateralAdmin.php'; ?>
 
 <!-- Dashboard Content -->
 <div class="row g-3 mb-4">
@@ -100,7 +100,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var statusCounts = <?php echo json_encode(Order::statusCounts()); ?>;
+    var statusCounts = <?php echo json_encode(Pedido::statusCounts()); ?>;
     var ctx = document.getElementById('ordersChart');
     if (ctx) {
         new Chart(ctx, {
@@ -127,4 +127,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include VIEW_PATH . '/Plantillas/adminFooter.php'; ?>
+<?php include VIEW_PATH . '/Plantillas/pieAdmin.php'; ?>

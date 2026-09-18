@@ -1,9 +1,9 @@
 <?php
-class promotionController {
+class promocionController {
     public function index() {
         $pageTitle = 'Promociones';
         $activeMenu = 'promotions';
-        $promotions = Promotion::all();
+        $promotions = Promocion::all();
         include VIEW_PATH . '/Promociones/index.php';
     }
 }

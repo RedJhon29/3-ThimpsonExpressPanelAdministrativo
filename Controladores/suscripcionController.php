@@ -1,9 +1,9 @@
 <?php
-class subscriptionController {
+class suscripcionController {
     public function index() {
         $pageTitle = 'Suscripciones';
         $activeMenu = 'subscriptions';
-        $subscriptions = Subscription::all();
+        $subscriptions = Suscripcion::all();
         include VIEW_PATH . '/Suscripciones/index.php';
     }
 }

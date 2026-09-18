@@ -1,9 +1,9 @@
 <?php
-class chatbotController {
+class asistenteVirtualController {
     public function index() {
         $pageTitle = 'Chatbot';
         $activeMenu = 'chatbot';
-        $intents = Chatbot::getIntents();
+        $intents = AsistenteVirtual::getIntents();
         include VIEW_PATH . '/Chatbot/index.php';
     }
 }

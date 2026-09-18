@@ -1,9 +1,9 @@
 <?php
-class subscriberController {
+class suscriptorController {
     public function index() {
         $pageTitle = 'Suscriptores';
         $activeMenu = 'subscribers';
-        $subscribers = Subscriber::all();
+        $subscribers = Suscriptor::all();
         include VIEW_PATH . '/Suscriptores/index.php';
     }
 }

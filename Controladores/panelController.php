@@ -1,11 +1,11 @@
 <?php
-class dashboardController {
+class panelController {
     public function index() {
         $pageTitle = 'Dashboard';
         $activeMenu = 'dashboard';
-        $stats = Dashboard::getStats();
-        $recentOrders = Order::all();
-        $riders = Rider::all();
+        $stats = Panel::getStats();
+        $recentOrders = Pedido::all();
+        $riders = Motorizado::all();
         include VIEW_PATH . '/Panel/index.php';
     }
 }
