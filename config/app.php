@@ -11,7 +11,7 @@ define('CONTROLLER_PATH', BASE_PATH . '/controllers');
 define('MODEL_PATH', BASE_PATH . '/models');
 
 // URL base
-define('BASE_URL', '/3-ThimpsonExpressPanelAdministrativo/php/public');
+define('BASE_URL', '/3-ThimpsonExpressPanelAdministrativo');
 
 // Datos de la empresa
 define('APP_NAME', 'Thimpson Express');
