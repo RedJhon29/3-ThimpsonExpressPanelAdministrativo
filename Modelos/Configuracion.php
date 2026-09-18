@@ -1,5 +1,5 @@
 <?php
-class Settings {
+class Configuracion {
     private static $settings = [
         'app_name' => 'Thimpson Express',
         'currency' => 'C$',

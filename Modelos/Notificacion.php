@@ -1,5 +1,5 @@
 <?php
-class Notification {
+class Notificacion {
     private static $notifications = [
         ['id'=>1,'type'=>'order_update','message'=>'Pedido TEX-0847 actualizado a En Camino','time'=>'14:35','read'=>false],
         ['id'=>2,'type'=>'new_rider','message'=>'Nuevo rider registrado: Carlos Peralta','time'=>'12:00','read'=>true],

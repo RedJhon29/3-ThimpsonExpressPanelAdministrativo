@@ -1,5 +1,5 @@
 <?php
-class Subscription {
+class Suscripcion {
     private static $subscriptions = [
         ['id'=>1,'client'=>'Sabor Criollo','plan'=>'Pro','cycle'=>'monthly','amount'=>25,'status'=>'active','renewal'=>'2026-10-01'],
         ['id'=>2,'client'=>'Farmacia Divina','plan'=>'Pro','cycle'=>'yearly','amount'=>240,'status'=>'active','renewal'=>'2027-01-01'],

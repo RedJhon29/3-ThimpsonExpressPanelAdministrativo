@@ -1,5 +1,5 @@
 <?php
-class Support {
+class Soporte {
     private static $tickets = [
         ['id'=>1,'client'=>'Carlos Martínez','subject'=>'Pedido no entregado','status'=>'open','priority'=>'high','created'=>'2026-09-18 10:00'],
         ['id'=>2,'client'=>'Ana Rodríguez','subject'=>'Consulta sobre precio','status'=>'closed','priority'=>'low','created'=>'2026-09-17 15:00'],

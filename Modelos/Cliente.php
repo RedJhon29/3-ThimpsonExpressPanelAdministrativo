@@ -1,5 +1,5 @@
 <?php
-class Client {
+class Cliente {
     private static $clients = [
         ['id'=>1,'name'=>'Carlos Martínez','email'=>'carlos@email.com','phone'=>'+505 8100 1111','orders'=>15,'joined'=>'2026-01-15','status'=>'active'],
         ['id'=>2,'name'=>'Ana Rodríguez','email'=>'ana@email.com','phone'=>'+505 8100 2222','orders'=>23,'joined'=>'2026-02-20','status'=>'active'],

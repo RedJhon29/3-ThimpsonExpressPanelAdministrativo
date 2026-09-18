@@ -1,5 +1,5 @@
 <?php
-class Chatbot {
+class AsistenteVirtual {
     private static $intents = [
         ['id'=>1,'name'=>'Saludo','patterns'=>['hola','buenos dias','hey'],'response'=>'¡Hola! ¿En qué puedo ayudarte?'],
         ['id'=>2,'name'=>'Precio','patterns'=>['precio','cuanto cuesta','costo'],'response'=>'Nuestros servicios de mandado cuestan C$40 por parada.'],

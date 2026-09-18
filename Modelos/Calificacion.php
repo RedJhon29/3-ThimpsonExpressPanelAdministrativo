@@ -1,5 +1,5 @@
 <?php
-class Rating {
+class Calificacion {
     private static $ratings = [
         ['id'=>1,'rider'=>'María Torres','client'=>'Carlos M.','rating'=>5,'comment'=>'Excelente servicio','date'=>'2026-09-15'],
         ['id'=>2,'rider'=>'María Torres','client'=>'Ana R.','rating'=>5,'comment'=>'Muy profesional','date'=>'2026-09-14'],

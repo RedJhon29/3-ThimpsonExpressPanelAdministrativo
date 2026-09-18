@@ -1,5 +1,5 @@
 <?php
-class Business {
+class Negocio {
     private static $businesses = [
         ['id'=>1,'name'=>'Sabor Criollo','category'=>'Comida','rating'=>4.8,'reviews'=>132,'plan'=>'premium','status'=>'active'],
         ['id'=>2,'name'=>'Farmacia Divina Providencia','category'=>'Farmacias','rating'=>4.9,'reviews'=>87,'plan'=>'premium','status'=>'active'],

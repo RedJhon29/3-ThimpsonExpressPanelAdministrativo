@@ -1,5 +1,5 @@
 <?php
-class Conversation {
+class Conversacion {
     private static $conversations = [
         ['id'=>1,'client'=>'Carlos Martínez','last_message'=>'¿Cuánto cuesta el delivery?','time'=>'14:30','unread'=>2,'status'=>'open'],
         ['id'=>2,'client'=>'Ana Rodríguez','last_message'=>'Gracias por la entrega','time'=>'13:45','unread'=>0,'status'=>'closed'],

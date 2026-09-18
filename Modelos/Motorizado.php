@@ -1,5 +1,5 @@
 <?php
-class Rider {
+class Motorizado {
     private static $riders = [
         ['id'=>1,'name'=>'María Torres','phone'=>'+505 8800 1111','vehicle'=>'Moto Yamaha FZ','plate'=>'M-12345','rating'=>4.9,'deliveries'=>342,'status'=>'active','current_lat'=>13.6424,'current_lng'=>-86.4864],
         ['id'=>2,'name'=>'Luis Gómez','phone'=>'+505 8800 2222','vehicle'=>'Moto Honda Wave','plate'=>'M-67890','rating'=>4.8,'deliveries'=>218,'status'=>'active','current_lat'=>13.6324,'current_lng'=>-86.4764],

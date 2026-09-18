@@ -4,5 +4,5 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Redirigir todo a Publico/index.php
-RewriteRule ^(.*)$ Publico/index.php [QSA,L]
+# Redirigir todo a index.php (raíz)
+RewriteRule ^(.*)$ index.php [QSA,L]

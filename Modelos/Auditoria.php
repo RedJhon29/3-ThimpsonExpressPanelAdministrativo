@@ -1,5 +1,5 @@
 <?php
-class Audit {
+class Auditoria {
     private static $logs = [
         ['id'=>1,'user'=>'Admin','action'=>'Login','details'=>'Inicio de sesión exitoso','ip'=>'192.168.1.1','time'=>'2026-09-18 08:00'],
         ['id'=>2,'user'=>'Admin','action'=>'Editar servicio','details'=>'Actualizó precio de Mandado','ip'=>'192.168.1.1','time'=>'2026-09-18 09:15'],

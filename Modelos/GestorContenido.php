@@ -1,5 +1,5 @@
 <?php
-class Cms {
+class GestorContenido {
     private static $banners = [
         ['id'=>1,'title'=>'Celebramos con vos!','active'=>true,'start_date'=>'2026-08-01','end_date'=>'2026-08-31'],
     ];

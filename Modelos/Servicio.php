@@ -1,5 +1,5 @@
 <?php
-class Service {
+class Servicio {
     private static $services = [
         ['id'=>1,'name'=>'Mandado','slug'=>'mandado','price_type'=>'fixed','price_base'=>40,'coverage'=>'Ocotal, Zona Norte','status'=>'active'],
         ['id'=>2,'name'=>'Delivery','slug'=>'delivery','price_type'=>'fixed','price_base'=>40,'coverage'=>'Ocotal, Zona Norte','status'=>'active'],

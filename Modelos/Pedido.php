@@ -1,5 +1,5 @@
 <?php
-class Order {
+class Pedido {
     private static $orders = [
         ['id' => 'TEX-2026-0847', 'client' => 'Carlos Martínez', 'rider' => 'María Torres', 'origin' => 'Ocotal Centro', 'destination' => 'Barrio San José', 'status' => 'IN_TRANSIT', 'cost' => 120, 'distance' => 4.8, 'created_at' => '2026-09-18 14:30'],
         ['id' => 'TEX-2026-0851', 'client' => 'Ana Rodríguez', 'rider' => 'Luis Gómez', 'origin' => 'Farmacia Central', 'destination' => 'Residencial Los Pinos', 'status' => 'PICKED_UP', 'cost' => 185, 'distance' => 6.7, 'created_at' => '2026-09-18 13:15'],

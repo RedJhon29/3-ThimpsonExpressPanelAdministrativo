@@ -1,5 +1,5 @@
 <?php
-class Dashboard {
+class Panel {
     public static function getStats() {
         return [
             'total_orders_today' => 47,

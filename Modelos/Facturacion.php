@@ -1,5 +1,5 @@
 <?php
-class Billing {
+class Facturacion {
     private static $invoices = [
         ['id'=>'INV-2026-001','client'=>'Sabor Criollo','amount'=>25,'status'=>'Pagada','date'=>'2026-09-01'],
         ['id'=>'INV-2026-002','client'=>'Farmacia Divina','amount'=>25,'status'=>'Pagada','date'=>'2026-09-01'],

@@ -1,5 +1,5 @@
 <?php
-class Finance {
+class Finanza {
     public static function getStats() {
         return [
             'revenue_month' => 45200,
