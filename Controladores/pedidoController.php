@@ -9,6 +9,8 @@ class pedidoController {
     public function detail() {
         $pageTitle = 'Detalle de Pedido';
         $activeMenu = 'orders';
+        $orderId = $_GET['id'] ?? null;
+        $order = $orderId ? Pedido::findById($orderId) : null;
         include VIEW_PATH . '/Pedidos/detail.php';
     }
 }
