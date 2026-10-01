@@ -80,7 +80,7 @@
             <span class="sidebar-status-dot"></span>
             Operativo
         </div>
-        <a href="#" class="sidebar-logout">
+        <a href="<?php echo BASE_URL; ?>/logout" class="sidebar-logout">
             <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
         </a>
     </div>

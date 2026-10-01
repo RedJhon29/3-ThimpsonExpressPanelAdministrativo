@@ -4,6 +4,9 @@
  * Todas las peticiones pasan por aquí vía .htaccess
  */
 
+// Iniciar sesión al principio
+session_start();
+
 require_once __DIR__ . '/Configuracion/app.php';
 
 // URI actual
@@ -16,89 +19,110 @@ if (strpos($uri, $projectPrefix) === 0) {
     $uri = substr($uri, strlen($projectPrefix)) ?: '/';
 }
 
+// Rutas públicas (no requieren autenticación)
+$publicRoutes = [
+    '/login',
+    '/login/authenticate',
+    '/logout',
+];
+
 // Router: mapear rutas → Controlador@método
 $routes = [
+    // Auth
+    '/login'                 => ['loginController', 'index'],
+    '/login/authenticate'    => ['loginController', 'authenticate'],
+    '/logout'                => ['loginController', 'logout'],
+
     // Dashboard
-    '/'                         => ['panelController', 'index'],
-    '/dashboard'                => ['panelController', 'index'],
+    '/'                      => ['panelController', 'index'],
+    '/dashboard'             => ['panelController', 'index'],
 
     // Pedidos
-    '/orders'                   => ['pedidoController', 'index'],
-    '/orders/detail'            => ['pedidoController', 'detail'],
+    '/orders'                => ['pedidoController', 'index'],
+    '/orders/detail'         => ['pedidoController', 'detail'],
 
     // Riders
-    '/riders'                   => ['motorizadoController', 'index'],
-    '/riders/detail'            => ['motorizadoController', 'detail'],
-    '/riders/tracking'          => ['motorizadoController', 'tracking'],
+    '/riders'                => ['motorizadoController', 'index'],
+    '/riders/detail'         => ['motorizadoController', 'detail'],
+    '/riders/tracking'       => ['motorizadoController', 'tracking'],
 
     // Servicios
-    '/services'                 => ['servicioController', 'index'],
+    '/services'              => ['servicioController', 'index'],
 
     // Marketplace
-    '/marketplace'              => ['tiendaController', 'index'],
+    '/marketplace'           => ['tiendaController', 'index'],
 
     // CMS
-    '/cms'                      => ['gestorContenidoController', 'index'],
-    '/landing-editor'           => ['editorLandingController', 'index'],
+    '/cms'                   => ['gestorContenidoController', 'index'],
+    '/landing-editor'        => ['editorLandingController', 'index'],
 
     // Chatbot
-    '/chatbot'                  => ['asistenteVirtualController', 'index'],
+    '/chatbot'               => ['asistenteVirtualController', 'index'],
 
     // Clientes
-    '/clients'                  => ['clienteController', 'index'],
+    '/clients'               => ['clienteController', 'index'],
 
     // Finanzas
-    '/finance'                  => ['finanzaController', 'index'],
+    '/finance'               => ['finanzaController', 'index'],
 
     // Conversaciones
-    '/conversations'            => ['conversacionController', 'index'],
+    '/conversations'         => ['conversacionController', 'index'],
 
     // Suscriptores
-    '/subscribers'              => ['suscriptorController', 'index'],
+    '/subscribers'           => ['suscriptorController', 'index'],
 
     // Reviews
-    '/reviews'                  => ['resenaController', 'index'],
+    '/reviews'               => ['resenaController', 'index'],
 
     // Ratings
-    '/ratings'                  => ['calificacionController', 'index'],
+    '/ratings'               => ['calificacionController', 'index'],
 
     // Promociones
-    '/promotions'               => ['promocionController', 'index'],
+    '/promotions'            => ['promocionController', 'index'],
 
     // Zonas
-    '/zones'                    => ['zonaController', 'index'],
+    '/zones'                 => ['zonaController', 'index'],
 
     // Notificaciones
-    '/notifications'            => ['notificacionController', 'index'],
+    '/notifications'         => ['notificacionController', 'index'],
 
     // Reportes
-    '/reports'                  => ['reporteController', 'index'],
+    '/reports'               => ['reporteController', 'index'],
 
     // Auditoría
-    '/audit'                    => ['auditoriaController', 'index'],
+    '/audit'                 => ['auditoriaController', 'index'],
 
     // Configuración
-    '/settings'                 => ['configuracionController', 'index'],
+    '/settings'              => ['configuracionController', 'index'],
 
     // Usuarios Admin
-    '/admin-users'              => ['usuarioAdminController', 'index'],
+    '/admin-users'           => ['usuarioAdminController', 'index'],
 
     // Dispositivos
-    '/devices'                  => ['dispositivoController', 'index'],
+    '/devices'               => ['dispositivoController', 'index'],
 
     // Soporte
-    '/support'                  => ['soporteController', 'index'],
+    '/support'               => ['soporteController', 'index'],
 
     // Suscripciones
-    '/subscriptions'            => ['suscripcionController', 'index'],
+    '/subscriptions'         => ['suscripcionController', 'index'],
 
     // Pricing
-    '/pricing'                  => ['precioController', 'index'],
+    '/pricing'               => ['precioController', 'index'],
 
     // WhatsApp
-    '/whatsapp'                 => ['whatsappController', 'index'],
-    '/openwa'                   => ['openwaController', 'index'],
+    '/whatsapp'              => ['whatsappController', 'index'],
+    '/openwa'                => ['openwaController', 'index'],
 ];
+
+// Verificar autenticación para rutas protegidas
+$isPublicRoute = in_array($uri, $publicRoutes);
+if (!$isPublicRoute && !isset($_SESSION['user_id'])) {
+    // Guardar la URL original para redirigir después del login
+    $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+    header('Location: ' . BASE_URL . '/login');
+    exit;
+}
 
 // Buscar coincidencia exacta
 $controller = null;
