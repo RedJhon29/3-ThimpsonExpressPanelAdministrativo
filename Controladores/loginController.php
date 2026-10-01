@@ -10,7 +10,8 @@ class loginController {
         $pageTitle = 'Iniciar Sesión';
         $activeMenu = '';
         $error = $_SESSION['login_error'] ?? null;
-        unset($_SESSION['login_error']);
+        $usuario = $_SESSION['login_usuario'] ?? '';
+        unset($_SESSION['login_error'], $_SESSION['login_usuario']);
 
         include VIEW_PATH . '/Auth/login.php';
     }
@@ -21,20 +22,22 @@ class loginController {
             exit;
         }
 
-        $email = trim($_POST['email'] ?? '');
+        $usuario = trim($_POST['usuario'] ?? '');
         $password = $_POST['password'] ?? '';
 
-        if (empty($email) || empty($password)) {
-            $_SESSION['login_error'] = 'Email y contraseña son requeridos';
+        if (empty($usuario) || empty($password)) {
+            $_SESSION['login_error'] = 'Usuario y contraseña son requeridos';
+            $_SESSION['login_usuario'] = $usuario;
             header('Location: ' . BASE_URL . '/login');
             exit;
         }
 
-        if (UsuarioAdmin::verifyPassword($email, $password)) {
-            $user = UsuarioAdmin::findByEmail($email);
+        if (UsuarioAdmin::verifyPassword($usuario, $password)) {
+            $user = UsuarioAdmin::findByEmail($usuario);
 
             if ($user['status'] !== 'active') {
                 $_SESSION['login_error'] = 'Cuenta desactivada. Contacte al administrador.';
+                $_SESSION['login_usuario'] = $usuario;
                 header('Location: ' . BASE_URL . '/login');
                 exit;
             }
@@ -53,6 +56,7 @@ class loginController {
             exit;
         } else {
             $_SESSION['login_error'] = 'Credenciales inválidas';
+            $_SESSION['login_usuario'] = $usuario;
             header('Location: ' . BASE_URL . '/login');
             exit;
         }

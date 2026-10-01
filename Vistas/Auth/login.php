@@ -190,18 +190,18 @@
 
             <form method="POST" action="<?php echo BASE_URL; ?>/login/authenticate" id="loginForm">
                 <div class="mb-3">
-                    <label for="email" class="form-label">
+                    <label for="usuario" class="form-label">
                         <i class="bi bi-person me-1"></i> Usuario
                     </label>
                     <input type="text"
                            class="form-control"
-                           id="email"
-                           name="email"
+                           id="usuario"
+                           name="usuario"
                            placeholder="usuario"
                            required
                            autocomplete="username"
                            autofocus
-                           value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                           value="<?php echo htmlspecialchars($usuario ?? ''); ?>">
                 </div>
 
                 <div class="mb-3">
@@ -213,7 +213,7 @@
                                class="form-control"
                                id="password"
                                name="password"
-                               placeholder="••••••••"
+                               placeholder="Contraseña"
                                required
                                autocomplete="current-password">
                         <button type="button"
