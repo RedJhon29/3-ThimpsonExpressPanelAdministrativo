@@ -3,7 +3,7 @@ class usuarioAdminController {
     public function index() {
         $pageTitle = 'Usuarios Admin';
         $activeMenu = 'admin-users';
-        $users = UsuarioAdmin::all();
+        $users = loginModel::all();
         include VIEW_PATH . '/AdminUsuarios/index.php';
     }
 }

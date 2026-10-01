@@ -1,5 +1,5 @@
 <?php
-class UsuarioAdmin {
+class loginModel {
     private static $users = [
         [
             'id' => 1,

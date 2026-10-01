@@ -15,7 +15,7 @@
         <div class="stat-card">
             <div class="stat-icon"><i class="bi bi-people" style="color:var(--primary);"></i></div>
             <div>
-                <div class="stat-value" style="color:var(--primary);"><?php echo count(UsuarioAdmin::all()); ?></div>
+                <div class="stat-value" style="color:var(--primary);"><?php echo count(loginModel::all()); ?></div>
                 <div class="stat-label">Total Usuarios</div>
             </div>
         </div>
@@ -65,7 +65,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach (UsuarioAdmin::all() as $user): ?>
+                    <?php foreach (loginModel::all() as $user): ?>
                     <tr>
                         <td><strong><?php echo $user['id']; ?></strong></td>
                         <td><?php echo $user['name']; ?></td>

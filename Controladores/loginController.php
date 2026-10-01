@@ -32,8 +32,8 @@ class loginController {
             exit;
         }
 
-        if (UsuarioAdmin::verifyPassword($usuario, $password)) {
-            $user = UsuarioAdmin::findByEmail($usuario);
+        if (loginModel::verifyPassword($usuario, $password)) {
+            $user = loginModel::findByEmail($usuario);
 
             if ($user['status'] !== 'active') {
                 $_SESSION['login_error'] = 'Cuenta desactivada. Contacte al administrador.';
@@ -50,7 +50,7 @@ class loginController {
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['user_role'] = $user['role'];
 
-            UsuarioAdmin::updateLastLogin($user['id']);
+            loginModel::updateLastLogin($user['id']);
 
             header('Location: ' . BASE_URL . '/dashboard');
             exit;
