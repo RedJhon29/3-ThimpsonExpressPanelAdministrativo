@@ -1,8 +1,61 @@
+# ====================ENCABEZADO====================
+# ARCHIVO: .htaccess — front controller y ocultamiento de rutas reales
+# ======================DETALLES=====================
+# QUÉ HACE: enruta toda petición a index.php y responde 404 al acceso
+#     directo a carpetas internas, archivos sensibles y listados.
+# VINCULADO A: index.php (front controller); Publico/ es lo único estático
+#     que debe seguir servible.
+# SI SE ALTERA: romper el rewrite deja el panel en 500; quitar un bloqueo
+#     reabre esa fuga.
+# FECHA Y HORA: 2026-10-02 14:35
+# ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+# ==================================================
+
+# =================CUERPO DEL CÓDIGO=================
+
 RewriteEngine On
+
+# Sin listado de directorios: la estructura no se adivina navegando
+Options -Indexes
+
+# La firma de Apache/PHP en las páginas de error revela versiones exactas
+ServerSignature Off
+
+# Endurecimiento de respuesta; 'always' para que apliquen también en errores
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# La versión exacta de PHP en cada respuesta permite fingerprinting del runtime
+Header unset X-Powered-By
+Header always unset X-Powered-By
+Header edit X-Powered-By ^.*$ ""
+
+# Las carpetas del MVC solo entran por el router, nunca servidas en directo
+RewriteRule ^(?:Configuracion|Modelos|Vistas|Controladores)(?:/|$) - [R=404,L]
+
+# Cubre .git (código fuente), .env, .gitignore y .htaccess
+RewriteRule ^\. - [R=404,L]
+
+# La documentación del repo entrega el mapa del proyecto a cualquiera
+RewriteRule ^(?:AGENTS|README|CHANGELOG|LICENSE)(?:\.[^/]*)?$ - [R=404,L]
+
+# Respaldo, volcado o script de servidor suelto en cualquier nivel
+RewriteRule \.(?:sql|bak|old|log|ini|env|sh|ps1|md)$ - [R=404,L]
+RewriteRule ~$ - [R=404,L]
+
+# Un directorio sin index.php no debe existir para el navegador
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_FILENAME}/index.php !-f
+RewriteRule ^ - [R=404,L]
+
+# Sin index.php en la URL: solo redirige si lo pidió el navegador, no el router
+RewriteCond %{THE_REQUEST} \s(/[^\s?]*)index\.php(?:/([^\s?]*))?[\s?]
+RewriteRule ^index\.php(?:/(.*))?$ %1%2 [R=301,L]
 
 # Si es un archivo o directorio real, servirlo directamente
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-
-# Redirigir todo a index.php (raíz)
 RewriteRule ^(.*)$ index.php [QSA,L]
+
+# ============FIN DEL FRAGMENTO DE CÓDIGO============
