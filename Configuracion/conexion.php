@@ -11,7 +11,7 @@ VINCULADO A: aún sin consumidores; lo incluirán los Modelos con
     require_once y llamarán obtenerConexion().
 SI SE ALTERA: cambiar credenciales o DSN deja el panel sin datos.
 LÍMITES: credenciales de desarrollo local escritas en el archivo.
-FECHA Y HORA: 2026-10-02 15:17
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================*/
 
@@ -34,7 +34,7 @@ define('CLAVE_BASE_DATOS', 'postgres');
  *           este archivo; sin ellas lanza PDOException.
  * SI SE ALTERA: si deja de devolver PDO o de reutilizarla, cada
  *           consumidor tendría que abrir su propia conexión.
- * FECHA Y HORA: 2026-10-02 15:17
+ * FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
  * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
  * ==================================================
  */
