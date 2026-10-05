@@ -381,9 +381,10 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   → expuesto a fuerza bruta. Requiere decisión de arquitectura (¿contador por IP? ¿bloqueo?).
 - **`git`:** **`40eaffd`** `feat: añadir overlay de login de 3 s con doble arco y quitar el
   splash` (5 archivos, +169/−39), **`e4c642d`** `style: agrandar el doble arco del login y
-  afinar su trazo` (2 archivos, +17/−16) y **`75aac60`** `chore: descargar SweetAlert y
-  Alertify a Publico/Recursos` (7 archivos, 4 de ellos nuevos) **subidos** a `origin/main`;
-  verificado `HEAD` == `origin/main`.
+  afinar su trazo` (2 archivos, +17/−16), **`75aac60`** `chore: descargar SweetAlert y
+  Alertify a Publico/Recursos` (7 archivos, 4 de ellos nuevos) y **`1eeac3d`** `style:
+  reducir el efecto de carga del login a 2 segundos` (2 archivos) **subidos** a
+  `origin/main`; verificado `HEAD` == `origin/main`.
 - **Vistas sin controlador:** `Pedidos/*` y `Riders/*` quedaron huérfanas a propósito (el
   usuario las conservó). Al reconstruir sus controladores hay que setear `$pageTitle` y
   `$activeMenu` antes del include.
