@@ -1,9 +1,11 @@
 # Traza: Login funcional contra PostgreSQL + limpieza de la deuda de estilo
 
 **Proyecto:** Thimpson Express Panel Administrativo
-**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con fases 8, 9 y 10)
+**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con las fases 8 a 13)
 **Estado del objetivo:** cumplido (0 errores en ambos modos del guardián; 10/10 pruebas HTTP;
-login, botón de salida y los 3 spinners tipo rueda verificados en navegador real)
+login con overlay de 2 s y doble arco, SweetAlert/Alertify/DataTables locales, botón de
+salida con alerta de confirmación + spinner de 1200 ms y redirección con sesión destruida,
+verificados en navegador real)
 
 ## Resumen ejecutivo
 
@@ -14,8 +16,12 @@ del propio guardián** (Fase 7), **el bloqueo de la salida con `Enter`** que imp
 panel (Fase 8), se añadió el **botón de cierre de sesión con overlay** en la esquina superior
 derecha (Fase 9) y se reemplazaron los **3 spinners** por rueditas circulares amarillo/blanco,
 aprovechando el hallazgo del `border-radius: 0px !important` global para ganar el empate
-(Fase 10). Todo quedó verificado con `php -l` (20/20), 10 pruebas HTTP y navegador real
-(Chrome for Testing). **Ningún cambio alteró la UI visible más allá de lo pedido.**
+(Fase 10). Las fases 11-13 completaron la **experiencia de carga y salida**: overlay de login
+con doble arco y fin del splash (Fase 11), **SweetAlert/Alertify locales** (Fase 12) y
+**DataTables local en español + alerta de confirmación al cerrar sesión** con spinner de
+1200 ms que destruye la sesión (Fase 13). Todo quedó verificado con `php -l` (lint global 0
+errores), 10 pruebas HTTP y navegador real (Chrome for Testing). **Ningún cambio alteró la
+UI visible más allá de lo pedido.**
 
 ---
 
@@ -28,8 +34,11 @@ aprovechando el hallazgo del `border-radius: 0px !important` global para ganar e
 | Código muerto fuera del árbol de trabajo | ✅ (71 archivos) |
 | Guardián `-SoloNuevos` → 0 errores / 0 avisos | ✅ |
 | Guardián modo total → 0 errores | ✅ (207 → 0) |
-| `php -l` sin errores | ✅ (20/20) |
+| `php -l` sin errores | ✅ (lint global: 0 errores) |
 | UI del panel intacta | ✅ (dashboard 200, CSS 200, sin cambios de HTML visible) |
+| DataTables operativo en español **sin CDN** | ✅ (4 archivos locales, 0 peticiones a `cdn.datatables.net`) |
+| Cerrar sesión pide confirmación (Sí/Cancelar) en **los 2 botones** | ✅ |
+| Al confirmar: spinner idéntico al login, duración corta, sesión destruida | ✅ (1200 ms → `/login` medido en 1656 ms; sesión invalidada) |
 
 ---
 
@@ -286,6 +295,8 @@ durando menos, y redireccionar al login destruyendo la sesión por completo". Co
 | `Controladores/panelController.php` | Render del dashboard | Si se quitan variables, `Vistas/Panel/index.php` falla |
 | `Vistas/Plantillas/*.php` | Layout completo | Se desbordan **todas** las vistas |
 | `Publico/Recursos/css/admin.css` | Tema del panel | Cambia la UI de todo el panel |
+| `Publico/Recursos/datatables/*` | DataTables local + i18n es-ES | Si se mueven, actualizar las 3 rutas `BASE_URL` de encabezado/pie |
+| `Vistas/Plantillas/pieAdmin.php` | Cargas del panel + DataTables + cierre de sesión | Se rompe el idioma de las tablas y la alerta de salida |
 | `scripts/validar-estilo.ps1:131,161` | Guardián | Afecta a **todos** los proyectos |
 
 ---
