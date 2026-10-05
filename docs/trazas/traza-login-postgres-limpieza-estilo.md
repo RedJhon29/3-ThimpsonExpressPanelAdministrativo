@@ -485,6 +485,7 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 | 1. Online | sin bloqueos | CDN-first, `fallos=[]` | ✅ `origenJquery=code.jquery.com`, libs CDN, tabla "Mostrando 1 a 5 de 5", chart 256×256, 0 errores |
 | 2. Offline | abort a 6 dominios CDN (jsdelivr/unpkg/code.jquery/datatables/fonts) | todo local | ✅ 9 scripts en LOCAL, 9 links con `data-pasos` correctos, tabla + chart OK, `fallos=[]`, 0 errores propios |
 | 3. Sin locales | abort además de `jquery/`/`bootstrap/`/`bootstrap-icons/` locales | alerta de Alertify con detalle | ✅ **4 recursos** (Bootstrap CSS, Icons, jQuery, Bootstrap JS) con secuencia `cdn -> local -> cdn` y ruta; el resto siguió cargando |
+| 4. Alertify caído (emergencia) | abort además de `**/Publico/Recursos/alertify/**` (su CDN ya cae con jsdelivr) | `window.alert()` nativo con el detalle | ✅ `alertify=undefined`, sin modal Alertify, **1 sola invocación** de `window.alert` con los **6 recursos**, sus secuencias y rutas (mensaje capturado programáticamente; el diálogo nativo real también se abrió en pantalla) |
 | Regresión logout | flujo completo | alerta → spinner → `/login` | ✅ "¿Cerrar sesión?" → spinner 96 px → **1258 ms**, 0 errores |
 | Smoke HTTP | `curl` | 200 | ✅ `/login` 200, `gestorPlugins.js` 200, `admin.css` 200 |
 | `php -l` / guardián `-SoloNuevos` | global | 0 / 0-0-0 | ✅ 0 errores / **0-0-0** |
@@ -564,6 +565,10 @@ pwsh -NoProfile -File ".../scripts/validar-estilo.ps1" -Ruta "<proy>"           
 #    Escenario 3 (sin locales): además abortar
 #      **/Publico/Recursos/{jquery,bootstrap,bootstrap-icons}/**
 #      -> debe aparecer la alerta de Alertify con los 4 recursos y su secuencia.
+#    Escenario 4 (emergencia): además abortar **/Publico/Recursos/alertify/**
+#      -> window.alert() nativo con los 6 recursos. Para capturar el texto sin que
+#         el MCP pause el run, usar addInitScript que reemplace window.alert por un
+#     	colector en window.__llamadasAlert (el diálogo nativo NO se abre igual).
 #    Al terminar: retirar las rutas (page.unroute) y borrar .playwright-mcp/.
 ```
 
