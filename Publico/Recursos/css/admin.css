@@ -905,8 +905,8 @@ img { max-width: 100%; height: auto; }
 .spinner-doble {
     position: relative;
     display: block;
-    width: var(--doble-size, 4rem);
-    height: var(--doble-size, 4rem);
+    width: var(--doble-size, 6rem);
+    height: var(--doble-size, 6rem);
 }
 .doble-arco {
     position: absolute;
@@ -914,13 +914,13 @@ img { max-width: 100%; height: auto; }
 }
 .doble-arco-amarillo {
     inset: 0;
-    border: 8px solid transparent;
+    border: 5px solid transparent;
     border-color: var(--primary) var(--primary) transparent transparent;
     animation: giroRueda 1s linear infinite;
 }
 .doble-arco-blanco {
-    inset: 14px;
-    border: 5px solid transparent;
+    inset: 17px;
+    border: 3px solid transparent;
     border-color: #FFFFFF #FFFFFF transparent transparent;
     animation: giroRuedaInversa 1s linear infinite;
 }

@@ -187,9 +187,10 @@ afuera →, blanco adentro ←).
   (arregla de paso el bug del botón disabled eterno); sin JS → form nativo sin overlay.
 - **Doble arco** (final de `admin.css`): `.spinner-doble` con dos `.doble-arco` absolutos;
   semicírculos de 180° exactos vía `border-color: X X transparent transparent` (top+right);
-  `border-radius: 50% !important` (gana al reset `*`). Amarillo 8 px `inset:0` +
-  `giroRueda` (horario →); blanco 5 px `inset:14px` + `giroRuedaInversa` (clave nueva:
-  `rotate(-360deg)`, antihorario ←). Radios 32 px vs 18 px ⇒ el amarillo rodea al blanco.
+  `border-radius: 50% !important` (gana al reset `*`). Círculo de **96 px (6rem)** con trazo
+  fino por pedido de elegancia: amarillo 5 px `inset:0` + `giroRueda` (horario →); blanco
+  3 px `inset:17px` + `giroRuedaInversa` (clave nueva: `rotate(-360deg)`, antihorario ←).
+  Radios 48 px vs 31 px ⇒ el amarillo rodea al blanco con 12 px de aire.
 - **Splash eliminado sin restos:** HTML en `encabezadoAdmin.php`, JS `load`+800 ms en
   `pieAdmin.php` (su banner QUÉ HACE pasa a "helper global de toast") y CSS
   `.splash-screen`/`.splash-content`. `.spinner-rueda` **sigue vivo** en el overlay de logout
@@ -197,11 +198,11 @@ afuera →, blanco adentro ←).
 - **Si alguien altera esta parte →** quitar el `inset:0` del amarillo rompe la concenricidad;
   un `border-color` de un solo lado deja arcos de 90° en vez de 180°; quitar el `!important`
   del radio vuelve al cuadro por el reset `*` de `admin.css:46-49`.
-- **Evidencia (navegador real, muestreo cada 180 ms):** Δángulo **+72°** (amarillo, derecha)
-  y **−72°** (blanco, izquierda); grosor 8 px/5 px; overlay **3117 ms**; `#splashScreen` ya
-  **no existe** en `/dashboard`; consola 0 errores; `php -l` 20/0; gate `-SoloNuevos` 0/0/0
-  (4 archivos modificados); smoke `/login` sin sesión: `spinner-doble` presente,
-  `spinner-rueda` ×1 (botón), sin `splashScreen`.
+- **Evidencia (navegador real, muestreo cada 180 ms):** Δángulo **+75°** (amarillo, derecha)
+  y **−75°** (blanco, izquierda); diámetro **96 px** con grosores **5 px / 3 px**; overlay
+  **3117 ms**; `#splashScreen` ya **no existe** en `/dashboard`; consola 0 errores;
+  `php -l` 20/0; gate `-SoloNuevos` 0/0/0 (4 archivos modificados); smoke `/login` sin
+  sesión: `spinner-doble` presente, `spinner-rueda` ×1 (botón), sin `splashScreen`.
 
 ---
 
@@ -312,9 +313,9 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 |---|---|---|
 | Overlay visible al enviar | `.show` → pantalla completa | ✅ captura con arcos + texto |
 | Duración del overlay | ≥ 3000 ms | ✅ **3117 ms** hasta `/dashboard` |
-| Giro amarillo (Δ en 180 ms) | > 0 (derecha) | ✅ **+72°** |
-| Giro blanco (Δ en 180 ms) | < 0 (izquierda) | ✅ **−72°** |
-| Grosor de los arcos | amarillo > blanco | ✅ 8 px / 5 px |
+| Giro amarillo (Δ en 180 ms) | > 0 (derecha) | ✅ **+75°** |
+| Giro blanco (Δ en 180 ms) | < 0 (izquierda) | ✅ **−75°** |
+| Grosor de los arcos | amarillo > blanco, fino y visible | ✅ 5 px / 3 px sobre círculo de 96 px |
 | Credenciales inválidas | vuelve a `/login` con mensaje | ✅ 3556 ms + "Credenciales inválidas" |
 | `#splashScreen` en `/dashboard` | ya no existe | ✅ `false` + captura directa |
 | Spinner tras login | **uno solo** (el overlay) | ✅ secuencia: overlay → dashboard sin splash |
