@@ -232,6 +232,45 @@ select2, datatables, chart.js, sweetalert2, alertify). Con `question` el usuario
   plugins; consola sin errores; `php -l` 20/0; gate `-SoloNuevos` 0/0/0 (2 archivos M +
   2 carpetas nuevas).
 
+### Fase 13 — DataTables local en español + cierre de sesión con alerta suave
+
+**Pedido (2026-10-05):** 1) "descargá e instalá en `Publico/Recursos/` los plugins de
+DataTables con su CSS, JS y traducción en español, listos para usarse"; 2) "al pulsar
+cerrar sesión que aparezca una alerta suave de confirmación con botón de confirmar y
+cancelar; al confirmar, el spinner de saliendo del sistema idéntico al del login pero
+durando menos, y redireccionar al login destruyendo la sesión por completo". Con
+`question` el usuario fijó la duración en **1200 ms** (vs 2000 ms del login).
+
+- **DataTables local** (`Publico/Recursos/datatables/`): `jquery.dataTables.min.js`
+  (87 221 B, v1.13.7 — misma versión que el CDN), `dataTables.bootstrap5.min.js`
+  (2 358 B), `dataTables.bootstrap5.min.css` (12 163 B) e `i18n/es-ES.json`
+  (10 700 B, del repo oficial `DataTables/Plugins`; el CDN no sirve i18n). Tres
+  referencias CDN → `BASE_URL` en `encabezadoAdmin.php` y `pieAdmin.php`.
+- **Hallazgo (detectado en prueba, corregido):** el JSON oficial **no trae `paginate`
+  de raíz** y el renderer Bootstrap 5 lee el texto de ese nodo ⇒ los botones salían
+  `Previous/Next`. Solución: `paginate` en español inline junto a `language.url`
+  (`pieAdmin.php`), con comentario que documenta el porqué.
+- **Cierre de sesión:** `prepararCierreSesion()` cablea **los 2 botones**
+  (`#logoutBtn` y `.sidebar-logout` — este último antes salía directo, sin alerta) con
+  SweetAlert2 (`question`, `Sí, salir`/`Cancelar`, tema oscuro del panel, botón
+  confirmación `--primary` con texto `#131517` para contraste ≥7:1). Al confirmar,
+  `mostrarOverlaySalida()` muestra `#logoutOverlay` con el **mismo `spinner-doble`**
+  del login (96 px, arcos amarillo/blanco), espera **1200 ms**, ejecuta
+  `fetch('/logout')` (destruye sesión: cookie + `session_destroy`) y navega a la URL
+  final (`/login`).
+- **admin.css:** `.logout-overlay` alineado al `.login-overlay` (z-index 2500, gap 18,
+  `color-mix` 78 % + blur 4 px, texto 15 px) y nueva regla
+  `.swal2-confirm.swal-confirmar-salida`.
+- **Evidencia:** `php -l` 24/0 (lint global: 0 errores) · gate `-SoloNuevos` **0/0/0** ·
+  4/4 archivos locales responden 200 y **0 peticiones** a `cdn.datatables.net` ·
+  E2E Playwright: DataTables en español (`Anterior/Siguiente`, `Buscar:`,
+  `Mostrando 1 a 5 de 5 registros`), **Cancelar** permanece en el panel, **Sí, salir**
+  → overlay con spinner 96×96/2 arcos → `/login` en **1656-1657 ms** con sesión
+  destruida (dashboard posterior → 302 a login), 0 errores de consola.
+- **Gotcha del entorno:** las capturas de pantalla de Playwright pintaron un **overlay
+  fantasma** (falso positivo) mientras `isVisible()`/DOM decían `display:none`; la
+  verificación se hizo con asserts duros de la API de Playwright, no con imágenes.
+
 ---
 
 ## 3. Archivos afectados
@@ -385,6 +424,13 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   Alertify a Publico/Recursos` (7 archivos, 4 de ellos nuevos) y **`1eeac3d`** `style:
   reducir el efecto de carga del login a 2 segundos` (2 archivos) **subidos** a
   `origin/main`; verificado `HEAD` == `origin/main`.
+- **`git`:** **`41b64b4`** `fix: blindar lectura de $error en vista de login`,
+  **`5dc01c5`** `docs: registrar en la traza el commit del efecto de 2 segundos`
+  (ambos **subidos**) y **`553dc30`** `feat: DataTables local en español y cierre de
+  sesión con confirmación` (8 archivos: 4 modificados + 4 nuevos en
+  `Publico/Recursos/datatables/`, +428/−24) — este último commiteado en local, pendiente
+  de push junto con este `docs:`. Verificado `HEAD == origin/main` solo para los dos
+  primeros.
 - **Vistas sin controlador:** `Pedidos/*` y `Riders/*` quedaron huérfanas a propósito (el
   usuario las conservó). Al reconstruir sus controladores hay que setear `$pageTitle` y
   `$activeMenu` antes del include.
