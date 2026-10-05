@@ -298,8 +298,8 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   9 links `?page=…` muertos, `var(--warning)` inexistente.
 - **`editRider()`** se define en `Riders/index.php` pero se invoca desde `Riders/detail.php`:
   si esa vista se abre sola, el botón Editar falla (documentado en su banner).
-- **`git`:** el commit `1a57f3b` (login + limpieza + botón de salida) ya está en `origin/main`;
-  los **4 archivos de la Fase 10** (spinners) siguen **sin commitear** (requiere aprobación).
+- **`git`:** ambos commits están en `origin/main`: `1a57f3b` (login + limpieza + botón de
+  salida) y `2fcc3e6` (Fase 10, spinners: 5 archivos, +73/−7). Verificado `HEAD == origin/main`.
 - **`admin.css:46-49`** — `*, *::before, *::after { border-radius: var(--radius) !important }`
   con `--radius: 0px` **anula todo radio** que no lleve `!important` (incluye
   `.spinner-border` de Bootstrap). No se tocó: afecta a toda la UI. `.spinner-rueda` lo
