@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+VISTA: Riders/detail — ficha individual de un rider
+ARCHIVO: Vistas/Riders/detail.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: muestra la ficha del rider por id con sus datos,
+    métricas y botones de acción.
+VINCULADO A: relee $_GET['id'] y consulta Modelos/Motorizado
+    ::find(); su controlador aún no existe.
+SI SE ALTERA: el botón Editar llama a editRider(), definida
+    en Riders/index.php; si esta vista se abre sola, falla.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <?php include VIEW_PATH . '/Plantillas/encabezadoAdmin.php'; ?>
 <?php include VIEW_PATH . '/Plantillas/barraLateralAdmin.php'; ?>
 

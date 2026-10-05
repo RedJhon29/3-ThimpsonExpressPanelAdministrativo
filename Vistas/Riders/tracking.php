@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+VISTA: Riders/tracking — mapa de posiciones de riders
+ARCHIVO: Vistas/Riders/tracking.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: muestra el mapa de ubicaciones y los controles
+    de refresco y centrado de la vista.
+VINCULADO A: incluye encabezadoAdmin, barraLateralAdmin y
+    pieAdmin; su controlador aún no existe.
+SI SE ALTERA: si cambian los id de los controles revisar
+    refreshMap() y centerMap() de este mismo archivo.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <?php include VIEW_PATH . '/Plantillas/encabezadoAdmin.php'; ?>
 <?php include VIEW_PATH . '/Plantillas/barraLateralAdmin.php'; ?>
 
@@ -81,11 +99,25 @@
 <?php include VIEW_PATH . '/Plantillas/pieAdmin.php'; ?>
 
 <script>
+/*====================ENCABEZADO====================
+FUNCIÓN: refreshMap() | ROL: vista (JS)
+=====================DETALLES=====================
+QUÉ HACE: deja constancia en consola del refresco de posiciones; la llamada a la API de tracking aún no está conectada. SIN VÍNCULOS EXTERNOS.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia | ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================
+*/
 function refreshMap() {
     console.log('Actualizando posiciones de riders...');
     // Aquí se integraría la llamada a la API de tracking
 }
 
+/*====================ENCABEZADO====================
+FUNCIÓN: centerMap() | ROL: vista (JS)
+=====================DETALLES=====================
+QUÉ HACE: deja constancia en consola del centrado del mapa; el cálculo de la posición promedio aún no está implementado. SIN VÍNCULOS EXTERNOS.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia | ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================
+*/
 function centerMap() {
     console.log('Centrando mapa...');
     // Aquí se centraría el mapa en la posición promedio

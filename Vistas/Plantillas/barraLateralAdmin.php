@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+PLANTILLA: barraLateralAdmin — menú lateral del panel
+ARCHIVO: Vistas/Plantillas/barraLateralAdmin.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: pinta el sidebar con su menú y marca el ítem activo según
+    $activeMenu; añade el botón de apagado y overlay del topbar.
+VINCULADO A: lo incluye el controlador después de
+    encabezadoAdmin.php y antes de la vista; lo cierra pieAdmin.php.
+SI SE ALTERA: una key nueva de $activeMenu debe existir aquí para
+    que se resalte; la lista de links muertos está en AGENTS.md.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <!-- Sidebar -->
 <aside class="admin-sidebar" id="adminSidebar">
     <!-- Logo -->
@@ -117,8 +135,21 @@
                     <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Super Admin</div>
                 </div>
             </div>
+            <a href="<?php echo BASE_URL; ?>/logout"
+               class="topbar-logout"
+               id="logoutBtn"
+               title="Cerrar sesión"
+               aria-label="Cerrar sesión">
+                <i class="bi bi-power" aria-hidden="true"></i>
+            </a>
         </div>
     </header>
+
+    <!-- Overlay de salida del sistema -->
+    <div class="logout-overlay" id="logoutOverlay" role="status" aria-live="polite">
+        <div class="spinner-border" style="color:var(--primary);width:2.6rem;height:2.6rem;" role="status" aria-hidden="true"></div>
+        <span class="logout-overlay-text">Saliendo del sistema</span>
+    </div>
 
     <!-- Page Content -->
     <main class="admin-content">

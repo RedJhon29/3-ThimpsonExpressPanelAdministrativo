@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+PLANTILLA: pieAdmin — cierre del layout del panel
+ARCHIVO: Vistas/Plantillas/pieAdmin.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: cierra main y sidebar, carga las librerías del panel y
+    define los helpers globales de toast y splash.
+VINCULADO A: lo cierra la última línea de cada vista del panel;
+    abre los contenedores Vistas/Plantillas/barraLateralAdmin.php.
+SI SE ALTERA: si se rompe el cierre, todas las vistas se desbordan;
+    revisar el orden encabezado → barra → vista → pie.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
     </main>
 </div>
 
@@ -50,6 +68,15 @@ if (typeof $ !== 'undefined' && $.fn.DataTable) {
 window.showToast = function(type, title, text) {
     Swal.fire({ icon: type, title: title, text: text, timer: 3000, showConfirmButton: false, background: '#131517', color: '#fff' });
 };
+
+// Cierre de sesión con overlay de salida
+document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    var overlay = document.getElementById('logoutOverlay');
+    var destino = this.getAttribute('href');
+    if (overlay) { overlay.classList.add('show'); }
+    setTimeout(function() { window.location.href = destino; }, 700);
+});
 </script>
 </body>
 </html>

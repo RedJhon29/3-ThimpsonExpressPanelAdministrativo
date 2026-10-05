@@ -1,3 +1,20 @@
+<!--====================ENCABEZADO====================
+VISTA: error 404 — página no encontrada
+ARCHIVO: Vistas/Errores/404.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: muestra el error 404 con un enlace de vuelta al dashboard.
+VINCULADO A: lo incluye index.php en la ruta 404, entre
+    Vistas/Plantillas/encabezadoAdmin.php y pieAdmin.php.
+SI SE ALTERA: revisar que BASE_URL siga disponible (la define
+    Configuracion/app.php) antes de tocar el enlace.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <main class="container py-5 text-center">
     <div class="row justify-content-center">
         <div class="col-md-6">

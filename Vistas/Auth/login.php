@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+VISTA: Auth/login — pantalla de autenticación del panel
+ARCHIVO: Vistas/Auth/login.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: muestra el formulario de usuario y contraseña con
+    spinner de carga y bloqueo de credenciales inválidas.
+VINCULADO A: lo renderiza Controladores/loginController.php
+    con $error y $usuario; envía a /login/authenticate.
+SI SE ALTERA: si cambian los name del formulario hay que
+    ajustar authenticate() y su mensaje de error.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <!DOCTYPE html>
 <html lang="es-NI">
 <head>
@@ -241,6 +259,20 @@
     </div>
 
     <script>
+        /*====================ENCABEZADO====================
+        FUNCIÓN: togglePassword() | ROL: vista (JS)
+        ==================================================
+        =====================DETALLES=====================
+        QUÉ HACE: alterna el campo de contraseña entre texto
+            visible y oculto, con su ícono de ojo.
+        VINCULADO A: lo llama el botón del campo contraseña en
+            este mismo archivo; no depende de librerías.
+        SI SE ALTERA: si cambian los id password/toggleIcon,
+            actualizar el HTML del botón que la dispara.
+        FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+        ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+        ==================================================
+        */
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.getElementById('toggleIcon');
@@ -265,15 +297,6 @@
             btnLoading.classList.remove('d-none');
         });
 
-        // Enter key support
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && (e.target.id === 'email' || e.target.id === 'password')) {
-                const form = document.getElementById('loginForm');
-                if (form.checkValidity()) {
-                    form.dispatchEvent(new Event('submit'));
-                }
-            }
-        });
     </script>
 </body>
 </html>

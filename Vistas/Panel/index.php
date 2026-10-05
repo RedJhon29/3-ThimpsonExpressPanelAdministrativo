@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+VISTA: Panel/index — dashboard con KPI y pedidos recientes
+ARCHIVO: Vistas/Panel/index.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: pinta las tarjetas de KPI, la tabla de pedidos
+    recientes y el bloque de riders del dashboard.
+VINCULADO A: lo incluye Controladores/panelController.php con
+    $stats, $recentOrders y $riders ya cargados.
+SI SE ALTERA: cada clave de $stats debe existir aquí; si se
+    renombra en el modelo, la tarjeta sale vacía.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <?php include VIEW_PATH . '/Plantillas/encabezadoAdmin.php'; ?>
 <?php include VIEW_PATH . '/Plantillas/barraLateralAdmin.php'; ?>
 

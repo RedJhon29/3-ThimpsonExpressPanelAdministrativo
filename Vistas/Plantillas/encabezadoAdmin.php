@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+PLANTILLA: encabezadoAdmin — apertura del layout del panel
+ARCHIVO: Vistas/Plantillas/encabezadoAdmin.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: abre el documento, declara el head con las librerías
+    externas y CSS del panel, el splash screen y el body.
+VINCULADO A: lo incluye el controlador con $pageTitle y
+    $activeMenu ya cargados, antes de barraLateralAdmin.php.
+SI SE ALTERA: si cambia el orden o se pierden esas variables,
+    se rompen el título del tab y el menú activo del sidebar.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <!DOCTYPE html>
 <html lang="es-NI">
 <head>

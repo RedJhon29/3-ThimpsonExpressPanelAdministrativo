@@ -1,7 +1,20 @@
-/* ============================================
-   Admin Panel — Dark Theme CSS
-   Thimpson Express Panel Administrativo
-   ============================================ */
+/*====================ENCABEZADO====================
+ESTILO: admin.css — tema oscuro del panel
+ARCHIVO: Publico/Recursos/css/admin.css
+==================================================*/
+
+/*=====================DETALLES=====================
+QUÉ HACE: define los tokens de color y tipografía y los
+    estilos del layout, componentes y utilidades del panel.
+VINCULADO A: lo cargan Vistas/Plantillas/encabezadoAdmin.php
+    y Vistas/Auth/login.php; sus clases usan var(--token).
+SI SE ALTERA: cambiar un token afecta a todas las vistas;
+    el listado de tokens está en el AGENTS.md del proyecto.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================*/
+
+/*================CUERPO DEL CÓDIGO=================*/
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -786,5 +799,58 @@ img { max-width: 100%; height: auto; }
     }
     .stat-value {
         font-size: 22px;
+    }
+}
+
+/* --- Botón de salida del topbar y overlay del sistema --- */
+.topbar-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--destructive);
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.topbar-logout:hover,
+.topbar-logout:focus-visible {
+    background: rgba(229, 57, 53, 0.12);
+    border-color: var(--destructive);
+    color: var(--destructive);
+}
+.logout-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(3px);
+}
+.logout-overlay.show {
+    display: flex;
+}
+.logout-overlay-text {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--foreground);
+}
+
+@media (max-width: 767.98px) {
+    .topbar-logout {
+        position: fixed;
+        top: 10px;
+        right: 12px;
+        z-index: 1500;
+        background: var(--surface-2);
     }
 }

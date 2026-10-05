@@ -1,8 +1,21 @@
 <?php
-/**
- * Front Controller — Thimpson Express Panel Administrativo
- * Todas las peticiones pasan por aquí vía .htaccess
- */
+/*====================ENCABEZADO====================
+FRONT CONTROLLER: index.php — router y guard de sesión
+ARCHIVO: index.php
+==================================================*/
+
+/*=====================DETALLES=====================
+QUÉ HACE: enruta la URI al controlador indicado en $routes y
+    bloquea con 302 las rutas protegidas sin sesión.
+VINCULADO A: exige .htaccess (rewrite) y Configuracion/app.php
+    (constantes y autoload); llama a los Controladores/*.
+SI SE ALTERA: cambia toda la navegación; revisar $routes, las
+    rutas públicas y el prefijo del proyecto.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================*/
+
+/*================CUERPO DEL CÓDIGO=================*/
 
 // Iniciar sesión al principio
 session_start();
@@ -36,83 +49,6 @@ $routes = [
     // Dashboard
     '/'                      => ['panelController', 'index'],
     '/dashboard'             => ['panelController', 'index'],
-
-    // Pedidos
-    '/orders'                => ['pedidoController', 'index'],
-    '/orders/detail'         => ['pedidoController', 'detail'],
-
-    // Riders
-    '/riders'                => ['motorizadoController', 'index'],
-    '/riders/detail'         => ['motorizadoController', 'detail'],
-    '/riders/tracking'       => ['motorizadoController', 'tracking'],
-
-    // Servicios
-    '/services'              => ['servicioController', 'index'],
-
-    // Marketplace
-    '/marketplace'           => ['tiendaController', 'index'],
-
-    // CMS
-    '/cms'                   => ['gestorContenidoController', 'index'],
-    '/landing-editor'        => ['editorLandingController', 'index'],
-
-    // Chatbot
-    '/chatbot'               => ['asistenteVirtualController', 'index'],
-
-    // Clientes
-    '/clients'               => ['clienteController', 'index'],
-
-    // Finanzas
-    '/finance'               => ['finanzaController', 'index'],
-
-    // Conversaciones
-    '/conversations'         => ['conversacionController', 'index'],
-
-    // Suscriptores
-    '/subscribers'           => ['suscriptorController', 'index'],
-
-    // Reviews
-    '/reviews'               => ['resenaController', 'index'],
-
-    // Ratings
-    '/ratings'               => ['calificacionController', 'index'],
-
-    // Promociones
-    '/promotions'            => ['promocionController', 'index'],
-
-    // Zonas
-    '/zones'                 => ['zonaController', 'index'],
-
-    // Notificaciones
-    '/notifications'         => ['notificacionController', 'index'],
-
-    // Reportes
-    '/reports'               => ['reporteController', 'index'],
-
-    // Auditoría
-    '/audit'                 => ['auditoriaController', 'index'],
-
-    // Configuración
-    '/settings'              => ['configuracionController', 'index'],
-
-    // Usuarios Admin
-    '/admin-users'           => ['usuarioAdminController', 'index'],
-
-    // Dispositivos
-    '/devices'               => ['dispositivoController', 'index'],
-
-    // Soporte
-    '/support'               => ['soporteController', 'index'],
-
-    // Suscripciones
-    '/subscriptions'         => ['suscripcionController', 'index'],
-
-    // Pricing
-    '/pricing'               => ['precioController', 'index'],
-
-    // WhatsApp
-    '/whatsapp'              => ['whatsappController', 'index'],
-    '/openwa'                => ['openwaController', 'index'],
 ];
 
 // Verificar autenticación para rutas protegidas
@@ -188,3 +124,5 @@ if (!method_exists($controllerInstance, $action)) {
 }
 
 call_user_func_array([$controllerInstance, $action], $params);
+
+/*===========FIN DEL FRAGMENTO DE CÓDIGO============*/

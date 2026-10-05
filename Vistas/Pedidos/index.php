@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+VISTA: Pedidos/index — listado de pedidos del panel
+ARCHIVO: Vistas/Pedidos/index.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: muestra la tabla de pedidos con buscador en vivo
+    y acciones por fila.
+VINCULADO A: incluye las plantillas encabezadoAdmin y
+    barraLateralAdmin; su controlador aún no existe.
+SI SE ALTERA: si cambia el selector .datatable revisar el
+    filtro de búsqueda y las librerías cargadas en el pie.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <?php include VIEW_PATH . '/Plantillas/encabezadoAdmin.php'; ?>
 <?php include VIEW_PATH . '/Plantillas/barraLateralAdmin.php'; ?>
 
@@ -122,6 +140,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+/*====================ENCABEZADO====================
+FUNCIÓN: editOrder() | ROL: vista (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: abre el formulario de edición del pedido elegido.
+VINCULADO A: lo invoca el botón de cada fila de la tabla de
+    este archivo hacia la acción edit del controlador.
+SI SE ALTERA: si cambia la URL o el nombre de la acción hay
+    que ajustar también el enlace que la dispara.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================
+*/
 function editOrder(id) {
     window.location.href = '?page=orders&action=edit&id=' + id;
 }

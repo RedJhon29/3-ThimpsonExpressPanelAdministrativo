@@ -1,3 +1,21 @@
+<!--====================ENCABEZADO====================
+VISTA: Pedidos/detail — ficha individual de un pedido
+ARCHIVO: Vistas/Pedidos/detail.php
+==================================================-->
+
+<!--=====================DETALLES=====================
+QUÉ HACE: muestra la ficha del pedido por folio con su
+    línea de tiempo de estados y las acciones de estado.
+VINCULADO A: relee $_GET['id'] y consulta Modelos/Pedido
+    ::findById(); incluye las tres piezas del layout.
+SI SE ALTERA: si cambia el parámetro id o findById(), esta
+    vista deja de encontrar el pedido y muestra vacío.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================-->
+
+<!--================CUERPO DEL CÓDIGO=================-->
+
 <?php include VIEW_PATH . '/Plantillas/encabezadoAdmin.php'; ?>
 <?php include VIEW_PATH . '/Plantillas/barraLateralAdmin.php'; ?>
 
@@ -152,18 +170,59 @@ $order = $orderId ? Pedido::findById($orderId) : null;
 <?php include VIEW_PATH . '/Plantillas/pieAdmin.php'; ?>
 
 <script>
+/*====================ENCABEZADO====================
+FUNCIÓN: updateStatus() | ROL: vista (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: pide confirmación y redirige a la URL de cambio
+    de estado del pedido.
+VINCULADO A: lo invocan los botones de estado de esta misma
+    ficha hacia la acción updateStatus del controlador.
+SI SE ALTERA: si cambia la URL de acción, revisar también el
+    estado que se concatena como parámetro.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================
+*/
 function updateStatus(id, status) {
     if (confirm('¿Confirmar cambio de estado a ' + status + '?')) {
         window.location.href = '?page=orders&action=updateStatus&id=' + id + '&status=' + status;
     }
 }
 
+/*====================ENCABEZADO====================
+FUNCIÓN: cancelOrder() | ROL: vista (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: pide confirmación y redirige a la cancelación
+    del pedido en curso.
+VINCULADO A: lo invoca el botón de cancelar de esta misma
+    ficha hacia la acción cancel del controlador.
+SI SE ALTERA: el texto de la alerta advierte que no se
+    deshace; si eso cambia, ajustar también el mensaje.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================
+*/
 function cancelOrder(id) {
     if (confirm('¿Cancelar este pedido? Esta acción no se puede deshacer.')) {
         window.location.href = '?page=orders&action=cancel&id=' + id;
     }
 }
 
+/*====================ENCABEZADO====================
+FUNCIÓN: editOrder() | ROL: vista (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: abre el formulario de edición del pedido actual.
+VINCULADO A: lo invoca el botón de editar de esta ficha
+    hacia la acción edit del controlador.
+SI SE ALTERA: si cambia la URL o el nombre de la acción hay
+    que ajustar también el botón que la dispara.
+FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================
+*/
 function editOrder(id) {
     window.location.href = '?page=orders&action=edit&id=' + id;
 }
