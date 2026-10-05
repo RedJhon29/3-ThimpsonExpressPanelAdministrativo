@@ -27,8 +27,8 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+<script src="<?php echo BASE_URL; ?>/Publico/Recursos/sweetalert/sweetalert2.min.js"></script>
+<script src="<?php echo BASE_URL; ?>/Publico/Recursos/alertify/alertify.min.js"></script>
 <script>
 // Sidebar toggle
 document.getElementById('toggleSidebar')?.addEventListener('click', function() {

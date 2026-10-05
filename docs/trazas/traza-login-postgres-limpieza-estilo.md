@@ -206,6 +206,32 @@ afuera →, blanco adentro ←).
 
 ---
 
+### Fase 12 — SweetAlert y Alertify locales (fin de 2 CDN)
+
+**Pedido (2026-10-05):** "descargá los plugins de sweetalert en las carpetas de los demás
+plugins como bootstrap, después los implementamos". **Hallazgo:** no existe carpeta de
+plugins locales — todo el panel carga **15 referencias CDN** (bootstrap, jQuery, leaflet,
+select2, datatables, chart.js, sweetalert2, alertify). Con `question` el usuario acotó:
+**SweetAlert en `Publico/Recursos/sweetalert/`** y **Alertify en `Publico/Recursos/alertify/`**.
+
+- **Bajados con `curl -L` desde el mismo URL que ya usaba el panel**, por lo que son
+  **byte-idénticos** a los servidos por el CDN (cero cambio de comportamiento):
+  `sweetalert2.min.css` (30 251 B) + `sweetalert2.min.js` (79 150 B, resoluble del `@11`) y
+  `alertify.min.css` (21 417 B) + `alertify.min.js` (36 978 B, v1.13.1). Licencias
+  incluidas en los banners de cada archivo.
+- **4 referencias cambiadas** al patrón `BASE_URL` de `admin.css:35`: `encabezadoAdmin.php`
+  (2 `<link>`) y `pieAdmin.php` (2 `<script>`). **0 referencias CDN** restantes de estos dos
+  plugins; `login.php` no los usa. Quedan **11 CDN** de otros plugins por decisión de alcance.
+- **Si alguien altera esta parte →** mover las carpetas exige actualizar esas 4 rutas;
+  volver al CDN no cambia el comportamiento (mismo archivo de origen).
+- **Evidencia:** las 4 rutas locales responden `200` con su content-type; en navegador
+  `Swal` = `function` y `alertify` = `object`; popup de SweetAlert y toast de Alertify
+  renderizados con sus estilos (capturas); **0 peticiones** a `cdn.jsdelivr.net` de estos
+  plugins; consola sin errores; `php -l` 20/0; gate `-SoloNuevos` 0/0/0 (2 archivos M +
+  2 carpetas nuevas).
+
+---
+
 ## 3. Archivos afectados
 
 | Archivo (punto central) | Rol | Si se modifica… |
@@ -320,6 +346,18 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 | `#splashScreen` en `/dashboard` | ya no existe | ✅ `false` + captura directa |
 | Spinner tras login | **uno solo** (el overlay) | ✅ secuencia: overlay → dashboard sin splash |
 | Consola del navegador | 0 errores | ✅ 0 |
+
+**Pruebas de la Fase 12 (plugins locales) — navegador real y HTTP:**
+
+| Prueba | Esperado | Obtenido |
+|---|---|---|
+| Descarga de los 4 archivos | JS/CSS reales con licencia | ✅ 168 KB en total |
+| Rutas locales vía `BASE_URL` | 4/4 con `200` | ✅ 200 + content-type correcto |
+| `typeof Swal` / `alertify` | `function` / `object` | ✅ `function` / `object` |
+| Render real | popup + toast con estilos | ✅ capturas `plugin-swal-local.png` y `plugin-alertify-local.png` |
+| Peticiones CDN de estos plugins | 0 | ✅ **0** (4/4 salen de `Publico/Recursos/`) |
+| Referencias CDN en plantillas | 0 | ✅ grep = 0 |
+| Consola / `php -l` / gate | 0 / 20-0 / 0-0-0 | ✅ ✅ ✅ |
 
 ---
 
