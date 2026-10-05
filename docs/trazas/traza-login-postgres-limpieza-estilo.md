@@ -1,11 +1,11 @@
 # Traza: Login funcional contra PostgreSQL + limpieza de la deuda de estilo
 
 **Proyecto:** Thimpson Express Panel Administrativo
-**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con las fases 8 a 13)
+**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con las fases 8 a 14)
 **Estado del objetivo:** cumplido (0 errores en ambos modos del guardián; 10/10 pruebas HTTP;
-login con overlay de 2 s y doble arco, SweetAlert/Alertify/DataTables locales, botón de
-salida con alerta de confirmación + spinner de 1200 ms y redirección con sesión destruida,
-verificados en navegador real)
+login con overlay de 2 s y doble arco, **panel 100 % offline con fallback automático
+CDN → local → CDN y alertas de Alertify**, botón de salida con confirmación + spinner de
+1200 ms y redirección con sesión destruida, verificados en navegador real)
 
 ## Resumen ejecutivo
 
@@ -16,12 +16,13 @@ del propio guardián** (Fase 7), **el bloqueo de la salida con `Enter`** que imp
 panel (Fase 8), se añadió el **botón de cierre de sesión con overlay** en la esquina superior
 derecha (Fase 9) y se reemplazaron los **3 spinners** por rueditas circulares amarillo/blanco,
 aprovechando el hallazgo del `border-radius: 0px !important` global para ganar el empate
-(Fase 10). Las fases 11-13 completaron la **experiencia de carga y salida**: overlay de login
-con doble arco y fin del splash (Fase 11), **SweetAlert/Alertify locales** (Fase 12) y
-**DataTables local en español + alerta de confirmación al cerrar sesión** con spinner de
-1200 ms que destruye la sesión (Fase 13). Todo quedó verificado con `php -l` (lint global 0
-errores), 10 pruebas HTTP y navegador real (Chrome for Testing). **Ningún cambio alteró la
-UI visible más allá de lo pedido.**
+(Fase 10). Las fases 11-14 completaron la **experiencia de carga, salida y resiliencia**:
+overlay de login con doble arco y fin del splash (Fase 11), **SweetAlert/Alertify locales**
+(Fase 12), **DataTables local en español + alerta de confirmación al cerrar sesión** con
+spinner de 1200 ms que destruye la sesión (Fase 13) y **migración offline total de los 9
+CDN + Google Fonts con fallback en cadena y alertas de recursos fallidos** (Fase 14). Todo
+quedó verificado con `php -l` (lint global 0 errores), 10 pruebas HTTP y navegador real
+(Chrome for Testing). **Ningún cambio alteró la UI visible más allá de lo pedido.**
 
 ---
 
@@ -39,6 +40,9 @@ UI visible más allá de lo pedido.**
 | DataTables operativo en español **sin CDN** | ✅ (4 archivos locales, 0 peticiones a `cdn.datatables.net`) |
 | Cerrar sesión pide confirmación (Sí/Cancelar) en **los 2 botones** | ✅ |
 | Al confirmar: spinner idéntico al login, duración corta, sesión destruida | ✅ (1200 ms → `/login` medido en 1656 ms; sesión invalidada) |
+| Con internet → CDN; sin internet → local; sin local → reintento CDN | ✅ (3 escenarios E2E: online / offline / sin locales) |
+| Fallo total → alerta de Alertify que especifica el recurso | ✅ (alerta agrupada con nombre, secuencia y ruta) |
+| Panel usable sin conexión (0 CDN obligatorios) | ✅ (los 9 plugins + fuentes locales; tiles OSM pendientes de red por naturaleza) |
 
 ---
 
@@ -282,6 +286,56 @@ durando menos, y redireccionar al login destruyendo la sesión por completo". Co
 
 ---
 
+### Fase 14 — Migración offline total de CDN con fallback en cadena
+
+**Pedido (2026-10-05):** "hay que migrar los CDN a offline, pero con un código que verifique:
+si hay internet use las CDN, si no detecta internet use los archivos locales, y si no
+encuentra los locales que vuelva a buscar las CDN, y si no encuentra ninguno que muestre
+alertas con Alertify que especifiquen el problema". Con `question` el usuario cerró:
+**offline total (plugins + tipografías)** y **mecanismo por fallo de carga**
+(CDN → local → CDN → alerta) en lugar de detección previa con `navigator.onLine`.
+
+- **Descargas (34 archivos nuevos):** bootstrap css/js, bootstrap-icons css + 2 fuentes,
+  jQuery 3.7.1, Leaflet css/js + 5 imágenes, Select2 css/js, Chart.js — estructura de
+  carpetas **idéntica a la del paquete original** para no reescribir rutas relativas; y
+  Google Fonts con UA de Chrome: `google-fonts.css` con **16 woff2** referenciados y
+  **0 URLs externas** restantes.
+- **Nuevo módulo `Publico/Recursos/js/gestorPlugins.js`** (deep module): handler global en
+  **modo captura** del evento `error` (no burbujea, se captura en `document`) que recorre
+  la secuencia `data-pasos` declarada por recurso en el HTML; API `cargarNiveles()`
+  (3 niveles con `Promise.all`, **un fallo aislado no corta la cadena**), `alListo()`
+  (callbacks tras libs + DOM, reemplaza a `DOMContentLoaded` para lo que usa libs) y
+  `reportarFallos()` (**una sola alerta** de Alertify con nombre, secuencia y ruta de cada
+  recurso; `alert()` nativo si Alertify faltara).
+- **Hallazgo de pruebas (crítico):** en Chromium **mutar el `src` de un `<script>` fallido
+  NO reanuda la carga** (verificado con spy de eventos: `SIN EVENTO tras mutación`); los
+  `<script>` se reemplazan por un **nodo nuevo** en la misma posición. Los `<link>` sí
+  recargan mutando `href` (los5 CSS CDN pasaron a local con `SPY-LOAD` y reglas reales).
+- **Carrera `DOMContentLoaded` detectada:** `Panel/index.php` ejecutaba `new Chart(...)`
+  en `DOMContentLoaded`; con carga asíncrona Chart podría no existir aún → migrado a
+  `gestorPlugins.alListo(...)`. Las demás vistas usan solo DOM vanilla o handlers de click
+  posteriores (sin cambio).
+- **`admin.css` fuera de gestión:** su error espurio durante la navegación generaba una
+  alerta de fallo falsa (carga perfecta verificada: 1 petición, 200, 22 847 B).
+- **Secuencias:** los9 de CDN → `cdn,local,cdn` (con internet, CDN-first como pidió el
+  usuario; verificado `origenJquery = code.jquery.com` en el E2E online); los ya locales
+  (DataTables/SweetAlert/Alertify) → `local,cdn` como red de seguridad.
+- **Fuera de alcance (aviso al usuario):** los **tiles de OpenStreetMap** son datos online,
+  no un plugin: Leaflet los necesita del servidor de tiles con o sin internet.
+- **Evidencia — 3 escenarios E2E Playwright:**
+  1. **Online:** todas las libs desde CDN, `fallosCargaPlugins = []`, tabla "Mostrando 1 a
+     5 de 5", chart 256×256, 0 errores de consola.
+  2. **Offline simulado** (abort a jsdelivr/unpkg/code.jquery/datatables/fonts ×6): los9
+     scripts en LOCAL (paso1), CSS con reglas reales (1298/2052/65/124/104), tabla y chart
+     OK, `fallos = []`, 0 errores propios.
+  3. **Sin locales** (CDN + jquery/bootstrap/bootstrap-icons locales abortados): alerta de
+     Alertify con **4 recursos** (`cdn -> local -> cdn` + ruta local de cada uno) y la
+     cadena siguió cargando el resto.
+  - **Regresión logout:** alerta → spinner 96 px → **1258 ms** → `/login`.
+  - `php -l` global 0 errores · guardián `-SoloNuevos` **0/0/0**.
+
+---
+
 ## 3. Archivos afectados
 
 | Archivo (punto central) | Rol | Si se modifica… |
@@ -296,6 +350,8 @@ durando menos, y redireccionar al login destruyendo la sesión por completo". Co
 | `Vistas/Plantillas/*.php` | Layout completo | Se desbordan **todas** las vistas |
 | `Publico/Recursos/css/admin.css` | Tema del panel | Cambia la UI de todo el panel |
 | `Publico/Recursos/datatables/*` | DataTables local + i18n es-ES | Si se mueven, actualizar las 3 rutas `BASE_URL` de encabezado/pie |
+| `Publico/Recursos/js/gestorPlugins.js` | Fallback CDN↔local + cadena + alertas | Si se rompe, ningún recurso gestionado se carga |
+| `Publico/Recursos/{bootstrap,bootstrap-icons,jQuery,leaflet,select2,chartjs,fonts}/` | Copias offline de los 9 CDN + fuentes | Si se mueven, actualizar `data-local` y las rutas de la cadena |
 | `Vistas/Plantillas/pieAdmin.php` | Cargas del panel + DataTables + cierre de sesión | Se rompe el idioma de las tablas y la alerta de salida |
 | `scripts/validar-estilo.ps1:131,161` | Guardián | Afecta a **todos** los proyectos |
 
@@ -436,11 +492,11 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   reducir el efecto de carga del login a 2 segundos` (2 archivos) **subidos** a
   `origin/main`; verificado `HEAD` == `origin/main`.
 - **`git`:** **`41b64b4`** `fix: blindar lectura de $error en vista de login`,
-  **`5dc01c5`** `docs: registrar en la traza el commit del efecto de 2 segundos`
-  (ambos **subidos**) y **`553dc30`** `feat: DataTables local en español y cierre de
-  sesión con confirmación` (8 archivos: 4 modificados + 4 nuevos en
-  `Publico/Recursos/datatables/`, +428/−24) — los tres **subidos** a `origin/main`
-  junto con este `docs:`; verificado `HEAD == origin/main`.
+  **`5dc01c5`** `docs: registrar en la traza el commit del efecto de 2 segundos`,
+  **`553dc30`** `feat: DataTables local…` (8 archivos, +428/−24), **`ec671ce`**, **`64e81ea`**,
+  **`1942dfd`** (docs de la Fase 13) y **`0bfa44c`** `feat: migrar los 9 CDN y Google Fonts
+  a offline con fallback en cadena` (37 archivos, +1658/−54, 34 de ellos nuevos) — todos
+  **subidos** a `origin/main`. Verificado `HEAD == origin/main`.
 - **Vistas sin controlador:** `Pedidos/*` y `Riders/*` quedaron huérfanas a propósito (el
   usuario las conservó). Al reconstruir sus controladores hay que setear `$pageTitle` y
   `$activeMenu` antes del include.
