@@ -17,6 +17,49 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 /*================CUERPO DEL CÓDIGO=================*/
 
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: limpiarComentariosSalida() | ROL: front controller
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: recibe el HTML final y elimina los comentarios que
+ *     no deben verse en el navegador (HTML y JS de línea/bloque).
+ * VINCULADO A: lo usa ob_start() de este mismo archivo.
+ * SI SE ALTERA: si cambian los patrones, verificar con curl que
+ *     sobrevivan las URLs (://) del JS y el HTML válido.
+ * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function limpiarComentariosSalida(string $salida): string
+{
+    try {
+        if (strpos($salida, '<') === false) {
+            return $salida;
+        }
+        // Solo pares <!-- ... -->: un <!-- huérfano no se toca
+        $limpia = preg_replace('#<!--.*?-->#s', '', $salida) ?? $salida;
+        // En <script> en línea (sin src): quitar bloques /* ... */
+        // y comentarios // que ocupan la línea completa
+        $limpia = preg_replace_callback(
+            '#<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>#s',
+            static function (array $bloque): string {
+                $js = preg_replace('#/\*.*?\*/#s', '', $bloque[1]) ?? $bloque[1];
+                $js = preg_replace('#^[ \t]*//.*$#m', '', $js) ?? $js;
+                return str_replace($bloque[1], $js, $bloque[0]);
+            },
+            $limpia
+        ) ?? $limpia;
+        return $limpia;
+    } catch (Throwable $e) {
+        return $salida; // fail-open: mejor comentario visible que página rota
+    }
+}
+
+// Buffer de salida: los comentarios se documentan en los archivos,
+// pero no viajan al navegador (Fase 15)
+ob_start('limpiarComentariosSalida');
+
 // Iniciar sesión al principio
 session_start();
 
