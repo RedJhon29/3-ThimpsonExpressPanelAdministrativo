@@ -428,9 +428,8 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   **`5dc01c5`** `docs: registrar en la traza el commit del efecto de 2 segundos`
   (ambos **subidos**) y **`553dc30`** `feat: DataTables local en español y cierre de
   sesión con confirmación` (8 archivos: 4 modificados + 4 nuevos en
-  `Publico/Recursos/datatables/`, +428/−24) — este último commiteado en local, pendiente
-  de push junto con este `docs:`. Verificado `HEAD == origin/main` solo para los dos
-  primeros.
+  `Publico/Recursos/datatables/`, +428/−24) — los tres **subidos** a `origin/main`
+  junto con este `docs:`; verificado `HEAD == origin/main`.
 - **Vistas sin controlador:** `Pedidos/*` y `Riders/*` quedaron huérfanas a propósito (el
   usuario las conservó). Al reconstruir sus controladores hay que setear `$pageTitle` y
   `$activeMenu` antes del include.
