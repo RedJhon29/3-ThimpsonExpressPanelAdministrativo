@@ -301,11 +301,11 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
         ==================================================
         =====================DETALLES=====================
         QUÉ HACE: muestra el overlay de pantalla completa y envía
-            el login, pintando la respuesta tras 3 segundos.
+            el login, pintando la respuesta tras 2 segundos.
         VINCULADO A: la llama el submit de #loginForm y usa
             #loginOverlay de este archivo; no depende de librerías.
         SI SE ALTERA: si cambian los id del form/overlay o el valor
-            3000, ajustar sus selectores y la duración del efecto.
+            2000, ajustar sus selectores y la duración del efecto.
         FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
         ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
         ==================================================
@@ -315,7 +315,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             const btn = document.getElementById('submitBtn');
             const btnText = btn.querySelector('.btn-text');
             const btnLoading = btn.querySelector('.btn-loading');
-            const duracionEfecto = 3000;
+            const duracionEfecto = 2000;
             const inicio = performance.now();
 
             btn.disabled = true;

@@ -176,11 +176,12 @@ de color amarillo y blanco". El proyecto tiene exactamente **3 spinners**.
 "Ingresando al sistema"); (b) tras medir en navegador real **dos cargas seguidas** (overlay 3 s
 + splash ≈ 1,2 s) el usuario eligió **quitar el splash del panel** ("solo uno"); (c) el spinner
 del overlay debía ser **dos semicírculos concéntricos girando en sentidos opuestos** (amarillo
-afuera →, blanco adentro ←).
+afuera →, blanco adentro ←); (d) del mismo día, **bajar el efecto a 2 s**.
 
 - **Overlay** (`admin.css:848-868`, `login.php`): `.login-overlay` = `fixed inset:0`,
   `z-index:2500`, `--background` al 78 % + `backdrop-filter: blur(4px)`; `.show` → `flex`.
-  `enviarLogin()` garantiza **≥ 3000 ms reales** (`Math.max(0, 3000 - transcurrido)`); éxito →
+  `enviarLogin()` garantiza **≥ 2000 ms reales** (`Math.max(0, 2000 - transcurrido)`; era
+  3000 y se bajó a 2000 el mismo día); éxito →
   `location.href` a la URL que devuelve el servidor; **credenciales inválidas →
   `document.write(await r.text())`** porque `loginController::index()` hace `unset()` del flash
   `login_error` (un GET extra lo borraría); red/5xx → cierra overlay y reactiva el botón
@@ -200,7 +201,8 @@ afuera →, blanco adentro ←).
   del radio vuelve al cuadro por el reset `*` de `admin.css:46-49`.
 - **Evidencia (navegador real, muestreo cada 180 ms):** Δángulo **+75°** (amarillo, derecha)
   y **−75°** (blanco, izquierda); diámetro **96 px** con grosores **5 px / 3 px**; overlay
-  **3117 ms**; `#splashScreen` ya **no existe** en `/dashboard`; consola 0 errores;
+  **2288 ms** con el efecto a 2 s (antes 3117 ms a 3 s; inválido: 2462 ms); `#splashScreen`
+  ya **no existe** en `/dashboard`; consola 0 errores;
   `php -l` 20/0; gate `-SoloNuevos` 0/0/0 (4 archivos modificados); smoke `/login` sin
   sesión: `spinner-doble` presente, `spinner-rueda` ×1 (botón), sin `splashScreen`.
 
@@ -338,11 +340,11 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 | Prueba | Esperado | Obtenido |
 |---|---|---|
 | Overlay visible al enviar | `.show` → pantalla completa | ✅ captura con arcos + texto |
-| Duración del overlay | ≥ 3000 ms | ✅ **3117 ms** hasta `/dashboard` |
+| Duración del overlay | ≥ 2000 ms | ✅ **2288 ms** hasta `/dashboard` (antes 3117 ms con 3000) |
 | Giro amarillo (Δ en 180 ms) | > 0 (derecha) | ✅ **+75°** |
 | Giro blanco (Δ en 180 ms) | < 0 (izquierda) | ✅ **−75°** |
 | Grosor de los arcos | amarillo > blanco, fino y visible | ✅ 5 px / 3 px sobre círculo de 96 px |
-| Credenciales inválidas | vuelve a `/login` con mensaje | ✅ 3556 ms + "Credenciales inválidas" |
+| Credenciales inválidas | vuelve a `/login` con mensaje | ✅ 2462 ms + "Credenciales inválidas" |
 | `#splashScreen` en `/dashboard` | ya no existe | ✅ `false` + captura directa |
 | Spinner tras login | **uno solo** (el overlay) | ✅ secuencia: overlay → dashboard sin splash |
 | Consola del navegador | 0 errores | ✅ 0 |
