@@ -1,11 +1,12 @@
 # Traza: Login funcional contra PostgreSQL + limpieza de la deuda de estilo
 
 **Proyecto:** Thimpson Express Panel Administrativo
-**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con las fases 8 a 14)
+**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con las fases 8 a 15)
 **Estado del objetivo:** cumplido (0 errores en ambos modos del guardián; 10/10 pruebas HTTP;
 login con overlay de 2 s y doble arco, **panel 100 % offline con fallback automático
 CDN → local → CDN y alertas de Alertify**, botón de salida con confirmación + spinner de
-1200 ms y redirección con sesión destruida, verificados en navegador real)
+1200 ms y redirección con sesión destruida, **HTML emitido sin comentarios visibles en el
+inspector**, verificados en navegador real)
 
 ## Resumen ejecutivo
 
@@ -20,10 +21,12 @@ aprovechando el hallazgo del `border-radius: 0px !important` global para ganar e
 overlay de login con doble arco y fin del splash (Fase 11), **SweetAlert/Alertify locales**
 (Fase 12), **DataTables local en español + alerta de confirmación al cerrar sesión** con
 spinner de 1200 ms que destruye la sesión (Fase 13) y **migración offline total de los 9
-CDN + Google Fonts con fallback en cadena y alertas de recursos fallidos** (Fase 14). Todo
+CDN + Google Fonts con fallback en cadena y alertas de recursos fallidos** (Fase 14) y
+**limpieza de comentarios en el HTML emitido** para que el inspector no muestre cómo opera
+el sistema, conservándolos en los archivos fuente (Fase 15). Todo
 quedó verificado con `php -l` (lint global 0 errores), 10 pruebas HTTP y navegador real
-(Chrome for Testing). **Ningún cambio alteró la UI visible más allá de lo pedido.**
-
+(Chrome for Testing). **Ningún cambio alteró la
+UI visible más allá de lo pedido.**
 ---
 
 ## 1. Objetivo y criterios de aceptación
@@ -43,6 +46,7 @@ quedó verificado con `php -l` (lint global 0 errores), 10 pruebas HTTP y navega
 | Con internet → CDN; sin internet → local; sin local → reintento CDN | ✅ (3 escenarios E2E: online / offline / sin locales) |
 | Fallo total → alerta de Alertify que especifica el recurso | ✅ (alerta agrupada con nombre, secuencia y ruta) |
 | Panel usable sin conexión (0 CDN obligatorios) | ✅ (los 9 plugins + fuentes locales; tiles OSM pendientes de red por naturaleza) |
+| Los comentarios no aparecen en el inspector ni en el código fuente | ✅ (0 `<!--`, 0 `ENCABEZADO`, 0 `//` de línea en /login, /dashboard y 404; archivos fuente intactos) |
 
 ---
 
@@ -336,6 +340,40 @@ alertas con Alertify que especifiquen el problema". Con `question` el usuario ce
 
 ---
 
+### Fase 15 — Comentarios fuera del inspector, dentro de los archivos
+
+**Pedido (2026-10-05):** al inspeccionar en el navegador se ven los comentarios de los
+archivos en la pestaña Elementos; el usuario quiere que **no se vean** pero que **sigan en
+los archivos donde se generan**, por motivos de exposición (los comentarios describen cómo
+opera el sistema).
+
+- **Diagnóstico previo:** solo viajan al navegador los comentarios **HTML** (`<!-- -->`) y
+  los de los **`<script>` en línea**; los comentarios PHP jamás salen y los de los
+  `.js`/`.css` externos no están en Elementos. Inventario: **52 comentarios HTML** en 14
+  vistas (42 banners de estilo + ~10 marcadores) y **16 comentarios `//`** en 7 bloques de
+  script en línea.
+- **Decisión de diseño:** limpiar la **salida**, no los archivos (la alternativa A,
+  convertir a `<?php /* */ ?>`, chocaba con la skill de estilo §2 y no resolvía los scripts
+  en línea). `index.php` —único punto de salida porque `.htaccess` devuelve 404 a
+  `Vistas/` en directo— registra `ob_start('limpiarComentariosSalida')`.
+- **`limpiarComentariosSalida()`:** elimina comentarios HTML **completos** (solo pares
+  `<!-- ... -->`; un `<!--` huérfano no se toca) y, dentro de cada `<script>` sin `src`,
+  los bloques `/* ... */` y las líneas que son **completamente** `//`. **Fail-open:**
+  cualquier error devuelve el HTML original.
+- **Riesgos evaluados antes de codificar (todos descartados):** las 9 URLs `://` del JS no
+  pueden ser alcanzadas por `^[ \t]*//` (la línea no empieza con `//`); no existen `*/`
+  huérfanos dentro de cadenas ni `<!--` heredados dentro de scripts; nadie usa `ob_*` en
+  el proyecto.
+- **Límite honesto documentado:** quitar comentarios reduce la exposición *casual*; el
+  código JS en línea y los `.js` externos siguen siendo legibles con F12 (la seguridad real
+  es del servidor, no de los comentarios).
+- **Evidencia:** `php -l` 0 · guardián `-SoloNuevos` **0/0/0** · curl con 0 `<!--`,
+  0 `ENCABEZADO` y 0 `//` en `/login`, `/dashboard` y el 404 (24 URLs `://` intactas) ·
+  E2E Playwright: DOM sin `<!--`, **consola 0 errores**, libs/tabla/chart OK, logout
+  1221 ms, y ciclo de login inválido completo (overlay → flash → botón rehabilitado).
+
+---
+
 ## 3. Archivos afectados
 
 | Archivo (punto central) | Rol | Si se modifica… |
@@ -352,6 +390,7 @@ alertas con Alertify que especifiquen el problema". Con `question` el usuario ce
 | `Publico/Recursos/datatables/*` | DataTables local + i18n es-ES | Si se mueven, actualizar las 3 rutas `BASE_URL` de encabezado/pie |
 | `Publico/Recursos/js/gestorPlugins.js` | Fallback CDN↔local + cadena + alertas | Si se rompe, ningún recurso gestionado se carga |
 | `Publico/Recursos/{bootstrap,bootstrap-icons,jQuery,leaflet,select2,chartjs,fonts}/` | Copias offline de los 9 CDN + fuentes | Si se mueven, actualizar `data-local` y las rutas de la cadena |
+| `index.php` | Router + **`limpiarComentariosSalida()`/`ob_start`** (Fase 15) | Si se quita el buffer, los comentarios vuelven al inspector; si cambian los patrones, verificar con curl que no se rompa el JS |
 | `Vistas/Plantillas/pieAdmin.php` | Cargas del panel + DataTables + cierre de sesión | Se rompe el idioma de las tablas y la alerta de salida |
 | `scripts/validar-estilo.ps1:131,161` | Guardián | Afecta a **todos** los proyectos |
 
@@ -490,6 +529,21 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 | Smoke HTTP | `curl` | 200 | ✅ `/login` 200, `gestorPlugins.js` 200, `admin.css` 200 |
 | `php -l` / guardián `-SoloNuevos` | global | 0 / 0-0-0 | ✅ 0 errores / **0-0-0** |
 
+**Pruebas de la Fase 15 (comentarios fuera del inspector) — curl y navegador real:**
+
+| Prueba | Esperado | Obtenido |
+|---|---|---|
+| `curl /login` → contar `<!--` / `ENCABEZADO` / `//` de línea | 0 / 0 / 0 | ✅ 0 / 0 / 0 (11 042 caracteres) |
+| `curl /dashboard` (con sesión) → mismos contadores | 0 / 0 / 0 | ✅ 0 / 0 / 0 (22 212 caracteres) |
+| URLs `://` en la salida del dashboard | intactas | ✅ **24** (data-cdn/src/href + JS) |
+| `curl /404` con sesión | 404 + 0 comentarios | ✅ 404 + 0 `<!--` + 0 `ENCABEZADO` |
+| DOM vivo del dashboard | sin `<!--` ni `ENCABEZADO` | ✅ `false` / `false` |
+| Consola con JS recortado | 0 errores | ✅ 0 (libs, cadena, tabla, chart operativos) |
+| Login inválido (script inline limpiado) | overlay + flash + botón | ✅ overlay "Iniciando al sistema", vuelta con "Credenciales inválidas", botón rehabilitado |
+| Logout (pieAdmin inline limpiado) | alerta → spinner → `/login` | ✅ **1221 ms** |
+| Archivos fuente | intactos | ✅ `git diff`: solo `index.php` (+43); vistas con sus comentarios |
+| `php -l` / guardián `-SoloNuevos` | 0 / 0-0-0 | ✅ 0 / **0-0-0** |
+
 ---
 
 ## 7. Decisiones y alternativas descartadas
@@ -520,6 +574,9 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   **`1942dfd`** (docs de la Fase 13) y **`0bfa44c`** `feat: migrar los 9 CDN y Google Fonts
   a offline con fallback en cadena` (37 archivos, +1658/−54, 34 de ellos nuevos) — todos
   **subidos** a `origin/main`. Verificado `HEAD == origin/main`.
+- **`git`:** **`4e971d0`** `feat: ocultar los comentarios del HTML emitido sin tocar los
+  archivos fuente` (`index.php` +43: función `limpiarComentariosSalida()` + `ob_start`) y
+  su `docs:` de la Fase 15 — subidos; verificado `HEAD == origin/main`.
 - **Vistas sin controlador:** `Pedidos/*` y `Riders/*` quedaron huérfanas a propósito (el
   usuario las conservó). Al reconstruir sus controladores hay que setear `$pageTitle` y
   `$activeMenu` antes del include.
@@ -570,10 +627,16 @@ pwsh -NoProfile -File ".../scripts/validar-estilo.ps1" -Ruta "<proy>"           
 #         el MCP pause el run, usar addInitScript que reemplace window.alert por un
 #     	colector en window.__llamadasAlert (el diálogo nativo NO se abre igual).
 #    Al terminar: retirar las rutas (page.unroute) y borrar .playwright-mcp/.
+
+# 5. Verificar la Fase 15 (comentarios no emitidos) con curl:
+#    $c = (curl.exe -s -b cookies.txt http://localhost:8080/.../dashboard) -join "`n"
+#    [regex]::Matches($c, '<!--').Count            # -> 0
+#    [regex]::Matches($c, '(?m)^\s*//').Count       # -> 0
+#    [regex]::Matches($c, '://').Count              # -> 24 (URLs intactas)
 ```
 
 **Hechos confirmados** (corridos): sintaxis, guardián en ambos modos, 10 pruebas HTTP,
-regresión de fixtures, **las 3 tablas de pruebas de las fases 11 a 14** (E2E en navegador
-real con sesión `admin/admin123`). **Supuestos no verificados:** que el `TODO` de límite de
-intentos se implemente en futuro; que las vistas `Pedidos`/`Riders` funcionen al
-reconstruir sus controladores (hoy devuelven 404, que es lo esperado).
+regresión de fixtures, **las tablas de pruebas de las fases 11 a 15** (E2E en navegador
+real con sesión `admin/admin123` + curl de la Fase 15). **Supuestos no verificados:** que el
+`TODO` de límite de intentos se implemente en futuro; que las vistas `Pedidos`/`Riders`
+funcionen al reconstruir sus controladores (hoy devuelven 404, que es lo esperado).
