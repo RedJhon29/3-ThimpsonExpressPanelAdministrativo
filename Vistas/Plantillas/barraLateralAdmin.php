@@ -147,7 +147,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
     <!-- Overlay de salida del sistema -->
     <div class="logout-overlay" id="logoutOverlay" role="status" aria-live="polite">
-        <div class="spinner-border" style="color:var(--primary);width:2.6rem;height:2.6rem;" role="status" aria-hidden="true"></div>
+        <div class="spinner-rueda" style="--rueda-size:2.6rem;--rueda-grosor:6px;" role="status" aria-hidden="true"></div>
         <span class="logout-overlay-text">Saliendo del sistema</span>
     </div>
 

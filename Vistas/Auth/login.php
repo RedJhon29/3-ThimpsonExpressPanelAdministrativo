@@ -246,7 +246,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
                 <button type="submit" class="btn-login" id="submitBtn">
                     <span class="btn-text">Iniciar Sesión</span>
                     <span class="btn-loading d-none">
-                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        <span class="spinner-rueda me-2" style="--rueda-size:1.1rem;--rueda-grosor:3px;" role="status"></span>
                         Ingresando...
                     </span>
                 </button>

@@ -46,6 +46,6 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
                 <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Panel Administrativo</div>
             </div>
         </div>
-        <div class="spinner-border" style="color:var(--primary);width:2rem;height:2rem;" role="status"></div>
+        <div class="spinner-rueda" style="--rueda-size:2rem;--rueda-grosor:5px;" role="status"></div>
     </div>
 </div>

@@ -854,3 +854,33 @@ img { max-width: 100%; height: auto; }
         background: var(--surface-2);
     }
 }
+
+/* --- Spinner rueda (amarillo y blanco) --- */
+@keyframes giroRueda {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.spinner-rueda {
+    --rueda-size: 2rem;
+    --rueda-grosor: 5px;
+    display: inline-block;
+    width: var(--rueda-size);
+    height: var(--rueda-size);
+    flex-shrink: 0;
+    vertical-align: middle;
+    border-radius: 50% !important;
+    background: conic-gradient(
+        var(--primary) 0deg 45deg,
+        #FFFFFF 45deg 90deg,
+        var(--primary) 90deg 135deg,
+        #FFFFFF 135deg 180deg,
+        var(--primary) 180deg 225deg,
+        #FFFFFF 225deg 270deg,
+        var(--primary) 270deg 315deg,
+        #FFFFFF 315deg 360deg
+    );
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--rueda-grosor)), #000 calc(100% - var(--rueda-grosor) + 0.5px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - var(--rueda-grosor)), #000 calc(100% - var(--rueda-grosor) + 0.5px));
+    animation: giroRueda 1s linear infinite;
+}

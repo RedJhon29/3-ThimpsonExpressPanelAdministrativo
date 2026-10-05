@@ -1,9 +1,9 @@
 # Traza: Login funcional contra PostgreSQL + limpieza de la deuda de estilo
 
 **Proyecto:** Thimpson Express Panel Administrativo
-**Fecha:** 2026-10-02 (ampliada el 2026-10-04 con fases 8 y 9)
+**Fecha:** 2026-10-02 (ampliada el 2026-10-04/05 con fases 8, 9 y 10)
 **Estado del objetivo:** cumplido (0 errores en ambos modos del guardián; 10/10 pruebas HTTP;
-login y botón de salida verificados en navegador real)
+login, botón de salida y los 3 spinners tipo rueda verificados en navegador real)
 
 ## Resumen ejecutivo
 
@@ -11,8 +11,10 @@ Se habilitó el login real contra PostgreSQL (antes roto por `obtenerConexion()`
 se purgó el código muerto (71 archivos) y se eliminaron los **207 errores** del guardián de
 estilo → **0 errores, 0 avisos** en los modos `-SoloNuevos` y total. Se corrigieron **2 bugs
 del propio guardián** (Fase 7), **el bloqueo de la salida con `Enter`** que impedía llegar al
-panel (Fase 8) y se añadió el **botón de cierre de sesión con overlay** en la esquina superior
-derecha (Fase 9). Todo quedó verificado con `php -l` (20/20), 10 pruebas HTTP y navegador real
+panel (Fase 8), se añadió el **botón de cierre de sesión con overlay** en la esquina superior
+derecha (Fase 9) y se reemplazaron los **3 spinners** por rueditas circulares amarillo/blanco,
+aprovechando el hallazgo del `border-radius: 0px !important` global para ganar el empate
+(Fase 10). Todo quedó verificado con `php -l` (20/20), 10 pruebas HTTP y navegador real
 (Chrome for Testing). **Ningún cambio alteró la UI visible más allá de lo pedido.**
 
 ---
@@ -144,6 +146,30 @@ Ambos se descubrieron **verificando**, no especulando:
 
 ---
 
+### Fase 10 — Spinners tipo rueda (amarillo y blanco)
+
+**Pedido (2026-10-05):** "en lugar de un cuadro que gire quiero que sean circulares, rueditas
+de color amarillo y blanco". El proyecto tiene exactamente **3 spinners**.
+
+- **Causa del "cuadro":** `admin.css:46-49` declara
+  `*, *::before, *::after { border-radius: var(--radius) !important }` con `--radius: 0px` →
+  **anula el `border-radius: 50%` de `.spinner-border` (Bootstrap)** en todo el panel.
+  Verificado midiendo la OM del browser: ninguna declaración de radio sobrevivía al `*`.
+- **Componente nuevo** (al final de `admin.css`): `.spinner-rueda` = anillo de 8 segmentos de
+  45° (`conic-gradient` con `var(--primary)`/`#FFFFFF`) recortado con
+  `mask: radial-gradient(farthest-side, ...)` + `@keyframes giroRueda` (360°, 1 s lineal
+  infinito) + `border-radius: 50% !important` (gana el empate por especificidad vs. el `*`).
+- **Los 3 usos** (tamaño por `--rueda-size`/`--rueda-grosor` inline): `encabezadoAdmin.php`
+  (splash, 2rem), `barraLateralAdmin.php` (overlay de salida, 2.6rem), `login.php`
+  (botón "Ingresando...", 1.1rem). **No queda ningún `spinner-border`** en el proyecto.
+- **Evidencia:** los 3 miden `border-radius: 50%` en la OM (32px / 17.6px / 41.6px) y las 3
+  capturas muestran anillos circulares; el `prefers-reduced-motion` global (`admin.css:769`)
+  ya detiene `giroRueda`.
+- **Si alguien altera este componente →** los 3 estados de carga vuelven al cuadro:
+  re-medicar `getComputedStyle` y volver a capturar splash + botón + overlay.
+
+---
+
 ## 3. Archivos afectados
 
 | Archivo (punto central) | Rol | Si se modifica… |
@@ -272,6 +298,16 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
   9 links `?page=…` muertos, `var(--warning)` inexistente.
 - **`editRider()`** se define en `Riders/index.php` pero se invoca desde `Riders/detail.php`:
   si esa vista se abre sola, el botón Editar falla (documentado en su banner).
+- **`git`:** el commit `1a57f3b` (login + limpieza + botón de salida) ya está en `origin/main`;
+  los **4 archivos de la Fase 10** (spinners) siguen **sin commitear** (requiere aprobación).
+- **`admin.css:46-49`** — `*, *::before, *::after { border-radius: var(--radius) !important }`
+  con `--radius: 0px` **anula todo radio** que no lleve `!important` (incluye
+  `.spinner-border` de Bootstrap). No se tocó: afecta a toda la UI. `.spinner-rueda` lo
+  compensa con `!important` propio; corregir la raíz implica migrar ese reset a `:where()`
+  y revisar los componentes que hoy dependan de ese comportamiento.
+- **Contraste del spinner en el botón de login:** los segmentos amarillos van sobre fondo
+  `--primary` (amarillo) ⇒ solo los blancos resaltan. Si no convence, variantes: segmentos
+  `--primary`/`--foreground` solo en ese uso, o aumentar `--rueda-grosor`.
 
 ---
 
