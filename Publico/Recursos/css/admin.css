@@ -810,26 +810,34 @@ img { max-width: 100%; height: auto; }
     border-color: var(--destructive);
     color: var(--destructive);
 }
+/* --- Overlay de salida del sistema (idéntico al del login) --- */
 .logout-overlay {
     position: fixed;
     inset: 0;
-    z-index: 2000;
+    z-index: 2500;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    background: rgba(0, 0, 0, 0.78);
-    backdrop-filter: blur(3px);
+    gap: 18px;
+    background: var(--background);
+    background: color-mix(in srgb, var(--background) 78%, transparent);
+    backdrop-filter: blur(4px);
 }
 .logout-overlay.show {
     display: flex;
 }
 .logout-overlay-text {
     font-family: var(--font-display);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--foreground);
+}
+/* Botón de confirmación del alert de salida: amarillo con texto oscuro */
+.swal2-confirm.swal-confirmar-salida {
+    background-color: var(--primary) !important;
+    color: #131517 !important;
+    font-weight: 600;
 }
 
 /* --- Overlay de carga del login (pantalla completa) --- */

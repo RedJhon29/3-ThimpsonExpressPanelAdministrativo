@@ -145,9 +145,12 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
         </div>
     </header>
 
-    <!-- Overlay de salida del sistema -->
+    <!-- Overlay de salida del sistema: mismo spinner doble que el login -->
     <div class="logout-overlay" id="logoutOverlay" role="status" aria-live="polite">
-        <div class="spinner-rueda" style="--rueda-size:2.6rem;--rueda-grosor:6px;" role="status" aria-hidden="true"></div>
+        <span class="spinner-doble" aria-hidden="true">
+            <span class="doble-arco doble-arco-amarillo"></span>
+            <span class="doble-arco doble-arco-blanco"></span>
+        </span>
         <span class="logout-overlay-text">Saliendo del sistema</span>
     </div>
 
