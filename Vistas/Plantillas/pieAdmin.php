@@ -5,7 +5,7 @@ ARCHIVO: Vistas/Plantillas/pieAdmin.php
 
 <!--=====================DETALLES=====================
 QUÉ HACE: cierra main y sidebar, carga las librerías del panel y
-    define los helpers globales de toast y splash.
+    define el helper global de toast.
 VINCULADO A: lo cierra la última línea de cada vista del panel;
     abre los contenedores Vistas/Plantillas/barraLateralAdmin.php.
 SI SE ALTERA: si se rompe el cierre, todas las vistas se desbordan;
@@ -30,14 +30,6 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 <script>
-// Splash screen
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        var splash = document.getElementById('splashScreen');
-        if (splash) { splash.style.opacity = '0'; setTimeout(function() { splash.style.display = 'none'; }, 300); }
-    }, 800);
-});
-
 // Sidebar toggle
 document.getElementById('toggleSidebar')?.addEventListener('click', function() {
     document.getElementById('adminSidebar').classList.toggle('show');

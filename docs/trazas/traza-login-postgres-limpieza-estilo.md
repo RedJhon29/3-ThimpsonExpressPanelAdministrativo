@@ -170,6 +170,41 @@ de color amarillo y blanco". El proyecto tiene exactamente **3 spinners**.
 
 ---
 
+### Fase 11 — Overlay de login + doble arco concéntrico (y fin del splash)
+
+**Pedido (2026-10-05):** (a) pantalla de carga de 3 s sobre el login (translúcida, spinner,
+"Ingresando al sistema"); (b) tras medir en navegador real **dos cargas seguidas** (overlay 3 s
++ splash ≈ 1,2 s) el usuario eligió **quitar el splash del panel** ("solo uno"); (c) el spinner
+del overlay debía ser **dos semicírculos concéntricos girando en sentidos opuestos** (amarillo
+afuera →, blanco adentro ←).
+
+- **Overlay** (`admin.css:848-868`, `login.php`): `.login-overlay` = `fixed inset:0`,
+  `z-index:2500`, `--background` al 78 % + `backdrop-filter: blur(4px)`; `.show` → `flex`.
+  `enviarLogin()` garantiza **≥ 3000 ms reales** (`Math.max(0, 3000 - transcurrido)`); éxito →
+  `location.href` a la URL que devuelve el servidor; **credenciales inválidas →
+  `document.write(await r.text())`** porque `loginController::index()` hace `unset()` del flash
+  `login_error` (un GET extra lo borraría); red/5xx → cierra overlay y reactiva el botón
+  (arregla de paso el bug del botón disabled eterno); sin JS → form nativo sin overlay.
+- **Doble arco** (final de `admin.css`): `.spinner-doble` con dos `.doble-arco` absolutos;
+  semicírculos de 180° exactos vía `border-color: X X transparent transparent` (top+right);
+  `border-radius: 50% !important` (gana al reset `*`). Amarillo 8 px `inset:0` +
+  `giroRueda` (horario →); blanco 5 px `inset:14px` + `giroRuedaInversa` (clave nueva:
+  `rotate(-360deg)`, antihorario ←). Radios 32 px vs 18 px ⇒ el amarillo rodea al blanco.
+- **Splash eliminado sin restos:** HTML en `encabezadoAdmin.php`, JS `load`+800 ms en
+  `pieAdmin.php` (su banner QUÉ HACE pasa a "helper global de toast") y CSS
+  `.splash-screen`/`.splash-content`. `.spinner-rueda` **sigue vivo** en el overlay de logout
+  y en el botón de login ⇒ no se tocó su componente.
+- **Si alguien altera esta parte →** quitar el `inset:0` del amarillo rompe la concenricidad;
+  un `border-color` de un solo lado deja arcos de 90° en vez de 180°; quitar el `!important`
+  del radio vuelve al cuadro por el reset `*` de `admin.css:46-49`.
+- **Evidencia (navegador real, muestreo cada 180 ms):** Δángulo **+72°** (amarillo, derecha)
+  y **−72°** (blanco, izquierda); grosor 8 px/5 px; overlay **3117 ms**; `#splashScreen` ya
+  **no existe** en `/dashboard`; consola 0 errores; `php -l` 20/0; gate `-SoloNuevos` 0/0/0
+  (4 archivos modificados); smoke `/login` sin sesión: `spinner-doble` presente,
+  `spinner-rueda` ×1 (botón), sin `splashScreen`.
+
+---
+
 ## 3. Archivos afectados
 
 | Archivo (punto central) | Rol | Si se modifica… |
@@ -271,6 +306,20 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 | Mismo flujo a **375px** | botón visible y funcional | ✅ `x=327, right=363` dentro del viewport → `/login` |
 | Sin JS (degradación) | sale igual | ✅ es `<a href>` real a `/logout` |
 
+**Pruebas de la Fase 11 (overlay de login, doble arco, fin del splash) — navegador real:**
+
+| Prueba | Esperado | Obtenido |
+|---|---|---|
+| Overlay visible al enviar | `.show` → pantalla completa | ✅ captura con arcos + texto |
+| Duración del overlay | ≥ 3000 ms | ✅ **3117 ms** hasta `/dashboard` |
+| Giro amarillo (Δ en 180 ms) | > 0 (derecha) | ✅ **+72°** |
+| Giro blanco (Δ en 180 ms) | < 0 (izquierda) | ✅ **−72°** |
+| Grosor de los arcos | amarillo > blanco | ✅ 8 px / 5 px |
+| Credenciales inválidas | vuelve a `/login` con mensaje | ✅ 3556 ms + "Credenciales inválidas" |
+| `#splashScreen` en `/dashboard` | ya no existe | ✅ `false` + captura directa |
+| Spinner tras login | **uno solo** (el overlay) | ✅ secuencia: overlay → dashboard sin splash |
+| Consola del navegador | 0 errores | ✅ 0 |
+
 ---
 
 ## 7. Decisiones y alternativas descartadas
@@ -289,8 +338,9 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 
 - **`Controladores/loginController.php:68`** — `TODO(2026-Q4)`: sin límite de intentos de login
   → expuesto a fuerza bruta. Requiere decisión de arquitectura (¿contador por IP? ¿bloqueo?).
-- **`git` sin commitear:** 91 cambios (20 M + 71 D) **aún no commiteados**; además `main` está
-  `ahead 1` (el commit `517d5b3` sigue sin subir). Requiere **aprobación explícita**.
+- **`git` sin commitear:** **4 modificaciones (M)** de la Fase 11 (overlay de login, doble
+  arco y fin del splash): `admin.css`, `login.php`, `encabezadoAdmin.php`, `pieAdmin.php`.
+  Requiere **aprobación explícita** para commitear.
 - **Vistas sin controlador:** `Pedidos/*` y `Riders/*` quedaron huérfanas a propósito (el
   usuario las conservó). Al reconstruir sus controladores hay que setear `$pageTitle` y
   `$activeMenu` antes del include.

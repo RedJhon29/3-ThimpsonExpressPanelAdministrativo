@@ -258,6 +258,15 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
         </div>
     </div>
 
+    <!-- Overlay de carga: pantalla completa con los arcos y el texto del login -->
+    <div class="login-overlay" id="loginOverlay" role="status" aria-live="polite">
+        <span class="spinner-doble" aria-hidden="true">
+            <span class="doble-arco doble-arco-amarillo"></span>
+            <span class="doble-arco doble-arco-blanco"></span>
+        </span>
+        <span class="login-overlay-texto">Ingresando al sistema</span>
+    </div>
+
     <script>
         /*====================ENCABEZADO====================
         FUNCIÓN: togglePassword() | ROL: vista (JS)
@@ -287,14 +296,67 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             }
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        /*====================ENCABEZADO====================
+        FUNCIÓN: enviarLogin() | ROL: vista (JS)
+        ==================================================
+        =====================DETALLES=====================
+        QUÉ HACE: muestra el overlay de pantalla completa y envía
+            el login, pintando la respuesta tras 3 segundos.
+        VINCULADO A: la llama el submit de #loginForm y usa
+            #loginOverlay de este archivo; no depende de librerías.
+        SI SE ALTERA: si cambian los id del form/overlay o el valor
+            3000, ajustar sus selectores y la duración del efecto.
+        FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+        ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+        ==================================================
+        */
+        async function enviarLogin(formulario) {
+            const overlay = document.getElementById('loginOverlay');
             const btn = document.getElementById('submitBtn');
             const btnText = btn.querySelector('.btn-text');
             const btnLoading = btn.querySelector('.btn-loading');
+            const duracionEfecto = 3000;
+            const inicio = performance.now();
 
             btn.disabled = true;
             btnText.classList.add('d-none');
             btnLoading.classList.remove('d-none');
+            overlay.classList.add('show');
+
+            try {
+                const respuesta = await fetch(formulario.action, {
+                    method: 'POST',
+                    body: new FormData(formulario)
+                });
+
+                const transcurrido = performance.now() - inicio;
+                const restante = Math.max(0, duracionEfecto - transcurrido);
+                await new Promise(function (resolver) {
+                    setTimeout(resolver, restante);
+                });
+
+                // Credenciales inválidas: se pinta la respuesta (ya lleva el
+                // mensaje y el usuario) sin hacer otro GET que consuma el flash.
+                if (new URL(respuesta.url).pathname === window.location.pathname) {
+                    document.open();
+                    document.write(await respuesta.text());
+                    document.close();
+                    return;
+                }
+
+                window.location.href = respuesta.url;
+            } catch (error) {
+                // Sin red o error del servidor: se devuelve al formulario usable
+                overlay.classList.remove('show');
+                btn.disabled = false;
+                btnText.classList.remove('d-none');
+                btnLoading.classList.add('d-none');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            enviarLogin(this);
         });
 
     </script>

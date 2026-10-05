@@ -35,17 +35,3 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <link href="<?php echo BASE_URL; ?>/Publico/Recursos/css/admin.css" rel="stylesheet">
 </head>
 <body class="admin-body">
-
-<!-- Splash Screen -->
-<div id="splashScreen" class="splash-screen">
-    <div class="splash-content">
-        <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:16px;">
-            <div class="sidebar-logo" style="width:48px;height:48px;font-size:22px;">T</div>
-            <div>
-                <div style="font-size:20px;font-weight:700;color:#fff;">Thimpson Express</div>
-                <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Panel Administrativo</div>
-            </div>
-        </div>
-        <div class="spinner-rueda" style="--rueda-size:2rem;--rueda-grosor:5px;" role="status"></div>
-    </div>
-</div>

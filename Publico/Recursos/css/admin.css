@@ -86,19 +86,6 @@ img { max-width: 100%; height: auto; }
     box-shadow: 0 0 0 3px rgba(251, 176, 59, 0.6);
 }
 
-/* --- Splash Screen --- */
-.splash-screen {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: var(--background);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.splash-content { text-align: center; }
-.splash-content h2 { font-family: var(--font-display); font-weight: 700; }
-
 /* --- Admin Layout --- */
 .admin-body {
     display: flex;
@@ -845,6 +832,30 @@ img { max-width: 100%; height: auto; }
     color: var(--foreground);
 }
 
+/* --- Overlay de carga del login (pantalla completa) --- */
+.login-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: var(--background);
+    background: color-mix(in srgb, var(--background) 78%, transparent);
+    backdrop-filter: blur(4px);
+}
+.login-overlay.show {
+    display: flex;
+}
+.login-overlay-texto {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--foreground);
+}
+
 @media (max-width: 767.98px) {
     .topbar-logout {
         position: fixed;
@@ -859,6 +870,11 @@ img { max-width: 100%; height: auto; }
 @keyframes giroRueda {
     to {
         transform: rotate(360deg);
+    }
+}
+@keyframes giroRuedaInversa {
+    to {
+        transform: rotate(-360deg);
     }
 }
 .spinner-rueda {
@@ -883,4 +899,28 @@ img { max-width: 100%; height: auto; }
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--rueda-grosor)), #000 calc(100% - var(--rueda-grosor) + 0.5px));
     mask: radial-gradient(farthest-side, transparent calc(100% - var(--rueda-grosor)), #000 calc(100% - var(--rueda-grosor) + 0.5px));
     animation: giroRueda 1s linear infinite;
+}
+
+/* --- Spinner doble arco (semicírculos en sentidos opuestos) --- */
+.spinner-doble {
+    position: relative;
+    display: block;
+    width: var(--doble-size, 4rem);
+    height: var(--doble-size, 4rem);
+}
+.doble-arco {
+    position: absolute;
+    border-radius: 50% !important;
+}
+.doble-arco-amarillo {
+    inset: 0;
+    border: 8px solid transparent;
+    border-color: var(--primary) var(--primary) transparent transparent;
+    animation: giroRueda 1s linear infinite;
+}
+.doble-arco-blanco {
+    inset: 14px;
+    border: 5px solid transparent;
+    border-color: #FFFFFF #FFFFFF transparent transparent;
+    animation: giroRuedaInversa 1s linear infinite;
 }
