@@ -117,7 +117,8 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// alListo garantiza Chart.js cargado; DOMContentLoaded dispararía antes
+gestorPlugins.alListo(function() {
     var statusCounts = <?php echo json_encode(Pedido::statusCounts()); ?>;
     var ctx = document.getElementById('ordersChart');
     if (ctx) {
