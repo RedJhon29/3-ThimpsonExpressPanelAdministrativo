@@ -467,6 +467,28 @@ pwsh -NoProfile -File "...\validar-estilo.ps1" -Ruta "C:\xampp\htdocs\3-Thimpson
 | Referencias CDN en plantillas | 0 | ✅ grep = 0 |
 | Consola / `php -l` / gate | 0 / 20-0 / 0-0-0 | ✅ ✅ ✅ |
 
+**Pruebas de la Fase 13 (DataTables local es-ES + cierre con alerta) — navegador real:**
+
+| Prueba | Esperado | Obtenido |
+|---|---|---|
+| 4 archivos DataTables locales | `200` | ✅ 4/4 (`dataTables.min.js`, ext. bootstrap5 js/css, `i18n/es-ES.json`) |
+| Peticiones a `cdn.datatables.net` | 0 | ✅ **0** |
+| Idioma de la tabla | español | ✅ `Anterior/Siguiente`, `Buscar:`, **"Mostrando 1 a 5 de 5 registros"** |
+| Confirmación en **los 2 botones** de salida | alerta "¿Cerrar sesión?" | ✅ Sí → spinner / Cancelar → se queda |
+| Tras confirmar | spinner 1200 ms → `/login` con sesión destruida | ✅ medido **1656 ms**; `$_SESSION` vacía |
+| `php -l` / guardián `-SoloNuevos` | 0 / 0-0-0 | ✅ 0 errores / 0-0-0 |
+
+**Pruebas de la Fase 14 (fallback CDN↔local) — 3 escenarios E2E Playwright:**
+
+| Escenario | Cómo se provocó | Esperado | Obtenido |
+|---|---|---|---|
+| 1. Online | sin bloqueos | CDN-first, `fallos=[]` | ✅ `origenJquery=code.jquery.com`, libs CDN, tabla "Mostrando 1 a 5 de 5", chart 256×256, 0 errores |
+| 2. Offline | abort a 6 dominios CDN (jsdelivr/unpkg/code.jquery/datatables/fonts) | todo local | ✅ 9 scripts en LOCAL, 9 links con `data-pasos` correctos, tabla + chart OK, `fallos=[]`, 0 errores propios |
+| 3. Sin locales | abort además de `jquery/`/`bootstrap/`/`bootstrap-icons/` locales | alerta de Alertify con detalle | ✅ **4 recursos** (Bootstrap CSS, Icons, jQuery, Bootstrap JS) con secuencia `cdn -> local -> cdn` y ruta; el resto siguió cargando |
+| Regresión logout | flujo completo | alerta → spinner → `/login` | ✅ "¿Cerrar sesión?" → spinner 96 px → **1258 ms**, 0 errores |
+| Smoke HTTP | `curl` | 200 | ✅ `/login` 200, `gestorPlugins.js` 200, `admin.css` 200 |
+| `php -l` / guardián `-SoloNuevos` | global | 0 / 0-0-0 | ✅ 0 errores / **0-0-0** |
+
 ---
 
 ## 7. Decisiones y alternativas descartadas
@@ -532,9 +554,21 @@ php -l (todos los .php)                                  # 20/20
 pwsh -NoProfile -File ".../scripts/validar-estilo.ps1" -Ruta "<proy>" -SoloNuevos   # 0/0
 pwsh -NoProfile -File ".../scripts/validar-estilo.ps1" -Ruta "<proy>"               # 0/0
 # + las 10 pruebas HTTP de §6
+
+# 4. Reproducir los escenarios E2E de la Fase 14 (Playwright sobre el servidor de arriba):
+#    Escenario 1 (online): ir a /logout, login admin/admin123 y evaluar
+#      window.fallosCargaPlugins (debe ser []) y el src del <script data-nombre="jQuery">.
+#    Escenario 2 (offline): page.route aborta
+#      cdn.jsdelivr.net/**, unpkg.com/**, code.jquery.com/**, cdn.datatables.net/**,
+#      fonts.googleapis.com/**, fonts.gstatic.com/**  -> repetir el paso anterior.
+#    Escenario 3 (sin locales): además abortar
+#      **/Publico/Recursos/{jquery,bootstrap,bootstrap-icons}/**
+#      -> debe aparecer la alerta de Alertify con los 4 recursos y su secuencia.
+#    Al terminar: retirar las rutas (page.unroute) y borrar .playwright-mcp/.
 ```
 
 **Hechos confirmados** (corridos): sintaxis, guardián en ambos modos, 10 pruebas HTTP,
-regresión de fixtures. **Supuestos no verificados:** que el `TODO` de límite de intentos se
-implemente en futuro; que las vistas `Pedidos`/`Riders` funcionen al reconstruir sus
-controladores (hoy devuelven 404, que es lo esperado).
+regresión de fixtures, **las 3 tablas de pruebas de las fases 11 a 14** (E2E en navegador
+real con sesión `admin/admin123`). **Supuestos no verificados:** que el `TODO` de límite de
+intentos se implemente en futuro; que las vistas `Pedidos`/`Riders` funcionen al
+reconstruir sus controladores (hoy devuelven 404, que es lo esperado).
