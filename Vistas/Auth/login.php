@@ -199,7 +199,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
         </div>
 
         <div class="login-body">
-            <?php if ($error): ?>
+            <?php if (!empty($error)): ?>
                 <div class="alert alert-danger" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     <?php echo htmlspecialchars($error); ?>
