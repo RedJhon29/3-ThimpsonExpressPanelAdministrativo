@@ -26,3 +26,10 @@ screenshots/
 # Temp
 *.tmp
 *.temp
+
+# Fotos de usuarios: son contenido de runtime, no se versionan.
+# El .htaccess de la carpeta uploads/ sí se versiona y por eso no se ignora.
+Publico/Recursos/uploads/usuarios/
+
+# Herramienta de pruebas E2E
+.playwright-mcp/

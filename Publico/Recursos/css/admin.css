@@ -425,17 +425,28 @@ img { max-width: 100%; height: auto; }
 
 .table-responsive {
     overflow-x: auto;
+    padding: 16px 20px;
 }
 
 .table {
     color: var(--foreground);
     margin-bottom: 0;
-    font-size: 14px;
+    font-size: 15px;
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--foreground);
+    --bs-table-border-color: var(--border);
+    background-color: transparent;
+}
+
+.table th,
+.table td {
+    background-color: transparent;
+    color: var(--foreground);
 }
 
 .table thead th {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -447,10 +458,11 @@ img { max-width: 100%; height: auto; }
 }
 
 .table tbody td {
-    padding: 12px 16px;
+    padding: 14px 16px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     vertical-align: middle;
     color: var(--foreground);
+    font-size: 15px;
 }
 
 .table tbody tr {
@@ -462,6 +474,24 @@ img { max-width: 100%; height: auto; }
 }
 
 .table .text-muted { color: var(--muted) !important; }
+
+/* DataTables: heredar el tema oscuro del panel */
+.dataTables_wrapper { color: var(--foreground); font-size: 14px; }
+.dataTables_wrapper .form-control,
+.dataTables_wrapper .form-select {
+    background-color: var(--surface-3);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+}
+.dataTables_wrapper .page-link {
+    background-color: transparent;
+    color: var(--foreground);
+    border-color: var(--border);
+}
+.dataTables_wrapper .page-item.active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
 
 /* --- Badges --- */
 .status-badge {
@@ -596,6 +626,117 @@ img { max-width: 100%; height: auto; }
     color: var(--muted);
     margin-bottom: 6px;
     display: block;
+}
+
+/* --- Modales --- */
+.modal-content {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--foreground);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* --- Campos del formulario de usuarios (ambos modales) --- */
+.usuario-campo-ayuda {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted);
+}
+
+.usuario-foto-previa {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.usuario-foto-imagen {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+/* El input file nativo pinta un botón del sistema: se homogenea con el tema */
+.usuario-campo-foto {
+    padding: 8px 10px;
+}
+
+.usuario-campo-foto::file-selector-button {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--primary);
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.usuario-campo-foto::file-selector-button:hover {
+    border-color: var(--primary);
+}
+
+/* --- Selección múltiple de usuarios --- */
+.usuario-col-seleccion,
+.usuario-celda-seleccion {
+    width: 36px;
+    text-align: center;
+}
+
+.usuario-seleccion,
+.usuario-seleccion-total {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.usuario-seleccion-conteo {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+
+.usuario-borrado-masivo {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary-foreground);
+    background: var(--destructive);
+    border: none;
+    padding: 10px 16px;
+    transition: all 0.15s ease-out;
+}
+
+.usuario-borrado-masivo:hover {
+    filter: brightness(0.92);
+}
+
+.usuario-borrado-masivo:active {
+    transform: scale(0.97);
 }
 
 /* --- Cards --- */

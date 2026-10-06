@@ -207,6 +207,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             <?php endif; ?>
 
             <form method="POST" action="<?php echo BASE_URL; ?>/login/authenticate" id="loginForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(crearTokenCsrf()); ?>">
                 <div class="mb-3">
                     <label for="usuario" class="form-label">
                         <i class="bi bi-person me-1"></i> Usuario

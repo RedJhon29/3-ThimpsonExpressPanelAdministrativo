@@ -71,6 +71,13 @@ class loginController
             exit;
         }
 
+        // Token CSRF: sin él, cualquier sitio podría enviar un POST al login
+        if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
+            $_SESSION['login_error'] = 'Sesión expirada. Recargá la página e intentá de nuevo.';
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
         $nick = trim($_POST['usuario'] ?? '');
         $clave = $_POST['password'] ?? '';
 

@@ -1,0 +1,28 @@
+# ==================================================
+# ARCHIVO: Publico/Recursos/uploads/.htaccess
+# ==================================================
+#
+# QUÉ HACE: impide que se ejecute cualquier script dentro de la
+#     carpeta de imágenes: el servidor entrega el archivo pero
+#     no lo interpreta como PHP.
+# VINCULADO A: aplica a Publico/Recursos/uploads/usuarios/, donde
+#     guardarFoto() en usuariosController deposita las fotos.
+# SI SE ALTERA: si se quita, una imagen subida podría ejecutarse
+#     como PHP en un hosting mal configurado.
+# NOTA: aquí los comentarios van con # a propósito. Apache no
+#     entiende los comentarios /* */ de PHP y los tomaría como
+#     una directiva inválida (error 500).
+# FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+# ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+# ==================================================
+
+# Sin motor de scripting: los .php no se interpretan
+php_flag engine off
+
+# Última barrera si el hosting no respeta php_flag
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|pl|py|cgi|asp|aspx|sh)$">
+    Require all denied
+</FilesMatch>
+
+# Tampoco se listan los archivos del directorio
+Options -Indexes

@@ -38,6 +38,9 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             <a href="<?php echo BASE_URL; ?>/dashboard" class="sidebar-link <?php echo ($activeMenu ?? '') === 'dashboard' ? 'active' : ''; ?>">
                 <i class="bi bi-grid-1x2"></i> Dashboard
             </a>
+            <a href="<?php echo BASE_URL; ?>/usuarios" class="sidebar-link <?php echo ($activeMenu ?? '') === 'usuarios' ? 'active' : ''; ?>">
+                <i class="bi bi-people-fill"></i> Usuarios
+            </a>
             <a href="<?php echo BASE_URL; ?>/orders" class="sidebar-link <?php echo ($activeMenu ?? '') === 'orders' ? 'active' : ''; ?>">
                 <i class="bi bi-receipt"></i> Órdenes
             </a>
@@ -114,7 +117,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             </button>
             <div class="topbar-search">
                 <i class="bi bi-search"></i>
-                <input type="text" placeholder="Buscar órdenes, clientes, motorizados... (Ctrl+K)">
+                <input type="text" id="topbarSearch" name="q" placeholder="Buscar órdenes, clientes, motorizados... (Ctrl+K)">
                 <span style="font-family:var(--font-mono);font-size:11px;padding:2px 6px;background:var(--surface-3);color:var(--muted);border:1px solid var(--border);">Ctrl+K</span>
             </div>
         </div>

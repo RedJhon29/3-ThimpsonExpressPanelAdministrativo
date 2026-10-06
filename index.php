@@ -63,6 +63,13 @@ ob_start('limpiarComentariosSalida');
 // Iniciar sesión al principio
 session_start();
 
+// El panel siempre refleja la base actual: sin esto el navegador puede
+// repintar una tabla con usuarios que ya se borraron o con controles que
+// ya no le corresponden al rol de la sesión.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/Configuracion/app.php';
 
 // URI actual
@@ -92,6 +99,15 @@ $routes = [
     // Dashboard
     '/'                      => ['panelController', 'index'],
     '/dashboard'             => ['panelController', 'index'],
+
+    // Usuarios
+    '/usuarios'                   => ['usuariosController', 'index'],
+    '/usuarios/guardar'           => ['usuariosController', 'guardar'],
+    '/usuarios/actualizar/{id}'   => ['usuariosController', 'actualizar'],
+    // Escrituras por POST con token CSRF: no pueden ser links
+    '/usuarios/eliminar'          => ['usuariosController', 'eliminar'],
+    '/usuarios/eliminar-varios'   => ['usuariosController', 'eliminarVarios'],
+    '/usuarios/toggle-estado'     => ['usuariosController', 'toggleEstado'],
 ];
 
 // Verificar autenticación para rutas protegidas
@@ -101,6 +117,12 @@ if (!$isPublicRoute && !isset($_SESSION['user_id'])) {
     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
     header('Location: ' . BASE_URL . '/login');
     exit;
+}
+
+// La sesión dice quién es, pero el id se contrasta con la base: si el
+// usuario fue borrado o su id renumerado, la sesión se cae.
+if (!$isPublicRoute) {
+    cerrarSesionInvalida();
 }
 
 // Buscar coincidencia exacta

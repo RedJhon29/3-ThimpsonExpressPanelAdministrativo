@@ -35,6 +35,9 @@ define('CURRENCY_SYMBOL', 'C$');
 // Define obtenerConexion(): no abre conexión hasta que un modelo la llama
 require_once __DIR__ . '/conexion.php';
 
+// Define crearTokenCsrf() y verificarTokenCsrf() para los formularios con escritura
+require_once __DIR__ . '/seguridad.php';
+
 // Autoloader — busca por nombre de clase
 spl_autoload_register(function ($class) {
     $modelFile = MODEL_PATH . '/' . $class . '.php';

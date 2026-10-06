@@ -51,13 +51,20 @@ function inicializarPanel() {
 
     // DataTables
     if (typeof $ !== 'undefined' && $.fn.DataTable) {
-        $('.datatable').DataTable({
-            language: {
-                url: '<?php echo BASE_URL; ?>/Publico/Recursos/datatables/i18n/es-ES.json',
-                // El JSON oficial no trae paginate de raíz y el renderer Bootstrap
-                // lee ese texto: sin esto los botones quedan en inglés.
-                paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" }
-            }
+        $('.datatable').each(function () {
+            $(this).DataTable({
+                language: {
+                    url: '<?php echo BASE_URL; ?>/Publico/Recursos/datatables/i18n/es-ES.json',
+                    // El JSON oficial no trae paginate de raíz y el renderer Bootstrap
+                    // lee ese texto: sin esto los botones quedan en inglés.
+                    paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" }
+                },
+                // initComplete corre cuando la inicialización terminó, incluida la
+                // carga por AJAX de language.url: recién ahí existe el buscador.
+                initComplete: function () {
+                    etiquetarCamposDataTables();
+                }
+            });
         });
     }
 
@@ -67,6 +74,32 @@ function inicializarPanel() {
     };
 
     prepararCierreSesion();
+}
+
+/*====================ENCABEZADO====================
+FUNCIÓN: etiquetarCamposDataTables() | ROL: plantilla (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: pone id y name a los campos que el renderer
+    bootstrap5 de DataTables crea sin ellos: el buscador
+    (input.form-control) y el selector de registros
+    (select.form-select).
+VINCULADO A: la invoca el initComplete de cada tabla en esta
+    misma plantilla; los nodos ya existen en el DOM.
+SI SE ALTERA: si DataTables cambia sus clases, revisar el
+    selector o los campos vuelven a quedar sin identificar.
+FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+==================================================*/
+function etiquetarCamposDataTables() {
+    var campos = document.querySelectorAll(
+        '.dataTables_wrapper input.form-control, .dataTables_wrapper select.form-select'
+    );
+
+    campos.forEach(function (campo, indice) {
+        if (!campo.id) { campo.id = 'dtCampo' + indice; }
+        if (!campo.name) { campo.name = 'campo' + indice; }
+    });
 }
 
 /*====================ENCABEZADO====================
