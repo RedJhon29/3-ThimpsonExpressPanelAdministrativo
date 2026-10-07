@@ -13,6 +13,9 @@ SI SE ALTERA: una key nueva de $activeMenu debe existir aquí para
 LÍMITES: solo hay dos vistas, Dashboard y Usuarios. Las otras
     categorías se conservan como títulos vacíos para cuando existan
     sus rutas: los enlaces que había ahí apuntan a rutas inexistentes.
+    El pie tiene Configuraciones como botón sin href y todavía sin
+    acción: /configuraciones no tiene ruta y un enlace ahí daría 404.
+    La salida de sesión vive en #logoutBtn del topbar.
 FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================-->
@@ -65,15 +68,72 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
     <!-- Footer -->
     <div class="sidebar-footer">
-        <div class="sidebar-status">
-            <span class="sidebar-status-dot"></span>
-            Operativo
-        </div>
-        <a href="<?php echo BASE_URL; ?>/logout" class="sidebar-logout">
-            <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
-        </a>
+        <!-- Placeholder hasta que /configuraciones tenga controlador. Va
+             como boton sin href para no dejar un link que devuelva 404:
+             se puede pulsar, pero todavia no hace nada. -->
+        <button type="button" id="botonConfiguraciones" class="sidebar-config"
+                title="Configuraciones (próximamente)">
+            <i class="bi bi-wrench"></i> Configuraciones
+        </button>
     </div>
 </aside>
+
+<!-- Modal: Configuraciones -->
+<!-- Es un modal largo con cuerpo desplazable y lo abre el boton
+     .sidebar-config. Las secciones son marcadores de posicion y todavia
+     no tienen logica: no hay formulario que guarde nada, por eso el pie
+     solo trae el boton de cerrar. -->
+<div class="modal fade" id="modalConfiguraciones" tabindex="-1" aria-labelledby="modalConfiguracionesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalConfiguracionesLabel">
+                    <i class="bi bi-wrench"></i> Configuraciones
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="configuracion-nota">
+                    Esta pantalla todavia no guarda nada: las secciones de abajo son
+                    el espacio donde quedaran las opciones del panel.
+                </p>
+
+                <div class="configuracion-seccion">
+                    <div class="configuracion-seccion-titulo">
+                        <i class="bi bi-shop"></i> Datos del negocio
+                    </div>
+                    <p class="configuracion-seccion-vacia">Sin definir.</p>
+                </div>
+
+                <div class="configuracion-seccion">
+                    <div class="configuracion-seccion-titulo">
+                        <i class="bi bi-truck"></i> Entregas y tarifas
+                    </div>
+                    <p class="configuracion-seccion-vacia">Sin definir.</p>
+                </div>
+
+                <div class="configuracion-seccion">
+                    <div class="configuracion-seccion-titulo">
+                        <i class="bi bi-bell"></i> Notificaciones
+                    </div>
+                    <p class="configuracion-seccion-vacia">Sin definir.</p>
+                </div>
+
+                <div class="configuracion-seccion">
+                    <div class="configuracion-seccion-titulo">
+                        <i class="bi bi-shield-lock"></i> Seguridad y roles
+                    </div>
+                    <p class="configuracion-seccion-vacia">Sin definir.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Main Content -->
 <div class="admin-main" id="adminMain">

@@ -53,6 +53,13 @@ function inicializarPanel() {
         document.getElementById('adminSidebar').classList.remove('show');
     });
 
+    // Abre el modal de Configuraciones. Va con guarda porque el boton
+    // existe en todas las vistas pero bootstrap puede no haber cargado.
+    document.getElementById('botonConfiguraciones')?.addEventListener('click', function() {
+        if (typeof bootstrap === 'undefined') { return; }
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalConfiguraciones')).show();
+    });
+
     // Select2
     if (typeof $ !== 'undefined' && $.fn.select2) {
         $('.select2').select2({ theme: 'bootstrap-5', width: '100%' });

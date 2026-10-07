@@ -251,6 +251,79 @@ img { max-width: 100%; height: auto; }
     background: rgba(229, 57, 53, 0.1);
 }
 
+/* --- Pie del sidebar: Configuraciones --- */
+/* Copia la base de .sidebar-logout para compartir medidas. Sin href a
+   proposito: el modulo todavia no existe y un enlace daria 404. */
+.sidebar-config {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    margin: 2px 8px;
+    color: var(--foreground);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s ease-out;
+    border: none;
+    background: none;
+    width: calc(100% - 16px);
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-config:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- Modal de Configuraciones --- */
+/* Usa la clase modal-xl de Bootstrap (1140px). No se reescribe el ancho
+   a mano: antesponia max-width y terminaba mas angosto que modal-lg.
+   El alto si es propio: tope en vh y scroll dentro del cuerpo para que
+   la cabecera y el pie queden siempre visibles. */
+#modalConfiguraciones .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.configuracion-nota {
+    font-size: 13.5px;
+    color: var(--muted);
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    line-height: 1.5;
+}
+
+.configuracion-seccion {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+}
+
+.configuracion-seccion:last-child {
+    margin-bottom: 0;
+}
+
+.configuracion-seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 6px;
+}
+
+.configuracion-seccion-vacia {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin: 0;
+}
+
 /* --- Main Content --- */
 /* Columna flex para que .admin-content crezca y empuje el footer al
    fondo con su margin-top:auto, igual que hace .sidebar-footer. */
