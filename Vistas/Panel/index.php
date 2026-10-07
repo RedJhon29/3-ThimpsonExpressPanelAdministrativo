@@ -1,15 +1,18 @@
 <!--====================ENCABEZADO====================
-VISTA: Panel/index — dashboard con KPI y pedidos recientes
+VISTA: Panel/index — dashboard con el conteo de usuarios
 ARCHIVO: Vistas/Panel/index.php
 ==================================================-->
 
 <!--=====================DETALLES=====================
-QUÉ HACE: pinta las tarjetas de KPI, la tabla de pedidos
-    recientes y el bloque de riders del dashboard.
+QUÉ HACE: pinta las tres tarjetas de usuarios del dashboard
+    (total, activos e inactivos) con el partial tarjetaEstadistica.php.
 VINCULADO A: lo incluye Controladores/panelController.php con
-    $stats, $recentOrders y $riders ya cargados.
+    $stats ya cargado; las cifras salen de Usuario::contarPorEstado().
 SI SE ALTERA: cada clave de $stats debe existir aquí; si se
     renombra en el modelo, la tarjeta sale vacía.
+LÍMITES: la tabla de pedidos recientes y el gráfico de distribución
+    se quitaron porque mostraban datos inventados; se reconstruyen
+    con consultas reales.
 FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================-->
@@ -21,129 +24,48 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 <!-- Dashboard Content -->
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="bi bi-receipt" style="color:var(--primary);"></i></div>
-            <div>
-                <div class="stat-value" style="color:var(--primary);"><?php echo $stats['total_orders_today']; ?></div>
-                <div class="stat-label">Pedidos Hoy</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="bi bi-person-video3" style="color:var(--success);"></i></div>
-            <div>
-                <div class="stat-value"><?php echo $stats['active_riders']; ?></div>
-                <div class="stat-label">Riders Activos</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="bi bi-cash-stack" style="color:var(--success);"></i></div>
-            <div>
-                <div class="stat-value" style="color:var(--success);"><?php echo CURRENCY_SYMBOL; ?><?php echo number_format($stats['revenue_today']); ?></div>
-                <div class="stat-label">Ingresos Hoy</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="bi bi-clock-history" style="color:var(--destructive);"></i></div>
-            <div>
-                <div class="stat-value" style="color:var(--destructive);"><?php echo $stats['pending_orders']; ?></div>
-                <div class="stat-label">Pendientes</div>
-            </div>
-        </div>
-    </div>
-</div>
+    <?php
+    /*
+     * Cada tarjeta se pinta con el partial tarjetaEstadistica.php para no
+     * repetir el mismo markup. Las tres salen de Usuario::contarPorEstado(),
+     * asi que reflejan el conteo real de la base en cada carga del panel.
+     * Son col-md-4 porque son tres: llenan la fila entera sin huecos.
+     */
+    $tarjetas = [
+        [
+            'icono' => 'bi-people',
+            'color' => 'var(--primary)',
+            'valor' => $stats['usuarios_total'],
+            'etiqueta' => 'Usuarios',
+        ],
+        [
+            'icono' => 'bi-person-check',
+            'color' => 'var(--success)',
+            'valor' => $stats['usuarios_activos'],
+            'etiqueta' => 'Usuarios Activos',
+        ],
+        [
+            'icono' => 'bi-person-slash',
+            'color' => 'var(--muted)',
+            'valor' => $stats['usuarios_inactivos'],
+            'etiqueta' => 'Usuarios Inactivos',
+        ],
+    ];
 
-<div class="row g-3">
-    <!-- Pedidos Recientes -->
-    <div class="col-lg-8">
-        <div class="table-container">
-            <div class="table-header">
-                <h5 class="mb-0">Pedidos Recientes</h5>
-                <span class="live-indicator"><span class="live-dot"></span> En vivo</span>
-            </div>
-            <div class="table-responsive">
-                <table class="table datatable" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Cliente</th>
-                            <th>Rider</th>
-                            <th>Estado</th>
-                            <th>Costo</th>
-                            <th>Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($recentOrders as $order): ?>
-                        <tr>
-                            <td><strong><?php echo $order['id']; ?></strong></td>
-                            <td><?php echo $order['client']; ?></td>
-                            <td><?php echo $order['rider'] ?? '<span class="text-muted">Sin asignar</span>'; ?></td>
-                            <td>
-                                <span class="status-badge <?php echo strtolower($order['status']); ?>">
-                                    <?php echo $order['status']; ?>
-                                </span>
-                            </td>
-                            <td style="font-family:var(--font-mono);"><?php echo CURRENCY_SYMBOL; ?><?php echo $order['cost']; ?></td>
-                            <td class="text-muted"><?php echo date('H:i', strtotime($order['created_at'])); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+    foreach ($tarjetas as $tarjeta) {
+        ?>
+        <div class="col-md-4">
+            <?php
+            $icono = $tarjeta['icono'];
+            $color = $tarjeta['color'];
+            $valor = $tarjeta['valor'];
+            $etiqueta = $tarjeta['etiqueta'];
+            include VIEW_PATH . '/Panel/tarjetaEstadistica.php';
+            ?>
         </div>
-    </div>
-
-    <!-- Stats Panel -->
-    <div class="col-lg-4">
-        <div class="chart-container mb-3">
-            <h5>Distribución de Pedidos</h5>
-            <canvas id="ordersChart" height="200"></canvas>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="bi bi-clock" style="color:var(--primary);"></i></div>
-            <div>
-                <div class="stat-value"><?php echo $stats['avg_delivery_time']; ?></div>
-                <div class="stat-label">Tiempo Promedio</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-// alListo garantiza Chart.js cargado; DOMContentLoaded dispararía antes
-gestorPlugins.alListo(function() {
-    var statusCounts = <?php echo json_encode(Pedido::statusCounts()); ?>;
-    var ctx = document.getElementById('ordersChart');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Pendiente', 'Recolectado', 'En Camino', 'Entregado'],
-                datasets: [{
-                    data: [statusCounts['PENDING'], statusCounts['PICKED_UP'], statusCounts['IN_TRANSIT'], statusCounts['DELIVERED']],
-                    backgroundColor: ['#E53935', '#1976D2', '#FBB03B', '#22C55E'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: '#A3A3A3', font: { family: 'Inter' } }
-                    }
-                }
-            }
-        });
+        <?php
     }
-});
-</script>
+    ?>
+</div>
 
 <?php include VIEW_PATH . '/Plantillas/pieAdmin.php'; ?>

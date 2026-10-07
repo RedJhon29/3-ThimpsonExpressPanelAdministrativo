@@ -263,6 +263,42 @@ class Usuario {
 
         return $sentencia->execute([$id]);
     }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: contarPorEstado() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: cuenta los usuarios por estado en una sola consulta y
+     *     devuelve total, activos e inactivos.
+     * VINCULADO A: lo llama Modelos/Panel.php::getStats() para las
+     *     tarjetas de usuarios del dashboard.
+     * SI SE ALTERA: los inactivos se derivan restando los activos al
+     *     total, no contando un literal, para que las tres tarjetas
+     *     siempre sumen y nunca dejen un usuario fuera.
+     * LÍMITES: estado_usuario es varchar sin CHECK en la base; solo se
+     *     reconoce 'activo' y cualquier otro valor cuenta como inactivo.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function contarPorEstado(): array {
+        $sentencia = obtenerConexion()->query(
+            "SELECT COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE estado_usuario = 'activo') AS activos
+             FROM usuarios"
+        );
+
+        $fila = $sentencia->fetch(PDO::FETCH_ASSOC) ?: ['total' => 0, 'activos' => 0];
+        $total = (int) $fila['total'];
+        $activos = (int) $fila['activos'];
+
+        return [
+            'total' => $total,
+            'activos' => $activos,
+            'inactivos' => $total - $activos,
+        ];
+    }
 }
 
 /*===========FIN DEL FRAGMENTO DE CÓDIGO============*/

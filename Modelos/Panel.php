@@ -5,12 +5,16 @@ ARCHIVO: Modelos/Panel.php
 ==================================================*/
 
 /*=====================DETALLES=====================
-QUÉ HACE: entrega los KPI del día (pedidos, riders,
-    ingresos, entregas y suscripciones) del dashboard.
+QUÉ HACE: entrega el conteo real de usuarios por estado
+    (total, activos, inactivos) del dashboard.
 VINCULADO A: lo llama Controladores/panelController.php
-    y los consume Vistas/Panel/index.php en las tarjetas.
+    y los consume Vistas/Panel/index.php en las tarjetas;
+    el conteo viene de Usuario::contarPorEstado().
 SI SE ALTERA: cambian las cifras visibles del dashboard;
     cada clave debe existir en la vista que la pinta.
+LÍMITES: solo expone usuarios. Los KPI de pedidos, riders,
+    ingresos y tiempo promedio se quitaron porque eran
+    números inventados sin tabla que los respaldara.
 FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================*/
@@ -23,7 +27,7 @@ class Panel {
      * FUNCIÓN: getStats() | ROL: modelo
      * ==================================================
      * =====================DETALLES=====================
-     * QUÉ HACE: entrega los indicadores del día que se pintan en el dashboard.
+     * QUÉ HACE: entrega los indicadores reales que se pintan en el dashboard.
      * VINCULADO A: lo llama Controladores/panelController.php::index() y cada
      *     clave la lee Vistas/Panel/index.php para una tarjeta de KPI.
      * SI SE ALTERA: quitar o renombrar una clave deja esa tarjeta sin dato;
@@ -33,15 +37,14 @@ class Panel {
      * ==================================================
      */
     public static function getStats() {
+        // Conteo real de usuarios: alimenta las tarjetas de total,
+        // activos e inactivos del dashboard.
+        $usuarios = Usuario::contarPorEstado();
+
         return [
-            'total_orders_today' => 47,
-            'active_riders' => 12,
-            'revenue_today' => 5840,
-            'pending_orders' => 8,
-            'delivered_today' => 35,
-            'avg_delivery_time' => '28 min',
-            'total_clients' => 342,
-            'active_subscriptions' => 89,
+            'usuarios_total' => $usuarios['total'],
+            'usuarios_activos' => $usuarios['activos'],
+            'usuarios_inactivos' => $usuarios['inactivos'],
         ];
     }
 }
