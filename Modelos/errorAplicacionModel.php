@@ -1,7 +1,7 @@
 <?php
 /*====================ENCABEZADO====================
-EXCEPCIÓN: ErrorAplicacion — fallo previsto con clave legible
-ARCHIVO: Modelos/ErrorAplicacion.php
+EXCEPCIÓN: errorAplicacionModel — fallo previsto con clave legible
+ARCHIVO: Modelos/errorAplicacionModel.php
 ==================================================*/
 
 /*=====================DETALLES=====================
@@ -9,7 +9,7 @@ QUÉ HACE: lanza los errores que la aplicación anticipa
     (validación, disco, permisos) identified by a key, para
     que la vista los muestre en lenguaje natural y no con
     códigos técnicos.
-VINCULADO A: la lanzan Modelos/AlmacenFotos.php y la
+VINCULADO A: la lanzan Modelos/almacenFotosModel.php y la
     traducen usuariosController::traducirError() y loginController.
 SI SE ALTERA: si cambia el nombre de una clave, hay que
     actualizarla en el mapa de traducciones del controlador o
@@ -20,7 +20,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 /*================CUERPO DEL CÓDIGO=================*/
 
-class ErrorAplicacion extends RuntimeException {
+class errorAplicacionModel extends RuntimeException {
     /**
      * Claves que usa la aplicación. El texto técnico queda en $detalle
      * para el registro; lo que ve el usuario sale del mapa de traducciones.
@@ -48,7 +48,7 @@ class ErrorAplicacion extends RuntimeException {
      * ==================================================
      * =====================DETALLES=====================
      * QUÉ HACE: guarda la clave del fallo y su detalle técnico.
-     * VINCULADO A: la construyen los throw de AlmacenFotos.php y
+     * VINCULADO A: la construyen los throw de almacenFotosModel.php y
      *     usuariosController; la clave busca el texto que ve el usuario.
      * SI SE ALTERA: si detalle se deja vacío, el registro pierde
      *     información del fallo real.

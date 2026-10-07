@@ -33,7 +33,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
  * QUÉ HACE: devuelve el usuario de la sesión leyéndolo de la
  *           base en cada petición, o null si ya no existe.
  * VINCULADO A: lo usan index.php y los Controladores; toma
- *           el id de $_SESSION y lo contrasta con Usuario::find().
+ *           el id de $_SESSION y lo contrasta con usuariosModel::find().
  * SI SE ALTERA: si devuelve datos cacheados sin volver a
  *           consultar, un id de sesión viejo vuelve a ser válido.
  * LÍMITES: consulta una vez por petición; el resultado se
@@ -57,7 +57,7 @@ function usuarioActual(): ?array
         return null;
     }
 
-    $fila = Usuario::find($id);
+    $fila = usuariosModel::find($id);
 
     // El id de la sesión tiene que seguir apuntando al mismo usuario:
     // si el id se renumeró o se borró la fila, la sesión no vale.

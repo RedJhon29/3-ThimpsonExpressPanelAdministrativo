@@ -9,7 +9,7 @@ QUÉ HACE: gestiona el CRUD de usuarios: lista, muestra el
     formulario de alta y edición, valida el envío, y
     ejecuta borrado y cambio de estado.
 VINCULADO A: lo llama index.php en las rutas /usuarios*;
-    llama a Modelos/Usuario.php y a verificarTokenCsrf()
+    llama a Modelos/usuariosModel.php y a verificarTokenCsrf()
     de Configuracion/seguridad.php.
 SI SE ALTERA: revisar los name del formulario y las rutas
     de index.php; toda escritura debe seguir exigiendo POST
@@ -32,11 +32,11 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
  * FUNCIÓN: traducirError() | ROL: controlador (privado)
  * ==================================================
  * =====================DETALLES=====================
- * QUÉ HACE: convierte una clave de ErrorAplicacion en un texto
+ * QUÉ HACE: convierte una clave de errorAplicacionModel en un texto
  *     que una persona entienda, con una sugerencia de arreglo.
  * VINCULADO A: lo llaman guardar() y actualizar() cuando la
  *     petición pide JSON; el texto viaja en la respuesta.
- * SI SE ALTERA: si se agrega una clave a ErrorAplicacion y no
+ * SI SE ALTERA: si se agrega una clave a errorAplicacionModel y no
  *     está en el mapa, el usuario vería el mensaje genérico.
  * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
  * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
@@ -44,67 +44,67 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
  */
     private function traducirError(string $clave): array {
         $mensajes = [
-            ErrorAplicacion::NICK_DUPLICADO => [
+            errorAplicacionModel::NICK_DUPLICADO => [
                 'texto' => 'Ese nombre de usuario ya está en uso.',
                 'sugerencia' => 'Elegí otro nombre de usuario para este registro.',
             ],
-            ErrorAplicacion::NICK_INEXISTENTE => [
+            errorAplicacionModel::NICK_INEXISTENTE => [
                 'texto' => 'El usuario que querés modificar ya no existe.',
                 'sugerencia' => 'Actualizá la página para ver la lista de usuarios actual.',
             ],
-            ErrorAplicacion::CLAVE_CORTA => [
+            errorAplicacionModel::CLAVE_CORTA => [
                 'texto' => 'La contraseña es demasiado corta.',
                 'sugerencia' => 'Usá una contraseña de al menos 8 caracteres.',
             ],
-            ErrorAplicacion::CLAVE_LARGA => [
+            errorAplicacionModel::CLAVE_LARGA => [
                 'texto' => 'La contraseña es demasiado larga.',
                 'sugerencia' => 'Limitala a 200 caracteres.',
             ],
-            ErrorAplicacion::CLAVE_VACIA => [
+            errorAplicacionModel::CLAVE_VACIA => [
                 'texto' => 'Falta la contraseña del usuario.',
                 'sugerencia' => 'Escribí una contraseña de al menos 8 caracteres.',
             ],
-            ErrorAplicacion::FOTO_PESADA => [
+            errorAplicacionModel::FOTO_PESADA => [
                 'texto' => 'La foto que elegiste pesa demasiado.',
                 'sugerencia' => 'Elegí una imagen de menos de 2 MB.',
             ],
-            ErrorAplicacion::FOTO_TIPO_INVALIDO => [
+            errorAplicacionModel::FOTO_TIPO_INVALIDO => [
                 'texto' => 'Ese archivo no es una imagen válida.',
                 'sugerencia' => 'Subí una foto en formato PNG, JPEG o WEBP.',
             ],
-            ErrorAplicacion::FOTO_NO_RECIBIDA => [
+            errorAplicacionModel::FOTO_NO_RECIBIDA => [
                 'texto' => 'No se recibió la foto.',
                 'sugerencia' => 'Volvé a elegir el archivo e intentá otra vez.',
             ],
-            ErrorAplicacion::FOTO_SUBIDA_FALLIDA => [
+            errorAplicacionModel::FOTO_SUBIDA_FALLIDA => [
                 'texto' => 'La carga de la foto se interrumpió.',
                 'sugerencia' => 'Revisá tu conexión o elegí un archivo más chico.',
             ],
-            ErrorAplicacion::FOTO_NO_GUARDADA => [
+            errorAplicacionModel::FOTO_NO_GUARDADA => [
                 'texto' => 'No pudimos guardar la foto en el servidor.',
                 'sugerencia' => 'Intentá de nuevo en un momento; si sigue igual, avisá al administrador.',
             ],
-            ErrorAplicacion::FOTO_CARPETA => [
+            errorAplicacionModel::FOTO_CARPETA => [
                 'texto' => 'No se pudo preparar la carpeta donde van las fotos.',
                 'sugerencia' => 'Verificá los permisos de escritura del servidor y avisá al administrador.',
             ],
-            ErrorAplicacion::USUARIO_NO_EXISTE => [
+            errorAplicacionModel::USUARIO_NO_EXISTE => [
                 'texto' => 'Ese usuario ya no existe.',
                 'sugerencia' => 'Actualizá la página para ver la lista de usuarios actual.',
             ],
-            ErrorAplicacion::SIN_PERMISO => [
+            errorAplicacionModel::SIN_PERMISO => [
                 'texto' => 'No tenés permiso para hacer esa acción.',
                 'sugerencia' => 'Solo el superadministrador puede eliminar usuarios.',
             ],
-            ErrorAplicacion::SESION_EXPIRADA => [
+            errorAplicacionModel::SESION_EXPIRADA => [
                 'texto' => 'Tu sesión expiró o la página estuvo demasiado tiempo abierta.',
                 'sugerencia' => 'Recargá la página e intentá de nuevo.',
             ],
-            ErrorAplicacion::SIN_USUARIOS => [
+            errorAplicacionModel::SIN_USUARIOS => [
                 'texto' => 'No hay ningún usuario que se pueda eliminar.',
                 'sugerencia' => 'Activá la casilla de al menos un usuario antes de continuar.',
             ],
-            ErrorAplicacion::ERROR_DE_GUARDADO => [
+            errorAplicacionModel::ERROR_DE_GUARDADO => [
                 'texto' => 'No pudimos guardar el usuario.',
                 'sugerencia' => 'Revisá los datos e intentá de nuevo en un momento.',
             ],
@@ -195,7 +195,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: muestra el listado de usuarios con el aviso de la
      *     última operación y de los errores del formulario.
      * VINCULADO A: lo llama index.php en la ruta /usuarios; consulta
-     *     Modelos/Usuario.php::all(); renderiza Vistas/Usuarios/index.php.
+     *     Modelos/usuariosModel.php::all(); renderiza Vistas/Usuarios/index.php.
      * SI SE ALTERA: la vista exige $pageTitle, $activeMenu, $usuarios,
      *     $tipos y $mensaje; si falta alguna, la pantalla falla.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -205,7 +205,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
     public function index(): void {
         $pageTitle = 'Usuarios';
         $activeMenu = 'usuarios';
-        $usuarios = Usuario::all();
+        $usuarios = usuariosModel::all();
         $tipos = self::TIPOS;
         $mensaje = flashMensaje();
         $errores = flashMensaje('errores_formulario') ?? [];
@@ -224,9 +224,9 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: valida el alta, hashea la clave e inserta el usuario; después
      *     guarda la foto en la carpeta propia del id que le tocó.
      * VINCULADO A: lo llama index.php en la ruta /usuarios/guardar con
-     *     POST; usa verificarTokenCsrf(), Usuario::crear(),
-     *     Usuario::establecerFoto() y AlmacenFotos::validar() y guardar().
-     * SI SE ALTERA: si falla la foto se deshace el alta con Usuario::eliminar();
+     *     POST; usa verificarTokenCsrf(), usuariosModel::crear(),
+     *     usuariosModel::establecerFoto() y almacenFotosModel::validar() y guardar().
+     * SI SE ALTERA: si falla la foto se deshace el alta con usuariosModel::eliminar();
      *     no debe quedar un usuario creado que no se pidió.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
@@ -237,7 +237,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             if ($json) {
-                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 405);
+                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 405);
             }
             $this->irAUsuarios();
             return;
@@ -245,7 +245,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
             if ($json) {
-                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 403);
+                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 403);
             }
             $this->volverAlFormulario('nuevo', [], []);
             return;
@@ -261,10 +261,10 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
             // La foto se valida antes de tocar la base: un archivo inválido no
             // debe dejar un usuario creado a medias.
-            AlmacenFotos::validar($_FILES['foto_usuario'] ?? []);
+            almacenFotosModel::validar($_FILES['foto_usuario'] ?? []);
 
             // Primero el usuario, porque su id es el nombre de la carpeta de la foto.
-            $idUsuario = Usuario::crear(
+            $idUsuario = usuariosModel::crear(
                 $valores['tipo_usuario'],
                 $valores['descripcion_usuario'],
                 $valores['nick_name'],
@@ -272,19 +272,19 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             );
 
             if ($idUsuario === null) {
-                throw new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, 'Usuario::crear devolvio null', 500);
+                throw new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, 'usuariosModel::crear devolvio null', 500);
             }
 
-            if (AlmacenFotos::hayArchivo($_FILES['foto_usuario'] ?? [])) {
+            if (almacenFotosModel::hayArchivo($_FILES['foto_usuario'] ?? [])) {
                 try {
-                    Usuario::establecerFoto($idUsuario, AlmacenFotos::guardar($_FILES['foto_usuario'], $idUsuario));
-                } catch (ErrorAplicacion $error) {
+                    usuariosModel::establecerFoto($idUsuario, almacenFotosModel::guardar($_FILES['foto_usuario'], $idUsuario));
+                } catch (errorAplicacionModel $error) {
                     // Sin foto el usuario no sirve: se deshace el alta completa
-                    Usuario::eliminar($idUsuario);
+                    usuariosModel::eliminar($idUsuario);
                     throw $error;
                 }
             }
-        } catch (ErrorAplicacion $error) {
+        } catch (errorAplicacionModel $error) {
             $this->responderFallo($json, 'nuevo', $error, $valores ?? []);
             return;
         } catch (Throwable $error) {
@@ -293,7 +293,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             $this->responderFallo(
                 $json,
                 'nuevo',
-                new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, $error->getMessage(), 500),
+                new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, $error->getMessage(), 500),
                 $valores ?? []
             );
             return;
@@ -353,7 +353,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * FUNCIÓN: responderFallo() | ROL: controlador (privado)
      * ==================================================
      * =====================DETALLES=====================
-     * QUÉ HACE: traduce un ErrorAplicacion y lo devuelve como JSON,
+     * QUÉ HACE: traduce un errorAplicacionModel y lo devuelve como JSON,
      *           o vuelve al formulario si la petición no pidió JSON.
      * VINCULADO A: la llaman guardar() y actualizar() en sus catch.
      * SI SE ALTERA: si dejara pasar una clave técnica, el usuario
@@ -362,7 +362,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
      * ==================================================
      */
-    private function responderFallo(bool $json, string $modal, ErrorAplicacion $error, array $valores): void
+    private function responderFallo(bool $json, string $modal, errorAplicacionModel $error, array $valores): void
     {
         if (!$json) {
             $this->volverAlFormulario($modal, [$modal === 'editar' ? 'foto_usuario' : 'foto_usuario' => $error->getMessage()], $valores);
@@ -389,8 +389,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     si el formulario trajo una nueva, y la foto solo si se subió
      *     archivo, en cuyo caso borra la anterior y su carpeta vacía.
      * VINCULADO A: lo llama index.php en /usuarios/actualizar/{id} con POST;
-     *     usa verificarTokenCsrf(), Usuario::actualizar(), actualizarClave(),
-     *     AlmacenFotos::validar(), guardar() y eliminar().
+     *     usa verificarTokenCsrf(), usuariosModel::actualizar(), actualizarClave(),
+     *     almacenFotosModel::validar(), guardar() y eliminar().
      * SI SE ALTERA: el campo clave vacío debe seguir significando "no
      *     cambiar", porque en la edición no es obligatorio.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -402,7 +402,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             if ($json) {
-                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 405);
+                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 405);
             }
             $this->irAUsuarios();
             return;
@@ -410,18 +410,18 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
             if ($json) {
-                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 403);
+                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 403);
             }
             $this->volverAlFormulario('editar', [], []);
             return;
         }
 
         $idUsuario = (int)$id;
-        $usuario = Usuario::find($idUsuario);
+        $usuario = usuariosModel::find($idUsuario);
 
         if ($usuario === null) {
             if ($json) {
-                $this->responderErrorTraducido(ErrorAplicacion::USUARIO_NO_EXISTE, 404);
+                $this->responderErrorTraducido(errorAplicacionModel::USUARIO_NO_EXISTE, 404);
             }
             flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'El usuario no existe.']);
             $this->irAUsuarios();
@@ -442,13 +442,13 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             // Sin foto nueva se conserva la que ya tenía el usuario
             $fotoAnterior = (string)($usuario['foto_usuario'] ?? '');
 
-            AlmacenFotos::validar($_FILES['foto_usuario'] ?? []);
+            almacenFotosModel::validar($_FILES['foto_usuario'] ?? []);
 
-            $foto = $hayFotoNueva = AlmacenFotos::hayArchivo($_FILES['foto_usuario'] ?? [])
-                ? AlmacenFotos::guardar($_FILES['foto_usuario'], $idUsuario)
+            $foto = $hayFotoNueva = almacenFotosModel::hayArchivo($_FILES['foto_usuario'] ?? [])
+                ? almacenFotosModel::guardar($_FILES['foto_usuario'], $idUsuario)
                 : $fotoAnterior;
 
-            Usuario::actualizar(
+            usuariosModel::actualizar(
                 $idUsuario,
                 $valores['tipo_usuario'],
                 $valores['descripcion_usuario'],
@@ -458,14 +458,14 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
             // Con la nueva ya guardada y registrada, la anterior sobra
             if ($hayFotoNueva && $fotoAnterior !== '' && $fotoAnterior !== $foto) {
-                AlmacenFotos::eliminar($fotoAnterior);
+                almacenFotosModel::eliminar($fotoAnterior);
             }
 
             // Clave vacía = mantener la actual
-            if ($valores['clave'] !== '' && !Usuario::actualizarClave($idUsuario, $valores['clave'])) {
-                throw new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, 'actualizarClave devolvio false', 500);
+            if ($valores['clave'] !== '' && !usuariosModel::actualizarClave($idUsuario, $valores['clave'])) {
+                throw new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, 'actualizarClave devolvio false', 500);
             }
-        } catch (ErrorAplicacion $error) {
+        } catch (errorAplicacionModel $error) {
             $valores['id_usuario'] = $idUsuario;
             $this->responderFallo($json, 'editar', $error, $valores);
             return;
@@ -475,7 +475,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             $this->responderFallo(
                 $json,
                 'editar',
-                new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, $error->getMessage(), 500),
+                new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, $error->getMessage(), 500),
                 $valores
             );
             return;
@@ -503,7 +503,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: borra el usuario recibido por POST, salvo que sea el mismo
      *     que está en sesión; también elimina su foto y su carpeta.
      * VINCULADO A: lo llama index.php en /usuarios/eliminar con POST; usa
-     *     verificarTokenCsrf(), Usuario::find(), Usuario::eliminar() y`n     *     AlmacenFotos::eliminar().
+     *     verificarTokenCsrf(), usuariosModel::find(), usuariosModel::eliminar() y`n     *     almacenFotosModel::eliminar().
      * SI SE ALTERA: la protección del usuario en sesión no debe quitarse;
      *     borrarse a sí mismo deja el panel sin administrador.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -538,7 +538,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         // El superadmin se conserva siempre: no se borra, solo se edita
         // o se desactiva, para no dejar el panel sin administrador.
-        $objetivo = Usuario::find($idUsuario);
+        $objetivo = usuariosModel::find($idUsuario);
 
         if ($objetivo === null) {
             flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'El usuario no existe.']);
@@ -554,11 +554,11 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         // Se lee la foto antes de borrar la fila: después ya no está
         $usuario = $objetivo;
-        Usuario::eliminar($idUsuario);
+        usuariosModel::eliminar($idUsuario);
 
         // La foto y su carpeta se van con el usuario: si no, quedan ocupando
         // espacio en el servidor para siempre.
-        AlmacenFotos::eliminar((string)($usuario['foto_usuario'] ?? ''));
+        almacenFotosModel::eliminar((string)($usuario['foto_usuario'] ?? ''));
 
         flashMensaje('mensaje', [
             'tipo' => 'success',
@@ -579,7 +579,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     POST; exige token CSRF y superadmin; los ids llegan en
      *     $_POST['id_usuario'] como arreglo.
      * SI SE ALTERA: no debe borrar ids que no existan: todos se
-     *     resuelven con Usuario::find() antes de tocar el disco.
+     *     resuelven con usuariosModel::find() antes de tocar el disco.
      * LÍMITES: revalida cada id aunque el JS ya los filtró.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
@@ -614,7 +614,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 continue;
             }
 
-            $usuario = Usuario::find($idUsuario);
+            $usuario = usuariosModel::find($idUsuario);
             if ($usuario === null) {
                 $omitidos++;
                 continue;
@@ -626,8 +626,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 continue;
             }
 
-            Usuario::eliminar($idUsuario);
-            AlmacenFotos::eliminar((string)($usuario['foto_usuario'] ?? ''));
+            usuariosModel::eliminar($idUsuario);
+            almacenFotosModel::eliminar((string)($usuario['foto_usuario'] ?? ''));
             $borrados++;
         }
 
@@ -664,7 +664,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: alterna estado_usuario entre activo e inactivo por POST,
      *     salvo que se intente desactivar al usuario en sesión.
      * VINCULADO A: lo llama index.php en /usuarios/toggle-estado con POST;
-     *     usa verificarTokenCsrf(), Usuario::find() y Usuario::cambiarEstado().
+     *     usa verificarTokenCsrf(), usuariosModel::find() y usuariosModel::cambiarEstado().
      * SI SE ALTERA: si el login dejara de revisar estado_usuario, una
      *     cuenta desactivada podría seguir entrando al panel.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -677,7 +677,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         }
 
         $idUsuario = (int)($_POST['id_usuario'] ?? 0);
-        $usuario = $idUsuario > 0 ? Usuario::find($idUsuario) : null;
+        $usuario = $idUsuario > 0 ? usuariosModel::find($idUsuario) : null;
 
         if ($usuario === null) {
             flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'Usuario no válido.']);
@@ -692,7 +692,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         }
 
         $nuevoEstado = $usuario['estado_usuario'] === 'activo' ? 'inactivo' : 'activo';
-        Usuario::cambiarEstado($idUsuario, $nuevoEstado);
+        usuariosModel::cambiarEstado($idUsuario, $nuevoEstado);
 
         flashMensaje('mensaje', [
             'tipo' => 'success',
@@ -709,10 +709,10 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: limpia y valida los campos del formulario; devuelve los
      *     errores y los valores ya escapados para repintar el form.
      * VINCULADO A: lo llaman guardar() y actualizar(); consulta
-     *     Usuario::existeNick() para el índice único de nick_name.
+     *     usuariosModel::existeNick() para el índice único de nick_name.
      * SI SE ALTERA: si agregás un campo, agregarlo también a $errores,
      *     a $valores y al input de la vista, o el dato se pierde.
-     * LÍMITES: no valida foto_usuario; esa la valida AlmacenFotos::validar() con
+     * LÍMITES: no valida foto_usuario; esa la valida almacenFotosModel::validar() con
      *     $_FILES porque es una subida de archivo, no un texto.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
@@ -740,7 +740,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             $errores['nick_name'] = 'El usuario (nick) es obligatorio.';
         } elseif (!preg_match('/^[a-zA-Z0-9._-]{3,40}$/', $nick)) {
             $errores['nick_name'] = 'Use 3 a 40 caracteres: letras, números, punto, guion o guion bajo.';
-        } elseif (Usuario::existeNick($nick, $ignorarId)) {
+        } elseif (usuariosModel::existeNick($nick, $ignorarId)) {
             $errores['nick_name'] = 'Ese usuario (nick) ya está registrado.';
         }
 
@@ -763,7 +763,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 'tipo_usuario' => $tipo,
                 'descripcion_usuario' => $descripcion,
                 'nick_name' => $nick,
-                'foto_usuario' => '', // la fija AlmacenFotos::guardar(); aquí nunca hay texto
+                'foto_usuario' => '', // la fija almacenFotosModel::guardar(); aquí nunca hay texto
                 'clave' => $clave,
             ],
         ];

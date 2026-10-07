@@ -7,7 +7,7 @@ ARCHIVO: Vistas/Panel/index.php
 QUÉ HACE: pinta las tres tarjetas de usuarios del dashboard
     (total, activos e inactivos) con el partial tarjetaEstadistica.php.
 VINCULADO A: lo incluye Controladores/panelController.php con
-    $stats ya cargado; las cifras salen de Usuario::contarPorEstado().
+    $stats ya cargado; las cifras salen de usuariosModel::contarPorEstado().
 SI SE ALTERA: cada clave de $stats debe existir aquí; si se
     renombra en el modelo, la tarjeta sale vacía.
 LÍMITES: la tabla de pedidos recientes y el gráfico de distribución
@@ -27,7 +27,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <?php
     /*
      * Cada tarjeta se pinta con el partial tarjetaEstadistica.php para no
-     * repetir el mismo markup. Las tres salen de Usuario::contarPorEstado(),
+     * repetir el mismo markup. Las tres salen de usuariosModel::contarPorEstado(),
      * asi que reflejan el conteo real de la base en cada carga del panel.
      * Son col-md-4 porque son tres: llenan la fila entera sin huecos.
      */

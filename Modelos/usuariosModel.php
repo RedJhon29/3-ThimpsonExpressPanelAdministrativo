@@ -1,7 +1,7 @@
 <?php
 /*====================ENCABEZADO====================
 MODELO: Usuario — modelo de datos de usuarios del panel
-ARCHIVO: Modelos/Usuario.php
+ARCHIVO: Modelos/usuariosModel.php
 ==================================================*/
 
 /*=====================DETALLES=====================
@@ -20,7 +20,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 /*================CUERPO DEL CÓDIGO=================*/
 
-class Usuario {
+class usuariosModel {
     /**
      * Columnas de la tabla usuarios en el orden del CREATE TABLE.
      * Se mantienen aparte porque loginModel::buscarPorNickName() necesita
@@ -271,7 +271,7 @@ class Usuario {
      * =====================DETALLES=====================
      * QUÉ HACE: cuenta los usuarios por estado en una sola consulta y
      *     devuelve total, activos e inactivos.
-     * VINCULADO A: lo llama Modelos/Panel.php::getStats() para las
+     * VINCULADO A: lo llama Modelos/panelModel.php::getStats() para las
      *     tarjetas de usuarios del dashboard.
      * SI SE ALTERA: los inactivos se derivan restando los activos al
      *     total, no contando un literal, para que las tres tarjetas

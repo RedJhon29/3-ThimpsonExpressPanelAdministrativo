@@ -1,7 +1,7 @@
 <?php
 /*====================ENCABEZADO====================
 MODELO: Panel — indicadores del dashboard
-ARCHIVO: Modelos/Panel.php
+ARCHIVO: Modelos/panelModel.php
 ==================================================*/
 
 /*=====================DETALLES=====================
@@ -9,7 +9,7 @@ QUÉ HACE: entrega el conteo real de usuarios por estado
     (total, activos, inactivos) del dashboard.
 VINCULADO A: lo llama Controladores/panelController.php
     y los consume Vistas/Panel/index.php en las tarjetas;
-    el conteo viene de Usuario::contarPorEstado().
+    el conteo viene de usuariosModel::contarPorEstado().
 SI SE ALTERA: cambian las cifras visibles del dashboard;
     cada clave debe existir en la vista que la pinta.
 LÍMITES: solo expone usuarios. Los KPI de pedidos, riders,
@@ -21,7 +21,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 /*================CUERPO DEL CÓDIGO=================*/
 
-class Panel {
+class panelModel {
     /**
      * ====================ENCABEZADO====================
      * FUNCIÓN: getStats() | ROL: modelo
@@ -39,7 +39,7 @@ class Panel {
     public static function getStats() {
         // Conteo real de usuarios: alimenta las tarjetas de total,
         // activos e inactivos del dashboard.
-        $usuarios = Usuario::contarPorEstado();
+        $usuarios = usuariosModel::contarPorEstado();
 
         return [
             'usuarios_total' => $usuarios['total'],

@@ -1,7 +1,7 @@
 <?php
 /*====================ENCABEZADO====================
 MODELO: AlmacenFotos — guardián de las fotos de usuario
-ARCHIVO: Modelos/AlmacenFotos.php
+ARCHIVO: Modelos/almacenFotosModel.php
 ==================================================*/
 
 /*=====================DETALLES=====================
@@ -19,7 +19,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 /*================CUERPO DEL CÓDIGO=================*/
 
-class AlmacenFotos {
+class almacenFotosModel {
     /**
      * Carpeta raíz de las fotos, relativa a BASE_PATH. Cada usuario tiene
      * una subcarpeta con su id: así una foto nunca se mezcla con otra.
@@ -76,17 +76,17 @@ class AlmacenFotos {
         }
 
 if ($archivo['error'] !== UPLOAD_ERR_OK) {
-            throw new ErrorAplicacion(ErrorAplicacion::FOTO_SUBIDA_FALLIDA, 'PHP upload error ' . $archivo['error'], 400);
+            throw new errorAplicacionModel(errorAplicacionModel::FOTO_SUBIDA_FALLIDA, 'PHP upload error ' . $archivo['error'], 400);
         }
 
         if ($archivo['size'] > self::TAMANO_MAXIMO) {
-            throw new ErrorAplicacion(ErrorAplicacion::FOTO_PESADA, 'tamano ' . $archivo['size'] . ' bytes');
+            throw new errorAplicacionModel(errorAplicacionModel::FOTO_PESADA, 'tamano ' . $archivo['size'] . ' bytes');
         }
 
         $info = new finfo(FILEINFO_MIME_TYPE);
 
         if (!isset(self::MIMES[$info->file($archivo['tmp_name'])])) {
-            throw new ErrorAplicacion(ErrorAplicacion::FOTO_TIPO_INVALIDO, 'mime ' . $info->file($archivo['tmp_name']));
+            throw new errorAplicacionModel(errorAplicacionModel::FOTO_TIPO_INVALIDO, 'mime ' . $info->file($archivo['tmp_name']));
         }
     }
 
@@ -108,7 +108,7 @@ if ($archivo['error'] !== UPLOAD_ERR_OK) {
     public static function guardar(array $archivo, int $idUsuario): string
     {
         if (!self::hayArchivo($archivo) || $archivo['error'] !== UPLOAD_ERR_OK) {
-            throw new ErrorAplicacion(ErrorAplicacion::FOTO_NO_RECIBIDA);
+            throw new errorAplicacionModel(errorAplicacionModel::FOTO_NO_RECIBIDA);
         }
 
         $info = new finfo(FILEINFO_MIME_TYPE);
@@ -117,13 +117,13 @@ if ($archivo['error'] !== UPLOAD_ERR_OK) {
         $carpetaAbsoluta = BASE_PATH . '/' . $carpetaRelativa;
 
         if (!is_dir($carpetaAbsoluta) && !mkdir($carpetaAbsoluta, 0755, true) && !is_dir($carpetaAbsoluta)) {
-            throw new ErrorAplicacion(ErrorAplicacion::FOTO_CARPETA, 'mkdir ' . $carpetaAbsoluta, 500);
+            throw new errorAplicacionModel(errorAplicacionModel::FOTO_CARPETA, 'mkdir ' . $carpetaAbsoluta, 500);
         }
 
         $nombreArchivo = 'usuario_' . bin2hex(random_bytes(8)) . '.' . $extension;
 
         if (!move_uploaded_file($archivo['tmp_name'], $carpetaAbsoluta . '/' . $nombreArchivo)) {
-            throw new ErrorAplicacion(ErrorAplicacion::FOTO_NO_GUARDADA, 'move_uploaded_file ' . $nombreArchivo, 500);
+            throw new errorAplicacionModel(errorAplicacionModel::FOTO_NO_GUARDADA, 'move_uploaded_file ' . $nombreArchivo, 500);
         }
 
         return $carpetaRelativa . '/' . $nombreArchivo;
