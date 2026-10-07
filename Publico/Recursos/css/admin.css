@@ -252,11 +252,25 @@ img { max-width: 100%; height: auto; }
 }
 
 /* --- Main Content --- */
+/* Columna flex para que .admin-content crezca y empuje el footer al
+   fondo con su margin-top:auto, igual que hace .sidebar-footer. */
 .admin-main {
     margin-left: 280px;
     flex: 1;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background-color: var(--background);
+}
+
+/* --- Footer --- */
+.admin-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
 }
 
 /* --- TopBar --- */
@@ -361,6 +375,7 @@ img { max-width: 100%; height: auto; }
 /* --- Page Content --- */
 .admin-content {
     padding: 24px;
+    flex: 1 0 auto;
 }
 
 /* --- KPI Cards --- */

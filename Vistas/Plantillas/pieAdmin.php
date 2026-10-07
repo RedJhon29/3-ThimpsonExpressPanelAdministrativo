@@ -4,12 +4,17 @@ ARCHIVO: Vistas/Plantillas/pieAdmin.php
 ==================================================-->
 
 <!--=====================DETALLES=====================
-QUÉ HACE: cierra main y sidebar, carga las librerías por la
-    cadena del gestor, inicializa la UI y alerta fallos.
+QUÉ HACE: cierra main, pinta el pie con la marca y el año, cierra
+    el contenedor del panel, carga las librerías por la cadena
+    del gestor, inicializa la UI y alerta fallos.
 VINCULADO A: lo cierra la última línea de cada vista del panel;
     abre los contenedores Vistas/Plantillas/barraLateralAdmin.php.
 SI SE ALTERA: si se rompe el cierre o la cadena de scripts,
-    todas las vistas se desbordan o pierden sus librerías.
+    todas las vistas se desbordan o pierden sus librerías. El pie
+    va después de </main> para que .admin-content lo empuje al
+    fondo con su margin-top:auto.
+LÍMITES: solo marca y año, sin enlaces: las rutas de ayuda o
+    soporte no existen y serían links que devuelven 404.
 FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================-->
@@ -17,6 +22,10 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 <!--================CUERPO DEL CÓDIGO=================-->
 
     </main>
+
+    <footer class="admin-footer">
+        &copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars(APP_NAME); ?> &middot; Panel Administrativo
+    </footer>
 </div>
 
 <!-- Scripts -->
