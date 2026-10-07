@@ -4,12 +4,15 @@ ARCHIVO: Vistas/Plantillas/barraLateralAdmin.php
 ==================================================-->
 
 <!--=====================DETALLES=====================
-QUÉ HACE: pinta el sidebar con su menú y marca el ítem activo según
-    $activeMenu; añade el botón de apagado y overlay del topbar.
+QUÉ HACE: pinta el sidebar con sus categorías y marca el ítem activo
+    según $activeMenu; añade el botón de apagado y overlay del topbar.
 VINCULADO A: lo incluye el controlador después de
     encabezadoAdmin.php y antes de la vista; lo cierra pieAdmin.php.
 SI SE ALTERA: una key nueva de $activeMenu debe existir aquí para
-    que se resalte; la lista de links muertos está en AGENTS.md.
+    que se resalte.
+LÍMITES: solo hay dos vistas, Dashboard y Usuarios. Las otras
+    categorías se conservan como títulos vacíos para cuando existan
+    sus rutas: los enlaces que había ahí apuntan a rutas inexistentes.
 FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================-->
@@ -41,57 +44,22 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             <a href="<?php echo BASE_URL; ?>/usuarios" class="sidebar-link <?php echo ($activeMenu ?? '') === 'usuarios' ? 'active' : ''; ?>">
                 <i class="bi bi-people-fill"></i> Usuarios
             </a>
-            <a href="<?php echo BASE_URL; ?>/orders" class="sidebar-link <?php echo ($activeMenu ?? '') === 'orders' ? 'active' : ''; ?>">
-                <i class="bi bi-receipt"></i> Órdenes
-            </a>
-            <a href="<?php echo BASE_URL; ?>/services" class="sidebar-link <?php echo ($activeMenu ?? '') === 'services' ? 'active' : ''; ?>">
-                <i class="bi bi-box-seam"></i> Servicios
-            </a>
-            <a href="<?php echo BASE_URL; ?>/riders" class="sidebar-link <?php echo ($activeMenu ?? '') === 'riders' ? 'active' : ''; ?>">
-                <i class="bi bi-person-video3"></i> Motorizados
-            </a>
         </div>
 
-        <!-- PLATAFORMA -->
+        <!-- PLATAFORMA: categoría sin vistas activas; sus enlaces se
+             reagregan cuando existan las rutas reales. -->
         <div class="sidebar-section">
             <span class="sidebar-section-title">Plataforma</span>
-            <a href="<?php echo BASE_URL; ?>/marketplace" class="sidebar-link <?php echo ($activeMenu ?? '') === 'marketplace' ? 'active' : ''; ?>">
-                <i class="bi bi-shop"></i> Marketplace
-            </a>
-            <a href="<?php echo BASE_URL; ?>/cms" class="sidebar-link <?php echo ($activeMenu ?? '') === 'cms' ? 'active' : ''; ?>">
-                <i class="bi bi-magic"></i> CMS Super-Poderes
-            </a>
-            <a href="<?php echo BASE_URL; ?>/chatbot" class="sidebar-link <?php echo ($activeMenu ?? '') === 'chatbot' ? 'active' : ''; ?>">
-                <i class="bi bi-robot"></i> IA / Asistente
-            </a>
         </div>
 
-        <!-- GESTIÓN -->
+        <!-- GESTIÓN: categoría sin vistas activas por ahora. -->
         <div class="sidebar-section">
             <span class="sidebar-section-title">Gestión</span>
-            <a href="<?php echo BASE_URL; ?>/clients" class="sidebar-link <?php echo ($activeMenu ?? '') === 'clients' ? 'active' : ''; ?>">
-                <i class="bi bi-people"></i> Clientes
-            </a>
-            <a href="<?php echo BASE_URL; ?>/finance" class="sidebar-link <?php echo ($activeMenu ?? '') === 'finance' ? 'active' : ''; ?>">
-                <i class="bi bi-cash-stack"></i> Finanzas
-            </a>
-            <a href="<?php echo BASE_URL; ?>/settings" class="sidebar-link <?php echo ($activeMenu ?? '') === 'settings' ? 'active' : ''; ?>">
-                <i class="bi bi-gear"></i> Configuración
-            </a>
         </div>
 
-        <!-- SISTEMA -->
+        <!-- SISTEMA: categoría sin vistas activas por ahora. -->
         <div class="sidebar-section">
             <span class="sidebar-section-title">Sistema</span>
-            <a href="<?php echo BASE_URL; ?>/notifications" class="sidebar-link <?php echo ($activeMenu ?? '') === 'notifications' ? 'active' : ''; ?>">
-                <i class="bi bi-bell"></i> Notificaciones
-            </a>
-            <a href="<?php echo BASE_URL; ?>/audit" class="sidebar-link <?php echo ($activeMenu ?? '') === 'audit' ? 'active' : ''; ?>">
-                <i class="bi bi-journal-text"></i> Auditoría
-            </a>
-            <a href="<?php echo BASE_URL; ?>/support" class="sidebar-link <?php echo ($activeMenu ?? '') === 'support' ? 'active' : ''; ?>">
-                <i class="bi bi-headset"></i> Soporte
-            </a>
         </div>
     </nav>
 
@@ -111,17 +79,16 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 <div class="admin-main" id="adminMain">
     <!-- TopBar -->
     <header class="admin-topbar">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 admin-topbar-izq">
             <button class="btn btn-ghost d-lg-none p-1" id="toggleSidebar" style="color:var(--muted);">
                 <i class="bi bi-list fs-4"></i>
             </button>
             <div class="topbar-search">
                 <i class="bi bi-search"></i>
-                <input type="text" id="topbarSearch" name="q" placeholder="Buscar órdenes, clientes, motorizados... (Ctrl+K)">
-                <span style="font-family:var(--font-mono);font-size:11px;padding:2px 6px;background:var(--surface-3);color:var(--muted);border:1px solid var(--border);">Ctrl+K</span>
+                <input type="text" id="topbarSearch" name="q" placeholder="Buscar órdenes, clientes, motorizados...">
             </div>
         </div>
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 admin-topbar-der">
             <div class="live-indicator d-none d-md-flex">
                 <i class="bi bi-lightning-charge-fill" style="color:var(--primary);"></i>
                 Cola en vivo

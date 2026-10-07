@@ -292,6 +292,20 @@ img { max-width: 100%; height: auto; }
 }
 
 /* --- Search Bar --- */
+/* El buscador toma el espacio que sobra en el topbar en vez de medir
+   400px fijos: con ancho fijo chocaba contra el grupo derecho entre
+   992px y 1150px de pantalla. min-width:0 permite que el input se
+   encoja sin desbordar; max-width evita que se estiren demasiado
+   en monitores anchos. */
+.admin-topbar-izq {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.admin-topbar-der {
+    flex: 0 0 auto;
+}
+
 .topbar-search {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -299,8 +313,10 @@ img { max-width: 100%; height: auto; }
     display: flex;
     align-items: center;
     gap: 8px;
-    width: 400px;
-    max-width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: 560px;
 }
 
 .topbar-search input {
