@@ -313,10 +313,13 @@ QUÉ HACE: pide confirmación SweetAlert antes de enviar los
     formularios de borrado y de cambio de estado, muestra el
     aviso de la última operación, rellena el modal de edición
     y reabre el modal correcto tras un error de validación.
+    Los formularios de alta y edición se envían por fetch y
+    responden con un aviso suave, sin recargar en caso de fallo.
 VINCULADO A: usa data-confirmar de los forms, los data-* de
     los botones de editar y window.showToast() de pieAdmin.php.
-SI SE ALTERA: si cambian los ids de los modales o los data-*
-    de los botones, revisar los selectores de este script.
+SI SE ALTERA: si cambian los ids de los modales, las clases
+    .form-usuario o los data-* de los botones, revisar los
+    selectores de este script.
 FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================*/
@@ -324,8 +327,37 @@ function conectarAccionesUsuarios() {
     var mensaje = <?php echo json_encode($mensaje, JSON_UNESCAPED_UNICODE); ?>;
     var modalAbierto = <?php echo json_encode($modalAbierto, JSON_UNESCAPED_UNICODE); ?>;
 
-    if (mensaje && window.showToast) {
-        window.showToast(mensaje.tipo === 'error' ? 'error' : 'success', mensaje.tipo === 'error' ? 'Acción rechazada' : 'Listo', mensaje.texto);
+    // Avisos suaves de resultado. Van centrados como la confirmación de
+    // borrado, pero sin botones: se cierran solos. El texto y la
+    // sugerencia llegan ya en lenguaje natural desde el controlador.
+    // Si la librería no cargó, se cae al toast de Alertify para que el
+    // resultado de la acción nunca quede sin avisar.
+    var mostrarAviso = function (tipo, texto, sugerencia) {
+        if (typeof Swal === 'undefined') {
+            if (window.showToast) {
+                window.showToast(tipo, tipo === 'error' ? 'Acción rechazada' : 'Listo', texto);
+            }
+            return;
+        }
+
+        Swal.fire({
+            icon: tipo === 'error' ? 'error' : 'success',
+            title: texto,
+            html: sugerencia
+                ? '<div style="margin-top:10px;font-size:13.5px;opacity:0.85;line-height:1.45">' + sugerencia + '</div>'
+                : '',
+            timer: tipo === 'error' ? 6000 : 3000,
+            showConfirmButton: false,
+            background: '#131517',
+            color: '#fff',
+            customClass: { popup: 'swal-aviso-usuario' }
+        });
+    };
+
+    // Resultado de acciones que llegan por POST clásico y recargan la página:
+    // eliminar, eliminar varios y cambiar estado.
+    if (mensaje) {
+        mostrarAviso(mensaje.tipo, mensaje.texto, mensaje.sugerencia);
     }
 
     if (typeof Swal === 'undefined') { return; }
@@ -463,6 +495,91 @@ function conectarAccionesUsuarios() {
 
         actualizarSeleccion();
     }
+
+    // Marca los campos que el servidor@Restó como inválidos
+    var marcarCampos = function (formulario, errores) {
+        formulario.querySelectorAll('.is-invalid').forEach(function (campo) {
+            campo.classList.remove('is-invalid');
+        });
+        formulario.querySelectorAll('div.marca-error').forEach(function (nota) {
+            nota.remove();
+        });
+
+        Object.keys(errores || {}).forEach(function (nombre) {
+            var campo = formulario.querySelector('[name="' + nombre + '"]');
+            if (!campo) { return; }
+
+            campo.classList.add('is-invalid');
+
+            var nota = document.createElement('div');
+            nota.className = 'invalid-feedback d-block marca-error';
+            nota.textContent = errores[nombre];
+            campo.insertAdjacentElement('afterend', nota);
+        });
+    };
+
+    // Envía un formulario de usuario por fetch y muestra el aviso.
+    // Con exito recarga el listado; con fallo deja el modal abierto para
+    // que el usuario no pierda lo que escribio.
+    var enviarFormulario = function (formulario) {
+        if (typeof Swal === 'undefined') {
+            formulario.submit();   // sin librerías, el envío normal funciona
+            return;
+        }
+
+        var boton = formulario.querySelector('button[type="submit"]');
+        var textoOriginal = boton ? boton.innerHTML : '';
+        if (boton) {
+            boton.disabled = true;
+            boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Guardando…';
+        }
+
+        fetch(formulario.action, {
+            method: 'POST',
+            body: new FormData(formulario),
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (respuesta) {
+                return respuesta.json().then(function (datos) {
+                    return { ok: respuesta.ok, datos: datos };
+                });
+            })
+            .then(function (resultado) {
+                var datos = resultado.datos || {};
+
+                if (datos.ok) {
+                    mostrarAviso('success', datos.texto, datos.sugerencia);
+                    // Se recarga para que la tabla muestre el usuario nuevo
+                    setTimeout(function () {
+                        window.location.href = datos.redirect || '<?php echo BASE_URL; ?>/usuarios';
+                    }, 1400);
+                    return;
+                }
+
+                marcarCampos(formulario, datos.errores);
+                mostrarAviso('error', datos.texto, datos.detalle || datos.sugerencia);
+            })
+            .catch(function () {
+                mostrarAviso(
+                    'error',
+                    'No pudimos conectarnos con el servidor.',
+                    'Revisá tu conexión a internet e intentá de nuevo.'
+                );
+            })
+            .finally(function () {
+                if (boton) {
+                    boton.disabled = false;
+                    boton.innerHTML = textoOriginal;
+                }
+            });
+    };
+
+    document.querySelectorAll('.form-usuario').forEach(function (formulario) {
+        formulario.addEventListener('submit', function (evento) {
+            evento.preventDefault();
+            enviarFormulario(formulario);
+        });
+    });
 
     // Tras un error de validación, reabrir el modal que falló
     if (modalAbierto === 'nuevo') {

@@ -699,6 +699,56 @@ img { max-width: 100%; height: auto; }
     border-color: var(--primary);
 }
 
+/* --- Avisos suaves de resultado (SweetAlert centrado, sin botones) --- */
+.swal2-popup.swal-aviso-usuario {
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.swal2-popup.swal-aviso-usuario .swal2-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.swal2-popup.swal-aviso-usuario .swal2-html-container {
+    color: var(--muted);
+}
+
+/* El circulo del icono de exito lo dibuja SweetAlert con dos divs
+   (swal2-success-circular-line-*) y el marco del cuadro es el div padre
+   .swal2-icon. El reset global de admin.css:46 aplica border-radius con
+   !important, asi que estas reglas tambien lo necesitan. */
+.swal2-popup.swal-aviso-usuario .swal2-icon.swal2-success,
+.swal2-popup.swal-aviso-usuario .swal2-icon.swal2-error,
+.swal2-popup.swal-aviso-usuario .swal2-icon.swal2-warning,
+.swal2-popup.swal-aviso-usuario .swal2-icon.swal2-info,
+.swal2-popup.swal-aviso-usuario .swal2-icon.swal2-question {
+    border-radius: 50% !important;
+}
+
+/* El circulo del check lo pinta .swal2-success-ring (borde verde) y las dos
+   lineas circulares lo recortan. Con el radio del tema los tres salen
+   cuadrados: hay que redondearlos. */
+.swal2-popup.swal-aviso-usuario .swal2-success-ring,
+.swal2-popup.swal-aviso-usuario .swal2-success-circular-line-left,
+.swal2-popup.swal-aviso-usuario .swal2-success-circular-line-right {
+    border-radius: 50% !important;
+}
+
+/* El svg interior del icono de error tambien va circular */
+.swal2-popup.swal-aviso-usuario .swal2-error .swal2-x {
+    border-radius: 50% !important;
+}
+
+/* Los botones de SweetAlert heredan radio 0 del reset global; se restituye
+   un radio suave para que el popup no se vea como un rectangulo duro. */
+.swal2-popup.swal-aviso-usuario .swal2-confirm,
+.swal2-popup.swal-aviso-usuario .swal2-cancel {
+    border-radius: 6px !important;
+}
+
 /* --- Selección múltiple de usuarios --- */
 .usuario-col-seleccion,
 .usuario-celda-seleccion {

@@ -75,18 +75,18 @@ class AlmacenFotos {
             return;
         }
 
-        if ($archivo['error'] !== UPLOAD_ERR_OK) {
-            throw new RuntimeException('No se pudo subir el archivo (código ' . $archivo['error'] . ').');
+if ($archivo['error'] !== UPLOAD_ERR_OK) {
+            throw new ErrorAplicacion(ErrorAplicacion::FOTO_SUBIDA_FALLIDA, 'PHP upload error ' . $archivo['error'], 400);
         }
 
         if ($archivo['size'] > self::TAMANO_MAXIMO) {
-            throw new RuntimeException('La foto supera el máximo de 2 MB.');
+            throw new ErrorAplicacion(ErrorAplicacion::FOTO_PESADA, 'tamano ' . $archivo['size'] . ' bytes');
         }
 
         $info = new finfo(FILEINFO_MIME_TYPE);
 
         if (!isset(self::MIMES[$info->file($archivo['tmp_name'])])) {
-            throw new RuntimeException('La foto debe ser un archivo PNG, JPEG o WEBP.');
+            throw new ErrorAplicacion(ErrorAplicacion::FOTO_TIPO_INVALIDO, 'mime ' . $info->file($archivo['tmp_name']));
         }
     }
 
@@ -108,7 +108,7 @@ class AlmacenFotos {
     public static function guardar(array $archivo, int $idUsuario): string
     {
         if (!self::hayArchivo($archivo) || $archivo['error'] !== UPLOAD_ERR_OK) {
-            throw new RuntimeException('No se recibió ningún archivo.');
+            throw new ErrorAplicacion(ErrorAplicacion::FOTO_NO_RECIBIDA);
         }
 
         $info = new finfo(FILEINFO_MIME_TYPE);
@@ -117,13 +117,13 @@ class AlmacenFotos {
         $carpetaAbsoluta = BASE_PATH . '/' . $carpetaRelativa;
 
         if (!is_dir($carpetaAbsoluta) && !mkdir($carpetaAbsoluta, 0755, true) && !is_dir($carpetaAbsoluta)) {
-            throw new RuntimeException('No se pudo crear la carpeta de la imagen.');
+            throw new ErrorAplicacion(ErrorAplicacion::FOTO_CARPETA, 'mkdir ' . $carpetaAbsoluta, 500);
         }
 
         $nombreArchivo = 'usuario_' . bin2hex(random_bytes(8)) . '.' . $extension;
 
         if (!move_uploaded_file($archivo['tmp_name'], $carpetaAbsoluta . '/' . $nombreArchivo)) {
-            throw new RuntimeException('No se pudo guardar la imagen en el servidor.');
+            throw new ErrorAplicacion(ErrorAplicacion::FOTO_NO_GUARDADA, 'move_uploaded_file ' . $nombreArchivo, 500);
         }
 
         return $carpetaRelativa . '/' . $nombreArchivo;

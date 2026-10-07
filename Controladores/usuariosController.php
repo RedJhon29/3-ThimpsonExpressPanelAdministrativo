@@ -27,6 +27,124 @@ class usuariosController {
  */
 private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: traducirError() | ROL: controlador (privado)
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: convierte una clave de ErrorAplicacion en un texto
+ *     que una persona entienda, con una sugerencia de arreglo.
+ * VINCULADO A: lo llaman guardar() y actualizar() cuando la
+ *     petición pide JSON; el texto viaja en la respuesta.
+ * SI SE ALTERA: si se agrega una clave a ErrorAplicacion y no
+ *     está en el mapa, el usuario vería el mensaje genérico.
+ * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+    private function traducirError(string $clave): array {
+        $mensajes = [
+            ErrorAplicacion::NICK_DUPLICADO => [
+                'texto' => 'Ese nombre de usuario ya está en uso.',
+                'sugerencia' => 'Elegí otro nombre de usuario para este registro.',
+            ],
+            ErrorAplicacion::NICK_INEXISTENTE => [
+                'texto' => 'El usuario que querés modificar ya no existe.',
+                'sugerencia' => 'Actualizá la página para ver la lista de usuarios actual.',
+            ],
+            ErrorAplicacion::CLAVE_CORTA => [
+                'texto' => 'La contraseña es demasiado corta.',
+                'sugerencia' => 'Usá una contraseña de al menos 8 caracteres.',
+            ],
+            ErrorAplicacion::CLAVE_LARGA => [
+                'texto' => 'La contraseña es demasiado larga.',
+                'sugerencia' => 'Limitala a 200 caracteres.',
+            ],
+            ErrorAplicacion::CLAVE_VACIA => [
+                'texto' => 'Falta la contraseña del usuario.',
+                'sugerencia' => 'Escribí una contraseña de al menos 8 caracteres.',
+            ],
+            ErrorAplicacion::FOTO_PESADA => [
+                'texto' => 'La foto que elegiste pesa demasiado.',
+                'sugerencia' => 'Elegí una imagen de menos de 2 MB.',
+            ],
+            ErrorAplicacion::FOTO_TIPO_INVALIDO => [
+                'texto' => 'Ese archivo no es una imagen válida.',
+                'sugerencia' => 'Subí una foto en formato PNG, JPEG o WEBP.',
+            ],
+            ErrorAplicacion::FOTO_NO_RECIBIDA => [
+                'texto' => 'No se recibió la foto.',
+                'sugerencia' => 'Volvé a elegir el archivo e intentá otra vez.',
+            ],
+            ErrorAplicacion::FOTO_SUBIDA_FALLIDA => [
+                'texto' => 'La carga de la foto se interrumpió.',
+                'sugerencia' => 'Revisá tu conexión o elegí un archivo más chico.',
+            ],
+            ErrorAplicacion::FOTO_NO_GUARDADA => [
+                'texto' => 'No pudimos guardar la foto en el servidor.',
+                'sugerencia' => 'Intentá de nuevo en un momento; si sigue igual, avisá al administrador.',
+            ],
+            ErrorAplicacion::FOTO_CARPETA => [
+                'texto' => 'No se pudo preparar la carpeta donde van las fotos.',
+                'sugerencia' => 'Verificá los permisos de escritura del servidor y avisá al administrador.',
+            ],
+            ErrorAplicacion::USUARIO_NO_EXISTE => [
+                'texto' => 'Ese usuario ya no existe.',
+                'sugerencia' => 'Actualizá la página para ver la lista de usuarios actual.',
+            ],
+            ErrorAplicacion::SIN_PERMISO => [
+                'texto' => 'No tenés permiso para hacer esa acción.',
+                'sugerencia' => 'Solo el superadministrador puede eliminar usuarios.',
+            ],
+            ErrorAplicacion::SESION_EXPIRADA => [
+                'texto' => 'Tu sesión expiró o la página estuvo demasiado tiempo abierta.',
+                'sugerencia' => 'Recargá la página e intentá de nuevo.',
+            ],
+            ErrorAplicacion::SIN_USUARIOS => [
+                'texto' => 'No hay ningún usuario que se pueda eliminar.',
+                'sugerencia' => 'Activá la casilla de al menos un usuario antes de continuar.',
+            ],
+            ErrorAplicacion::ERROR_DE_GUARDADO => [
+                'texto' => 'No pudimos guardar el usuario.',
+                'sugerencia' => 'Revisá los datos e intentá de nuevo en un momento.',
+            ],
+        ];
+
+        // Last resort: nunca se muestra una clave técnica al usuario
+        return $mensajes[$clave] ?? [
+            'texto' => 'Algo salió mal y no pudimos completar la operación.',
+            'sugerencia' => 'Intentá de nuevo en un momento. Si el problema sigue, avisá al administrador.',
+        ];
+    }
+
+/**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: responderErrorTraducido() | ROL: controlador (privado)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: devuelve un JSON de error con la forma que espera el
+     *           JavaScript (ok, tipo, texto, sugerencia).
+     * VINCULADO A: lo usan guardar() y actualizar() para los fallos
+     *     que no pasan por validardatos(), como sesión expirada.
+     * SI SE ALTERA: si faltara la clave ok, el JavaScript lo tomaría
+     *     como un acierto y mostraría el error con el ícono correcto.
+     * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private function responderErrorTraducido(string $clave, int $codigo = 422): void
+    {
+        $m = $this->traducirError($clave);
+
+        responderJson([
+            'ok' => false,
+            'tipo' => 'error',
+            'texto' => $m['texto'],
+            'detalle' => $m['sugerencia'],
+            'sugerencia' => $m['sugerencia'],
+        ], $codigo);
+    }
+
     /**
      * ====================ENCABEZADO====================
      * FUNCIÓN: esSuperadmin() | ROL: controlador (privado)
@@ -115,53 +233,151 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * ==================================================
      */
     public function guardar(): void {
-        if (!esPeticionPostOthrow(verificarTokenCsrf($_POST['csrf_token'] ?? null))) {
-            return;
-        }
+        $json = pideRespuestaJson();
 
-        [$errores, $valores] = $this->validardatos(true);
-
-        // volverAlFormulario() redirige y corta la ejecución
-        if ($errores !== []) {
-            $this->volverAlFormulario('nuevo', $errores, $valores);
-        }
-
-        // La foto se valida antes de tocar la base: un archivo inválido no debe
-        // dejar un usuario creado a medias.
-        try {
-            AlmacenFotos::validar($_FILES['foto_usuario'] ?? []);
-        } catch (RuntimeException $error) {
-            $this->volverAlFormulario('nuevo', ['foto_usuario' => $error->getMessage()], $valores);
-            return;
-        }
-
-        // Primero el usuario, porque su id es el nombre de la carpeta de la foto.
-        $idUsuario = Usuario::crear(
-            $valores['tipo_usuario'],
-            $valores['descripcion_usuario'],
-            $valores['nick_name'],
-            $valores['clave']
-        );
-
-        if ($idUsuario === null) {
-            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'No se pudo crear el usuario.']);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($json) {
+                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 405);
+            }
             $this->irAUsuarios();
             return;
         }
 
-        if (isset($_FILES['foto_usuario']['error']) && $_FILES['foto_usuario']['error'] !== UPLOAD_ERR_NO_FILE) {
-            try {
-                Usuario::establecerFoto($idUsuario, AlmacenFotos::guardar($_FILES['foto_usuario'], $idUsuario));
-            } catch (RuntimeException $error) {
-                // Sin foto el usuario no sirve: se deshace el alta completa
-                Usuario::eliminar($idUsuario);
-                $this->volverAlFormulario('nuevo', ['foto_usuario' => $error->getMessage()], $valores);
+        if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
+            if ($json) {
+                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 403);
+            }
+            $this->volverAlFormulario('nuevo', [], []);
+            return;
+        }
+
+        try {
+            [$errores, $valores] = $this->validardatos(true);
+
+            if ($errores !== []) {
+                $this->responderValidacion($json, 'nuevo', $errores, $valores);
                 return;
             }
+
+            // La foto se valida antes de tocar la base: un archivo inválido no
+            // debe dejar un usuario creado a medias.
+            AlmacenFotos::validar($_FILES['foto_usuario'] ?? []);
+
+            // Primero el usuario, porque su id es el nombre de la carpeta de la foto.
+            $idUsuario = Usuario::crear(
+                $valores['tipo_usuario'],
+                $valores['descripcion_usuario'],
+                $valores['nick_name'],
+                $valores['clave']
+            );
+
+            if ($idUsuario === null) {
+                throw new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, 'Usuario::crear devolvio null', 500);
+            }
+
+            if (AlmacenFotos::hayArchivo($_FILES['foto_usuario'] ?? [])) {
+                try {
+                    Usuario::establecerFoto($idUsuario, AlmacenFotos::guardar($_FILES['foto_usuario'], $idUsuario));
+                } catch (ErrorAplicacion $error) {
+                    // Sin foto el usuario no sirve: se deshace el alta completa
+                    Usuario::eliminar($idUsuario);
+                    throw $error;
+                }
+            }
+        } catch (ErrorAplicacion $error) {
+            $this->responderFallo($json, 'nuevo', $error, $valores ?? []);
+            return;
+        } catch (Throwable $error) {
+            // PDOException u otros imprevistos: no se muestra el detalle al usuario
+            error_log('[usuarios] error al guardar: ' . $error->getMessage());
+            $this->responderFallo(
+                $json,
+                'nuevo',
+                new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, $error->getMessage(), 500),
+                $valores ?? []
+            );
+            return;
+        }
+
+        if ($json) {
+            responderJson([
+                'ok' => true,
+                'tipo' => 'success',
+                'texto' => '¡Listo! El usuario se creó correctamente.',
+                'sugerencia' => 'Ahora podés administrarlo desde la tabla.',
+                'redirect' => BASE_URL . '/usuarios',
+            ]);
         }
 
         flashMensaje('mensaje', ['tipo' => 'success', 'texto' => 'Usuario creado correctamente.']);
         $this->irAUsuarios();
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: responderValidacion() | ROL: controlador (privado)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: devuelve los errores de campo al cliente, o vuelve al
+     *           formulario con los datos escritos si no pidió JSON.
+     * VINCULADO A: la llaman guardar() y actualizar() cuando
+     *     validardatos() encuentra algo; el texto por campo es el
+     *     que ya devuelve validardatos(), en lenguaje natural.
+     * SI SE ALTERA: si el JS espera otra forma de respuesta, la
+     *     ventana se quedaría esperando y no marcaría los campos.
+     * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private function responderValidacion(bool $json, string $modal, array $errores, array $valores): void
+    {
+        if (!$json) {
+            $this->volverAlFormulario($modal, $errores, $valores);
+            return;
+        }
+
+        $primero = reset($errores);
+
+        responderJson([
+            'ok' => false,
+            'tipo' => 'error',
+            'texto' => 'No pudimos crear el usuario porque hay datos que revisar.',
+            'detalle' => is_string($primero) ? $primero : 'Revisá los campos marcados.',
+            'sugerencia' => 'Corregí los campos señalados abajo y volvé a guardar.',
+            'errores' => $errores,
+        ], 422);
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: responderFallo() | ROL: controlador (privado)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: traduce un ErrorAplicacion y lo devuelve como JSON,
+     *           o vuelve al formulario si la petición no pidió JSON.
+     * VINCULADO A: la llaman guardar() y actualizar() en sus catch.
+     * SI SE ALTERA: si dejara pasar una clave técnica, el usuario
+     *     vería un mensaje incomprensible en lugar de una ayuda.
+     * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private function responderFallo(bool $json, string $modal, ErrorAplicacion $error, array $valores): void
+    {
+        if (!$json) {
+            $this->volverAlFormulario($modal, [$modal === 'editar' ? 'foto_usuario' : 'foto_usuario' => $error->getMessage()], $valores);
+            return;
+        }
+
+        $m = $this->traducirError($error->clave);
+
+        responderJson([
+            'ok' => false,
+            'tipo' => 'error',
+            'texto' => $m['texto'],
+            'detalle' => $m['sugerencia'],
+            'sugerencia' => $m['sugerencia'],
+        ], $error->getCode() >= 400 && $error->getCode() < 600 ? $error->getCode() : 422);
     }
 
     /**
@@ -182,7 +398,21 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * ==================================================
      */
     public function actualizar(string $id): void {
-        if (!esPeticionPostOthrow(verificarTokenCsrf($_POST['csrf_token'] ?? null))) {
+        $json = pideRespuestaJson();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($json) {
+                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 405);
+            }
+            $this->irAUsuarios();
+            return;
+        }
+
+        if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
+            if ($json) {
+                $this->responderErrorTraducido(ErrorAplicacion::SESION_EXPIRADA, 403);
+            }
+            $this->volverAlFormulario('editar', [], []);
             return;
         }
 
@@ -190,63 +420,75 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         $usuario = Usuario::find($idUsuario);
 
         if ($usuario === null) {
+            if ($json) {
+                $this->responderErrorTraducido(ErrorAplicacion::USUARIO_NO_EXISTE, 404);
+            }
             flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'El usuario no existe.']);
             $this->irAUsuarios();
             return;
         }
 
-        [$errores, $valores] = $this->validardatos(false, $idUsuario);
-
-        if ($errores !== []) {
-            $valores['id_usuario'] = $idUsuario;
-            $this->volverAlFormulario('editar', $errores, $valores);
-        }
-
-        // Sin foto nueva se conserva la que ya tenía el usuario
-        $fotoAnterior = (string)($usuario['foto_usuario'] ?? '');
+        $valores = [];
 
         try {
+            [$errores, $valores] = $this->validardatos(false, $idUsuario);
+
+            if ($errores !== []) {
+                $valores['id_usuario'] = $idUsuario;
+                $this->responderValidacion($json, 'editar', $errores, $valores);
+                return;
+            }
+
+            // Sin foto nueva se conserva la que ya tenía el usuario
+            $fotoAnterior = (string)($usuario['foto_usuario'] ?? '');
+
             AlmacenFotos::validar($_FILES['foto_usuario'] ?? []);
-        } catch (RuntimeException $error) {
+
+            $foto = $hayFotoNueva = AlmacenFotos::hayArchivo($_FILES['foto_usuario'] ?? [])
+                ? AlmacenFotos::guardar($_FILES['foto_usuario'], $idUsuario)
+                : $fotoAnterior;
+
+            Usuario::actualizar(
+                $idUsuario,
+                $valores['tipo_usuario'],
+                $valores['descripcion_usuario'],
+                $valores['nick_name'],
+                $foto
+            );
+
+            // Con la nueva ya guardada y registrada, la anterior sobra
+            if ($hayFotoNueva && $fotoAnterior !== '' && $fotoAnterior !== $foto) {
+                AlmacenFotos::eliminar($fotoAnterior);
+            }
+
+            // Clave vacía = mantener la actual
+            if ($valores['clave'] !== '' && !Usuario::actualizarClave($idUsuario, $valores['clave'])) {
+                throw new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, 'actualizarClave devolvio false', 500);
+            }
+        } catch (ErrorAplicacion $error) {
             $valores['id_usuario'] = $idUsuario;
-            $valores['foto_usuario'] = $fotoAnterior;
-            $this->volverAlFormulario('editar', ['foto_usuario' => $error->getMessage()], $valores);
+            $this->responderFallo($json, 'editar', $error, $valores);
+            return;
+        } catch (Throwable $error) {
+            error_log('[usuarios] error al actualizar: ' . $error->getMessage());
+            $valores['id_usuario'] = $idUsuario;
+            $this->responderFallo(
+                $json,
+                'editar',
+                new ErrorAplicacion(ErrorAplicacion::ERROR_DE_GUARDADO, $error->getMessage(), 500),
+                $valores
+            );
             return;
         }
 
-        $hayFotoNueva = isset($_FILES['foto_usuario']['error'])
-            && $_FILES['foto_usuario']['error'] !== UPLOAD_ERR_NO_FILE;
-
-        // Primero se escribe la nueva: si fallara, la anterior sigue en su sitio.
-        if ($hayFotoNueva) {
-            try {
-                $foto = AlmacenFotos::guardar($_FILES['foto_usuario'], $idUsuario);
-            } catch (RuntimeException $error) {
-                $valores['id_usuario'] = $idUsuario;
-                $valores['foto_usuario'] = $fotoAnterior;
-                $this->volverAlFormulario('editar', ['foto_usuario' => $error->getMessage()], $valores);
-                return;
-            }
-        } else {
-            $foto = $fotoAnterior;
-        }
-
-        Usuario::actualizar(
-            $idUsuario,
-            $valores['tipo_usuario'],
-            $valores['descripcion_usuario'],
-            $valores['nick_name'],
-            $foto
-        );
-
-        // Con la nueva ya guardada y registrada, la anterior sobra
-        if ($hayFotoNueva && $fotoAnterior !== '' && $fotoAnterior !== $foto) {
-            AlmacenFotos::eliminar($fotoAnterior);
-        }
-
-        // Clave vacía = mantener la actual
-        if ($valores['clave'] !== '') {
-            Usuario::actualizarClave($idUsuario, $valores['clave']);
+        if ($json) {
+            responderJson([
+                'ok' => true,
+                'tipo' => 'success',
+                'texto' => '¡Listo! Los cambios se guardaron correctamente.',
+                'sugerencia' => 'La tabla ya muestra la información actualizada.',
+                'redirect' => BASE_URL . '/usuarios',
+            ]);
         }
 
         flashMensaje('mensaje', ['tipo' => 'success', 'texto' => 'Usuario actualizado correctamente.']);
@@ -318,7 +560,11 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         // espacio en el servidor para siempre.
         AlmacenFotos::eliminar((string)($usuario['foto_usuario'] ?? ''));
 
-        flashMensaje('mensaje', ['tipo' => 'success', 'texto' => 'Usuario eliminado correctamente.']);
+        flashMensaje('mensaje', [
+            'tipo' => 'success',
+            'texto' => 'El usuario se eliminó correctamente.',
+            'sugerencia' => 'Se eliminó a <strong>' . htmlspecialchars((string)($usuario['nick_name'] ?? ''), ENT_QUOTES, 'UTF-8') . '</strong> junto con su foto.',
+        ]);
         $this->irAUsuarios();
     }
 
@@ -394,10 +640,16 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             return;
         }
 
-        $texto = "Se eliminaron $borrados usuario(s) con sus fotos.";
+        // Se concorda el plural (verbo y sustantivo): "Se eliminó 1 usuario"
+        // pero "Se eliminaron 3 usuarios". Evita el feo "usuario(s)".
+        $palabra = $borrados === 1 ? 'usuario' : 'usuarios';
+        $verbo = $borrados === 1 ? 'Se eliminó' : 'Se eliminaron';
+        $texto = "$verbo $borrados $palabra con sus fotos.";
 
         if ($omitidos > 0) {
-            $texto .= " Se omitieron $omitidos (tu propio usuario, superadmins o inexistentes).";
+            $texto .= $omitidos === 1
+                ? " Se omitió 1 usuario (tu propio usuario, un superadmin o inexistente)."
+                : " Se omitieron $omitidos usuarios (tu propio usuario, superadmins o inexistentes).";
         }
 
         flashMensaje('mensaje', ['tipo' => 'success', 'texto' => $texto]);
@@ -562,6 +814,8 @@ header('Location: ' . BASE_URL . '/usuarios');
 }
 
 /*===========FIN DEL FRAGMENTO DE CÓDIGO============*/
+
+
 
 
 

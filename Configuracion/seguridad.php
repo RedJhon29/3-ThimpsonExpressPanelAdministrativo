@@ -8,11 +8,12 @@ ARCHIVO: Configuracion/seguridad.php
 QUÉ HACE: resuelve el usuario de cada petición contra la base,
     emite y valida un token CSRF, guarda y lee mensajes de
     una sola vez (flash) y corta las peticiones que no son
-    POST válido.
+    POST válido; además contesta JSON cuando el cliente lo pide.
 VINCULADO A: lo incluye Configuracion/app.php; lo usan
     index.php (usuarioEnSesion), los Controladores
     (usuarioActual, verificarTokenCsrf, flashMensaje,
-    esPeticionPostOthrow) y las vistas (crearTokenCsrf).
+    esPeticionPostOthrow, pideRespuestaJson, responderJson)
+    y las vistas (crearTokenCsrf).
 SI SE ALTERA: si cambia el nombre de la clave de sesión o
     del input, los formularios dejan de validar y se cae la
     protección contra CSRF.
@@ -123,6 +124,53 @@ function cerrarSesionInvalida(): void
     session_destroy();
 
     header('Location: ' . BASE_URL . '/login');
+    exit;
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: pideRespuestaJson() | ROL: helper de petición
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: indica si el cliente espera JSON en vez de una
+ *           redirección (fetch con Accept o cabecera XHR).
+ * VINCULADO A: lo consultan las acciones del CRUD para elegir
+ *           entre redirigir con flash o contestar un JSON.
+ * SI SE ALTERA: si contestara false a un fetch, el navegador
+ *           seguiría la redirección y se perdería el mensaje.
+ * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function pideRespuestaJson(): bool
+{
+    if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest') {
+        return true;
+    }
+
+    return str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: responderJson() | ROL: helper de petición
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: contesta JSON y corta la ejecución, para las
+ *           acciones que el JavaScript maneja sin recargar.
+ * VINCULADO A: lo llaman usuariosController y loginController
+ *           cuando pideRespuestaJson() es verdadero.
+ * SI SE ALTERA: si no cortara con exit, la página seguiría
+ *           emitiendo HTML después del JSON.
+ * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function responderJson(array $datos, int $codigo = 200): void
+{
+    http_response_code($codigo);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($datos, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
