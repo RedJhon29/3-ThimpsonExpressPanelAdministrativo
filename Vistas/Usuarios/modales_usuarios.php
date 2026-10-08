@@ -32,6 +32,11 @@ $prefijoId = $prefijoId ?? 'nuevo';
 $claveOpcional = $claveOpcional ?? false;
 $textoBoton = $textoBoton ?? 'Guardar';
 
+// El modal de edicion se renderiza antes de saber a quien se edita: la
+// foto actual la inyecta el JS desde data-foto del boton que lo abrio.
+// En el alta no hay foto previa y se muestra la del default.
+$previaMostrarDefault = ($prefijoId !== 'editar');
+
 // El partial se incluye dos veces (modales nuevo y editar): sin prefijo,
 // los id se repetirían en el DOM y el HTML sería inválido.
 $idDe = static function (string $campo) use ($prefijoId): string {
@@ -140,14 +145,30 @@ $idDe = static function (string $campo) use ($prefijoId): string {
                name="foto_usuario"
                aria-describedby="<?php echo $idDe('foto_usuario-error'); ?>"
                accept="image/png,image/jpeg,image/webp">
-        <div class="usuario-foto-previa mt-2"
-             id="<?php echo $idDe('foto_usuario-previa'); ?>"
-             <?php echo empty($valores['foto_usuario']) ? 'hidden' : ''; ?>>
-            <?php if (!empty($valores['foto_usuario'])): ?>
-                <img src="<?php echo htmlspecialchars(BASE_URL . '/' . $valores['foto_usuario']); ?>"
-                     alt="Foto actual"
-                     class="usuario-foto-imagen">
-                <span class="usuario-campo-ayuda d-block mt-1">Foto actual; al elegir otra se reemplaza.</span>
+        <!-- Vista previa. En el alta arranca con la foto por defecto; al elegir
+             un archivo la reemplaza. En la edición muestra la actual a la
+             izquierda y, si se elige otra, la nueva a la derecha. -->
+        <div class="usuario-foto-previa mt-2" id="<?php echo $idDe('foto_usuario-previa'); ?>">
+            <?php if ($previaMostrarDefault): ?>
+                <div class="usuario-foto-caja" id="<?php echo $idDe('foto_usuario-nueva'); ?>">
+                    <img src="<?php echo htmlspecialchars(BASE_URL . '/' . usuariosModel::FOTO_POR_DEFECTO); ?>"
+                         alt="Foto por defecto que tendrá el usuario"
+                         class="usuario-foto-imagen">
+                    <span class="usuario-foto-etiqueta">Foto por defecto</span>
+                </div>
+            <?php else: ?>
+                <div class="usuario-foto-caja"
+                     id="<?php echo $idDe('foto_usuario-actual'); ?>"
+                     <?php /* se muestra solo si el usuario tiene foto */ ?>hidden>
+                    <img alt="Foto que tiene el usuario"
+                         class="usuario-foto-imagen">
+                    <span class="usuario-foto-etiqueta">Foto actual</span>
+                </div>
+                <div class="usuario-foto-caja" id="<?php echo $idDe('foto_usuario-nueva'); ?>" hidden>
+                    <img alt="Foto que se va a subir"
+                         class="usuario-foto-imagen">
+                    <span class="usuario-foto-etiqueta nueva">Foto nueva</span>
+                </div>
             <?php endif; ?>
         </div>
         <?php if (isset($errores['foto_usuario'])): ?>

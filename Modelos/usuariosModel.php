@@ -30,6 +30,29 @@ class usuariosModel {
                              nick_name, foto_usuario, ultimo_login, estado_usuario';
 
     /**
+     * Raíz de las fotos. Cada usuario sin foto sube recibe una subcarpeta
+     * propia nombrada id_nick_AAAAMMDD, así una foto nunca se mezcla con
+     * otra y la fecha del alta queda a la vista.
+     */
+    public const RUTA_FOTOS = 'Publico/Recursos/uploads/usuarios';
+
+    /**
+     * Foto por defecto: se copia a la carpeta del usuario cuando no se
+     * sube ninguna, para que la tabla nunca muestre un cuadro vacío.
+     */
+    public const FOTO_POR_DEFECTO = 'Publico/Recursos/uploads/usuarios/default/default.png';
+
+    /** MIME real del archivo -> extensión con que se guarda. */
+    private const MIMES_FOTO = [
+        'image/png'  => 'png',
+        'image/jpeg' => 'jpg',
+        'image/webp' => 'webp',
+    ];
+
+    /** 2 MB: por encima se rechaza antes de escribir en disco. */
+    private const TAMANO_MAXIMO_FOTO = 2097152;
+
+    /**
      * ====================ENCABEZADO====================
      * FUNCIÓN: all() | ROL: modelo
      * ==================================================
@@ -298,6 +321,285 @@ class usuariosModel {
             'activos' => $activos,
             'inactivos' => $total - $activos,
         ];
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: hayFotoSubida() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: indica si en el campo file venía realmente un archivo.
+     * VINCULADO A: la llaman usuariosController::guardar() y
+     *     actualizar() antes de decidir si hay que tocar el disco.
+     * SI SE ALTERA: si contesta mal, una subida vacía se procesa como
+     *     archivo válido y guardar() fallaría por falta de tmp_name.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function hayFotoSubida(array $archivo): bool
+    {
+        return isset($archivo['error']) && $archivo['error'] !== UPLOAD_ERR_NO_FILE;
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: validarFoto() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: revisa el archivo subido sin escribir nada en disco.
+     * VINCULADO A: la invocan usuariosController::guardar() y
+     *     actualizar() antes de tocar la base, para no dejar registros a medias.
+     * SI SE ALTERA: valida el MIME por contenido con finfo, nunca por
+     *     extensión; un tipo nuevo se agrega en self::MIMES_FOTO.
+     * LÍMITES: lanza RuntimeException con una clave de error; el texto
+     *     que ve el usuario lo arma el controlador con su traducción.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function validarFoto(array $archivo): void
+    {
+        if (!self::hayFotoSubida($archivo)) {
+            return;
+        }
+
+        if ($archivo['error'] !== UPLOAD_ERR_OK) {
+            throw new RuntimeException('foto_subida_fallida|PHP upload error ' . $archivo['error'], 400);
+        }
+
+        if ($archivo['size'] > self::TAMANO_MAXIMO_FOTO) {
+            throw new RuntimeException('foto_pesada|tamano ' . $archivo['size'] . ' bytes');
+        }
+
+        $info = new finfo(FILEINFO_MIME_TYPE);
+
+        if (!isset(self::MIMES_FOTO[$info->file($archivo['tmp_name'])])) {
+            throw new RuntimeException('foto_tipo_invalido|mime ' . $info->file($archivo['tmp_name']));
+        }
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: nombreCarpetaFoto() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: arma el nombre id_nick_AAAAMMDD de la carpeta del usuario.
+     * VINCULADO A: la usan guardarFoto() y usarFotoPorDefecto().
+     * SI SE ALTERA: el prefijo numérico es lo que usa
+     *     limpiarCarpetasHuerfanas() para recuperar el id del dueño, así
+     *     que debe seguir empezando con el id.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function nombreCarpetaFoto(int $idUsuario, string $nick, ?string $fecha = null): string
+    {
+        $limpio = preg_replace('/[^A-Za-z0-9_-]/', '', $nick);
+        $limpio = $limpio === '' ? 'usuario' : $limpio;
+        $dia = $fecha ?? date('Ymd');
+
+        return $idUsuario . '_' . $limpio . '_' . $dia;
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: guardarFoto() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: escribe la foto en la carpeta propia del usuario y
+     *     devuelve la ruta relativa que se guarda en la base.
+     * VINCULADO A: la llama usuariosController tras validarFoto(); el
+     *     name del campo es foto_usuario.
+     * SI SE ALTERA: el nombre del archivo lo genera el servidor con
+     *     random_bytes; usar el que envía el cliente permitiría escribir rutas.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function guardarFoto(array $archivo, int $idUsuario, string $nick, ?string $fecha = null): string
+    {
+        if (!self::hayFotoSubida($archivo) || $archivo['error'] !== UPLOAD_ERR_OK) {
+            throw new RuntimeException('foto_no_recibida');
+        }
+
+        $info = new finfo(FILEINFO_MIME_TYPE);
+        $extension = self::MIMES_FOTO[$info->file($archivo['tmp_name'])] ?? null;
+
+        if ($extension === null) {
+            throw new RuntimeException('foto_tipo_invalido|mime ' . $info->file($archivo['tmp_name']));
+        }
+
+        $carpetaRelativa = self::RUTA_FOTOS . '/' . self::nombreCarpetaFoto($idUsuario, $nick, $fecha);
+        $carpetaAbsoluta = BASE_PATH . '/' . $carpetaRelativa;
+
+        if (!is_dir($carpetaAbsoluta) && !mkdir($carpetaAbsoluta, 0755, true) && !is_dir($carpetaAbsoluta)) {
+            throw new RuntimeException('foto_carpeta|mkdir ' . $carpetaAbsoluta, 500);
+        }
+
+        $nombreArchivo = 'usuario_' . bin2hex(random_bytes(8)) . '.' . $extension;
+
+        if (!move_uploaded_file($archivo['tmp_name'], $carpetaAbsoluta . '/' . $nombreArchivo)) {
+            throw new RuntimeException('foto_no_guardada|move_uploaded_file ' . $nombreArchivo, 500);
+        }
+
+        return $carpetaRelativa . '/' . $nombreArchivo;
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: usarFotoPorDefecto() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: copia default.png a la carpeta del usuario y devuelve su
+     *     ruta, para que sin subida la tabla muestre una imagen y no un hueco.
+     * VINCULADO A: la llaman usuariosController::guardar() cuando no se
+     *     subió archivo, y actualizar() cuando el usuario venía con default.
+     * SI SE ALTERA: si el archivo por defecto no está en disco, la copia
+     *     falla y el alta se deshace: conviene no borrar esa imagen.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function usarFotoPorDefecto(int $idUsuario, string $nick, ?string $fecha = null): string
+    {
+        $origen = BASE_PATH . '/' . self::FOTO_POR_DEFECTO;
+
+        if (!is_file($origen)) {
+            throw new RuntimeException('foto_no_guardada|falta ' . self::FOTO_POR_DEFECTO, 500);
+        }
+
+        $carpetaRelativa = self::RUTA_FOTOS . '/' . self::nombreCarpetaFoto($idUsuario, $nick, $fecha);
+        $carpetaAbsoluta = BASE_PATH . '/' . $carpetaRelativa;
+
+        if (!is_dir($carpetaAbsoluta) && !mkdir($carpetaAbsoluta, 0755, true) && !is_dir($carpetaAbsoluta)) {
+            throw new RuntimeException('foto_carpeta|mkdir ' . $carpetaAbsoluta, 500);
+        }
+
+        $nombreArchivo = 'default.png';
+
+        if (!copy($origen, $carpetaAbsoluta . '/' . $nombreArchivo)) {
+            throw new RuntimeException('foto_no_guardada|copy default.png', 500);
+        }
+
+        return $carpetaRelativa . '/' . $nombreArchivo;
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: esFotoPorDefecto() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: indica si la foto guardada es la copia del default.
+     * VINCULADO A: la llama usuariosController::actualizar() para saber
+     *     si al subir foto nueva debe crear carpeta en vez de reemplazar.
+     * SI SE ALTERA: si devuelve mal, reemplazar una copia del default
+     *     intentaría escribir en una carpeta que puede no existir.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function esFotoPorDefecto(string $rutaFoto): bool
+    {
+        return $rutaFoto !== '' && str_ends_with($rutaFoto, '/' . basename(self::FOTO_POR_DEFECTO));
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: eliminarFoto() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: borra la foto del disco y, si su carpeta queda vacía,
+     *     también la elimina.
+     * VINCULADO A: la llaman usuariosController al reemplazar la foto,
+     *     al borrar un usuario y al borrar varios; y el script de barredora.
+     * SI SE ALTERA: solo toca rutas dentro de self::RUTA_FOTOS; con otro
+     *     prefijo, un valor manipulado podría borrar archivos ajenos.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function eliminarFoto(string $rutaFoto): void
+    {
+        $prefijo = self::RUTA_FOTOS . '/';
+
+        if ($rutaFoto === '' || !str_starts_with($rutaFoto, $prefijo)) {
+            return;
+        }
+
+        // La carpeta default/ es la fuente del archivo por defecto: nunca
+        // se borra aunque quede vacía, porque se usa para las altas nuevas.
+        if (str_starts_with($rutaFoto, self::FOTO_POR_DEFECTO)) {
+            return;
+        }
+
+        $rutaAbsoluta = BASE_PATH . '/' . $rutaFoto;
+        if (is_file($rutaAbsoluta)) {
+            unlink($rutaAbsoluta);
+        }
+
+        $carpeta = dirname($rutaAbsoluta);
+        if (is_dir($carpeta) && count(array_diff(scandir($carpeta), ['.', '..'])) === 0) {
+            rmdir($carpeta);
+        }
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: limpiarCarpetasHuerfanas() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: borra las carpetas de fotos cuyo usuario ya no existe en
+     *     la base; devuelve los ids que se eliminaron.
+     * VINCULADO A: la invocan scripts/limpiar-fotos-huerfanas.php y el
+     *     controlador; cubre bajas hechas por SQL fuera de la aplicación.
+     * SI SE ALTERA: las carpetas se nombran id_nick_AAAAMMDD, así que el id
+     *     se toma del prefijo antes del primer "_" y no del nombre entero.
+     *     default/ y .htaccess se dejan intactos.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function limpiarCarpetasHuerfanas(): array
+    {
+        $baseAbsoluta = BASE_PATH . '/' . self::RUTA_FOTOS;
+
+        if (!is_dir($baseAbsoluta)) {
+            return [];
+        }
+
+        // Ids que siguen vivos en la base: sus carpetas se respetan
+        $vivos = array_map('intval', obtenerConexion()
+            ->query('SELECT id_usuario FROM usuarios')
+            ->fetchAll(PDO::FETCH_COLUMN));
+
+        $eliminados = [];
+
+        foreach (array_diff(scandir($baseAbsoluta), ['.', '..']) as $entrada) {
+            // Solo carpetas de usuarios: default/ y archivos sueltos se ignoran
+            if (!preg_match('/^(\d+)_/', $entrada)) {
+                continue;
+            }
+
+            $idUsuario = (int)explode('_', $entrada, 2)[0];
+            if (in_array($idUsuario, $vivos, true)) {
+                continue;
+            }
+
+            $carpeta = $baseAbsoluta . '/' . $entrada;
+            $eliminados[$idUsuario] = 0;
+
+            foreach (array_diff(scandir($carpeta), ['.', '..']) as $archivo) {
+                if (is_file($carpeta . '/' . $archivo)) {
+                    @unlink($carpeta . '/' . $archivo);
+                    $eliminados[$idUsuario]++;
+                }
+            }
+
+            @rmdir($carpeta);
+        }
+
+        return $eliminados;
     }
 }
 

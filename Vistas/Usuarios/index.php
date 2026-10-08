@@ -266,6 +266,7 @@ $valoresEditar = $modalAbierto === 'editar' ? $repintados : [];
                     $prefijoId = 'nuevo';
                     $claveOpcional = false;
                     $textoBoton = 'Crear Usuario';
+                    $fotoPreviaActual = '';   // en el alta no hay foto previa
                     include VIEW_PATH . '/Usuarios/modales_usuarios.php';
                     ?>
                 </div>
@@ -296,6 +297,9 @@ $valoresEditar = $modalAbierto === 'editar' ? $repintados : [];
                     $prefijoId = 'editar';
                     $claveOpcional = true;
                     $textoBoton = 'Guardar Cambios';
+                    // En el alta no hay foto previa. En la edición la foto actual se
+                    // inyecta por JS desde data-foto del botón, porque el
+                    // modal se renderiza antes de saber a quién se edita.
                     include VIEW_PATH . '/Usuarios/modales_usuarios.php';
                     ?>
                 </div>
@@ -326,6 +330,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 function conectarAccionesUsuarios() {
     var mensaje = <?php echo json_encode($mensaje, JSON_UNESCAPED_UNICODE); ?>;
     var modalAbierto = <?php echo json_encode($modalAbierto, JSON_UNESCAPED_UNICODE); ?>;
+    var esSuperadmin = <?php echo $esSuperadmin ? 'true' : 'false'; ?>;
 
     // Avisos suaves de resultado. Van centrados como la confirmación de
     // borrado, pero sin botones: se cierran solos. El texto y la
@@ -400,47 +405,75 @@ function conectarAccionesUsuarios() {
             form.querySelector('[name="descripcion_usuario"]').value = boton.getAttribute('data-descripcion');
             form.querySelector('[name="nick_name"]').value = boton.getAttribute('data-nick');
             form.querySelector('[name="clave"]').value = '';
-            form.querySelector('[name="foto_usuario"]').value = '';
+form.querySelector('[name="foto_usuario"]').value = '';
 
-            var previa = document.getElementById('usuario-editar-foto_usuario-previa');
-            if (previa) {
-                previa.hidden = !boton.getAttribute('data-foto');
+            // La foto actual se pinta desde data-foto del boton que abrio
+            // el modal. La nueva arranca oculta hasta que se elija archivo.
+            var fotoActual = boton.getAttribute('data-foto');
+            var cajaActual = document.getElementById('usuario-editar-foto_usuario-actual');
+            var cajaNueva = document.getElementById('usuario-editar-foto_usuario-nueva');
+
+            if (cajaActual) {
+                cajaActual.hidden = !fotoActual;
+                if (fotoActual) {
+                    cajaActual.querySelector('img').src = '<?php echo BASE_URL; ?>/' + fotoActual;
+                }
             }
+
+            if (cajaNueva) {
+                cajaNueva.hidden = true;
+                cajaNueva.querySelector('img').removeAttribute('src');
+            }
+
+            // Limpiar el file: si se abre el modal de otro usuario sin
+            // elegir nada, no debe quedar el archivo del anterior.
+            form.querySelector('[name="foto_usuario"]').value = '';
         });
     }
 
-    // Previsualizar la imagen elegida antes de enviarla
+// Vista previa de la foto elegida. En el alta reemplaza la del default;
+    // en la edición muestra la nueva al lado de la actual. El id del
+    // preview comparte prefijo: usuario-nuevo-foto_usuario-previa.
     document.querySelectorAll('input.usuario-campo-foto').forEach(function (campo) {
-        campo.addEventListener('change', function () {
-            // El id del preview comparte prefijo: usuario-nuevo-foto_usuario-previa
-            var previa = document.getElementById(campo.id + '-previa');
-            if (!previa) { return; }
+        var esEdicion = campo.id.indexOf('editar') !== -1;
+        var cajaNueva = document.getElementById(campo.id + '-nueva');
 
+        campo.addEventListener('change', function () {
             var archivo = campo.files && campo.files[0];
+
+            // Sin archivo elegido: en el alta se vuelve a mostrar el default
+            // y en la edicion queda solo la foto actual.
             if (!archivo) {
-                previa.hidden = true;
+                if (cajaNueva) {
+                    cajaNueva.hidden = esEdicion;
+                    if (esEdicion) {
+                        cajaNueva.querySelector('img').removeAttribute('src');
+                    }
+                }
                 return;
             }
 
+            if (!cajaNueva) { return; }
+
             var lector = new FileReader();
             lector.onload = function (evento) {
-                previa.innerHTML = '';
-                var imagen = document.createElement('img');
-                imagen.src = evento.target.result;
-                imagen.alt = 'Vista previa de la foto elegida';
-                imagen.className = 'usuario-foto-imagen';
-                previa.appendChild(imagen);
-
-                var nota = document.createElement('span');
-                nota.className = 'usuario-campo-ayuda d-block mt-1';
-                nota.textContent = archivo.name;
-                previa.appendChild(nota);
-
-                previa.hidden = false;
+                cajaNueva.hidden = false;
+                cajaNueva.querySelector('img').src = evento.target.result;
             };
             lector.readAsDataURL(archivo);
         });
     });
+
+    // Solo el superadministrador crea y edita usuarios. El botón de alta y
+    // los de editar se ocultan a los demás roles: el servidor igual los
+    // rechaza, esto solo evita mostrar controles que no van a funcionar.
+    if (!esSuperadmin) {
+        document.getElementById('botonNuevoUsuario')?.remove();
+
+        document.querySelectorAll('button[aria-label^="Editar usuario"]').forEach(function (boton) {
+            boton.remove();
+        });
+    }
 
     // Selección múltiple: marca filas, refleja el total y arma el POST masivo.
     // Solo el superadmin recibe este bloque: el botón no existe si no puede borrar.

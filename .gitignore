@@ -28,8 +28,12 @@ screenshots/
 *.temp
 
 # Fotos de usuarios: son contenido de runtime, no se versionan.
-# El .htaccess de la carpeta uploads/ sí se versiona y por eso no se ignora.
-Publico/Recursos/uploads/usuarios/
+# default/ si se versiona porque es un asset del proyecto: sin esa imagen
+# el alta de un usuario sin foto no tiene con que copiar. El asterisco
+# delante del directorio es necesario: sin el, git no puede re-incluir
+# nada dentro de una carpeta excluida.
+Publico/Recursos/uploads/usuarios/*
+!Publico/Recursos/uploads/usuarios/default/
 
 # Herramienta de pruebas E2E
 .playwright-mcp/

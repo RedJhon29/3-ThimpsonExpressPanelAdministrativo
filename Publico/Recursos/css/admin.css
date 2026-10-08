@@ -853,6 +853,50 @@ img { max-width: 100%; height: auto; }
     border-radius: 6px !important;
 }
 
+/* --- Vista previa de la foto (ambos modales) --- */
+/* Alta: una sola caja. Edición: dos lado a lado, la anterior y la nueva. */
+.usuario-foto-previa {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-3);
+}
+
+.usuario-foto-previa.oculto {
+    display: none;
+}
+
+.usuario-foto-caja {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.usuario-foto-imagen {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface-1);
+}
+
+.usuario-foto-etiqueta {
+    font-size: 11.5px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.usuario-foto-etiqueta.nueva {
+    color: var(--success);
+}
+
 /* --- Selección múltiple de usuarios --- */
 .usuario-col-seleccion,
 .usuario-celda-seleccion {

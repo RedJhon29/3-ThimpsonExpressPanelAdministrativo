@@ -7,7 +7,7 @@ ARCHIVO: scripts/limpiar-fotos-huerfanas.php
 /*=====================DETALLES=====================
 QUÉ HACE: borra las carpetas de Publico/Recursos/uploads/usuarios/
     cuyo id de usuario ya no existe en la base de datos.
-VINCULADO A: usa Modelos/almacenFotosModel::limpiarHuerfanos() y
+VINCULADO A: usa Modelos/usuariosModel::limpiarCarpetasHuerfanas() y
     Configuracion/app.php; pensado para bajas hechas por SQL
     fuera de la aplicación (panel psql, restauraciones).
 SI SE ALTERA: solo se ejecuta por CLI; si se expone en web,
@@ -27,7 +27,7 @@ if (PHP_SAPI !== 'cli') {
 require_once __DIR__ . '/../Configuracion/app.php';
 
 /** @var array<int,int> $eliminados id de usuario => archivos borrados */
-$eliminados = almacenFotosModel::limpiarHuerfanos();
+$eliminados = usuariosModel::limpiarCarpetasHuerfanas();
 
 if ($eliminados === []) {
     echo "No hay carpetas huerfanas: todo esta en orden.\n";

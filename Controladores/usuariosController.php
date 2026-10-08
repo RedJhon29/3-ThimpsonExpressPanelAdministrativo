@@ -27,16 +27,38 @@ class usuariosController {
  */
 private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
+    /**
+     * Claves de fallo de la aplicación. El texto técnico viaja en el
+     * mensaje de la excepción ("clave|detalle") y lo que ve el usuario
+     * sale del mapa de traducciones() de esta misma clase.
+     */
+    private const CLAVE_NICK_DUPLICADO     = 'nick_duplicado';
+    private const CLAVE_NICK_INEXISTENTE    = 'nick_inexistente';
+    private const CLAVE_CLAVE_CORTA       = 'clave_corta';
+    private const CLAVE_CLAVE_LARGA       = 'clave_larga';
+    private const CLAVE_CLAVE_VACIA       = 'clave_vacia';
+    private const CLAVE_FOTO_PESADA       = 'foto_pesada';
+    private const CLAVE_FOTO_TIPO         = 'foto_tipo_invalido';
+    private const CLAVE_FOTO_NO_RECIBIDA  = 'foto_no_recibida';
+    private const CLAVE_FOTO_NO_GUARDADA  = 'foto_no_guardada';
+    private const CLAVE_FOTO_CARPETA      = 'foto_carpeta';
+    private const CLAVE_FOTO_SUBIDA       = 'foto_subida_fallida';
+    private const CLAVE_USUARIO_NO_EXISTE = 'usuario_no_existe';
+    private const CLAVE_SOLO_SUPERADMIN   = 'solo_superadmin';
+    private const CLAVE_SESION            = 'sesion_expirada';
+    private const CLAVE_SIN_USUARIOS      = 'sin_usuarios';
+    private const CLAVE_ERROR_GUARDADO    = 'error_de_guardado';
+
 /**
  * ====================ENCABEZADO====================
  * FUNCIÓN: traducirError() | ROL: controlador (privado)
  * ==================================================
  * =====================DETALLES=====================
- * QUÉ HACE: convierte una clave de errorAplicacionModel en un texto
+ * QUÉ HACE: convierte la clave de un fallo en un texto natural
  *     que una persona entienda, con una sugerencia de arreglo.
  * VINCULADO A: lo llaman guardar() y actualizar() cuando la
  *     petición pide JSON; el texto viaja en la respuesta.
- * SI SE ALTERA: si se agrega una clave a errorAplicacionModel y no
+ * SI SE ALTERA: si se agrega una clave a self::CLAVE_* y no
  *     está en el mapa, el usuario vería el mensaje genérico.
  * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
  * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
@@ -44,67 +66,67 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
  */
     private function traducirError(string $clave): array {
         $mensajes = [
-            errorAplicacionModel::NICK_DUPLICADO => [
+            self::CLAVE_NICK_DUPLICADO => [
                 'texto' => 'Ese nombre de usuario ya está en uso.',
                 'sugerencia' => 'Elegí otro nombre de usuario para este registro.',
             ],
-            errorAplicacionModel::NICK_INEXISTENTE => [
+            self::CLAVE_NICK_INEXISTENTE => [
                 'texto' => 'El usuario que querés modificar ya no existe.',
                 'sugerencia' => 'Actualizá la página para ver la lista de usuarios actual.',
             ],
-            errorAplicacionModel::CLAVE_CORTA => [
+            self::CLAVE_CLAVE_CORTA => [
                 'texto' => 'La contraseña es demasiado corta.',
                 'sugerencia' => 'Usá una contraseña de al menos 8 caracteres.',
             ],
-            errorAplicacionModel::CLAVE_LARGA => [
+            self::CLAVE_CLAVE_LARGA => [
                 'texto' => 'La contraseña es demasiado larga.',
                 'sugerencia' => 'Limitala a 200 caracteres.',
             ],
-            errorAplicacionModel::CLAVE_VACIA => [
+            self::CLAVE_CLAVE_VACIA => [
                 'texto' => 'Falta la contraseña del usuario.',
                 'sugerencia' => 'Escribí una contraseña de al menos 8 caracteres.',
             ],
-            errorAplicacionModel::FOTO_PESADA => [
+            self::CLAVE_FOTO_PESADA => [
                 'texto' => 'La foto que elegiste pesa demasiado.',
                 'sugerencia' => 'Elegí una imagen de menos de 2 MB.',
             ],
-            errorAplicacionModel::FOTO_TIPO_INVALIDO => [
+            self::CLAVE_FOTO_TIPO => [
                 'texto' => 'Ese archivo no es una imagen válida.',
                 'sugerencia' => 'Subí una foto en formato PNG, JPEG o WEBP.',
             ],
-            errorAplicacionModel::FOTO_NO_RECIBIDA => [
+            self::CLAVE_FOTO_NO_RECIBIDA => [
                 'texto' => 'No se recibió la foto.',
                 'sugerencia' => 'Volvé a elegir el archivo e intentá otra vez.',
             ],
-            errorAplicacionModel::FOTO_SUBIDA_FALLIDA => [
+            self::CLAVE_FOTO_SUBIDA => [
                 'texto' => 'La carga de la foto se interrumpió.',
                 'sugerencia' => 'Revisá tu conexión o elegí un archivo más chico.',
             ],
-            errorAplicacionModel::FOTO_NO_GUARDADA => [
+            self::CLAVE_FOTO_NO_GUARDADA => [
                 'texto' => 'No pudimos guardar la foto en el servidor.',
                 'sugerencia' => 'Intentá de nuevo en un momento; si sigue igual, avisá al administrador.',
             ],
-            errorAplicacionModel::FOTO_CARPETA => [
+            self::CLAVE_FOTO_CARPETA => [
                 'texto' => 'No se pudo preparar la carpeta donde van las fotos.',
                 'sugerencia' => 'Verificá los permisos de escritura del servidor y avisá al administrador.',
             ],
-            errorAplicacionModel::USUARIO_NO_EXISTE => [
+            self::CLAVE_USUARIO_NO_EXISTE => [
                 'texto' => 'Ese usuario ya no existe.',
                 'sugerencia' => 'Actualizá la página para ver la lista de usuarios actual.',
             ],
-            errorAplicacionModel::SIN_PERMISO => [
+            self::CLAVE_SOLO_SUPERADMIN => [
                 'texto' => 'No tenés permiso para hacer esa acción.',
-                'sugerencia' => 'Solo el superadministrador puede eliminar usuarios.',
+                'sugerencia' => 'Solo el superadministrador puede crear, modificar o eliminar usuarios.',
             ],
-            errorAplicacionModel::SESION_EXPIRADA => [
+            self::CLAVE_SESION => [
                 'texto' => 'Tu sesión expiró o la página estuvo demasiado tiempo abierta.',
                 'sugerencia' => 'Recargá la página e intentá de nuevo.',
             ],
-            errorAplicacionModel::SIN_USUARIOS => [
+            self::CLAVE_SIN_USUARIOS => [
                 'texto' => 'No hay ningún usuario que se pueda eliminar.',
                 'sugerencia' => 'Activá la casilla de al menos un usuario antes de continuar.',
             ],
-            errorAplicacionModel::ERROR_DE_GUARDADO => [
+            self::CLAVE_ERROR_GUARDADO => [
                 'texto' => 'No pudimos guardar el usuario.',
                 'sugerencia' => 'Revisá los datos e intentá de nuevo en un momento.',
             ],
@@ -125,7 +147,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: devuelve un JSON de error con la forma que espera el
      *           JavaScript (ok, tipo, texto, sugerencia).
      * VINCULADO A: lo usan guardar() y actualizar() para los fallos
-     *     que no pasan por validardatos(), como sesión expirada.
+     *     que no pasan por validarDatos(), como sesión expirada.
      * SI SE ALTERA: si faltara la clave ok, el JavaScript lo tomaría
      *     como un acierto y mostraría el error con el ícono correcto.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -225,7 +247,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     guarda la foto en la carpeta propia del id que le tocó.
      * VINCULADO A: lo llama index.php en la ruta /usuarios/guardar con
      *     POST; usa verificarTokenCsrf(), usuariosModel::crear(),
-     *     usuariosModel::establecerFoto() y almacenFotosModel::validar() y guardar().
+     *     usuariosModel::establecerFoto() y usuariosModel::validarFoto() y guardar().
      * SI SE ALTERA: si falla la foto se deshace el alta con usuariosModel::eliminar();
      *     no debe quedar un usuario creado que no se pidió.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -237,7 +259,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             if ($json) {
-                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 405);
+                $this->responderErrorTraducido(self::CLAVE_SESION, 405);
             }
             $this->irAUsuarios();
             return;
@@ -245,14 +267,25 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
             if ($json) {
-                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 403);
+                $this->responderErrorTraducido(self::CLAVE_SESION, 403);
             }
             $this->volverAlFormulario('nuevo', [], []);
             return;
         }
 
+        // Solo el superadministrador crea usuarios. Sin este chequeo
+        // cualquier rol autenticado podia crear un superadmin y tomar
+        // el panel: el token CSRF no alcanza porque es de su propia sesion.
+        if (!$this->esSuperadmin()) {
+            if ($json) {
+                $this->responderErrorTraducido(self::CLAVE_SOLO_SUPERADMIN, 403);
+            }
+            $this->irAUsuarios();
+            return;
+        }
+
         try {
-            [$errores, $valores] = $this->validardatos(true);
+            [$errores, $valores] = $this->validarDatos(true);
 
             if ($errores !== []) {
                 $this->responderValidacion($json, 'nuevo', $errores, $valores);
@@ -261,7 +294,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
             // La foto se valida antes de tocar la base: un archivo inválido no
             // debe dejar un usuario creado a medias.
-            almacenFotosModel::validar($_FILES['foto_usuario'] ?? []);
+            usuariosModel::validarFoto($_FILES['foto_usuario'] ?? []);
 
             // Primero el usuario, porque su id es el nombre de la carpeta de la foto.
             $idUsuario = usuariosModel::crear(
@@ -272,19 +305,22 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             );
 
             if ($idUsuario === null) {
-                throw new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, 'usuariosModel::crear devolvio null', 500);
+                throw new RuntimeException(self::CLAVE_ERROR_GUARDADO . '|usuariosModel::crear devolvio null', 500);
             }
 
-            if (almacenFotosModel::hayArchivo($_FILES['foto_usuario'] ?? [])) {
-                try {
-                    usuariosModel::establecerFoto($idUsuario, almacenFotosModel::guardar($_FILES['foto_usuario'], $idUsuario));
-                } catch (errorAplicacionModel $error) {
-                    // Sin foto el usuario no sirve: se deshace el alta completa
-                    usuariosModel::eliminar($idUsuario);
-                    throw $error;
-                }
+            // Con foto sube la que eligió el operador; sin foto se copia la
+            // del default para que la tabla nunca muestre un cuadro vacío.
+            $fotoSubida = $_FILES['foto_usuario'] ?? [];
+            $rutaFoto = usuariosModel::hayFotoSubida($fotoSubida)
+                ? usuariosModel::guardarFoto($fotoSubida, $idUsuario, $valores['nick_name'])
+                : usuariosModel::usarFotoPorDefecto($idUsuario, $valores['nick_name']);
+
+            usuariosModel::establecerFoto($idUsuario, $rutaFoto);
+        } catch (RuntimeException $error) {
+            // Sin foto el usuario no sirve: se deshace el alta completa
+            if (isset($idUsuario) && $idUsuario !== null) {
+                usuariosModel::eliminar($idUsuario);
             }
-        } catch (errorAplicacionModel $error) {
             $this->responderFallo($json, 'nuevo', $error, $valores ?? []);
             return;
         } catch (Throwable $error) {
@@ -293,7 +329,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             $this->responderFallo(
                 $json,
                 'nuevo',
-                new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, $error->getMessage(), 500),
+                new RuntimeException(self::CLAVE_ERROR_GUARDADO . '|' . $error->getMessage(), 500),
                 $valores ?? []
             );
             return;
@@ -321,8 +357,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: devuelve los errores de campo al cliente, o vuelve al
      *           formulario con los datos escritos si no pidió JSON.
      * VINCULADO A: la llaman guardar() y actualizar() cuando
-     *     validardatos() encuentra algo; el texto por campo es el
-     *     que ya devuelve validardatos(), en lenguaje natural.
+     *     validarDatos() encuentra algo; el texto por campo es el
+     *     que ya devuelve validarDatos(), en lenguaje natural.
      * SI SE ALTERA: si el JS espera otra forma de respuesta, la
      *     ventana se quedaría esperando y no marcaría los campos.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -350,26 +386,53 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
     /**
      * ====================ENCABEZADO====================
+     * FUNCIÓN: claveDe() | ROL: controlador (privado)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: saca la clave del mensaje "clave|detalle" de una excepción
+     *     y registra el detalle técnico; el texto que ve el usuario sale
+     *     después de traducirError() con esa clave.
+     * VINCULADO A: la llama responderFallo() antes de traducir.
+     * SI SE ALTERA: si devolviera el detalle, el usuario vería texto
+     *     técnico en vez de una ayuda.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private function claveDe(RuntimeException $error): string
+    {
+        // El mensaje viaja como "clave|detalleTecnico": el detalle se registra
+        // aparte y nunca se muestra, solo la clave busca su texto natural.
+        $partes = explode('|', $error->getMessage(), 2);
+
+        if (isset($partes[1]) && $partes[1] !== '') {
+            error_log('[usuarios] ' . $partes[0] . ': ' . $partes[1]);
+        }
+
+        return $partes[0];
+    }
+
+    /**
+     * ====================ENCABEZADO====================
      * FUNCIÓN: responderFallo() | ROL: controlador (privado)
      * ==================================================
      * =====================DETALLES=====================
-     * QUÉ HACE: traduce un errorAplicacionModel y lo devuelve como JSON,
-     *           o vuelve al formulario si la petición no pidió JSON.
+     * QUÉ HACE: traduce una excepción con clave y la devuelve como JSON
+     *     o repinta el formulario con el error, según la petición.
      * VINCULADO A: la llaman guardar() y actualizar() en sus catch.
-     * SI SE ALTERA: si dejara pasar una clave técnica, el usuario
-     *     vería un mensaje incomprensible en lugar de una ayuda.
+     * SI SE ALTERA: usa self::claveDe() para sacar la clave del mensaje.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
      * ==================================================
      */
-    private function responderFallo(bool $json, string $modal, errorAplicacionModel $error, array $valores): void
+    private function responderFallo(bool $json, string $modal, RuntimeException $error, array $valores): void
     {
         if (!$json) {
             $this->volverAlFormulario($modal, [$modal === 'editar' ? 'foto_usuario' : 'foto_usuario' => $error->getMessage()], $valores);
             return;
         }
 
-        $m = $this->traducirError($error->clave);
+        $m = $this->traducirError(self::claveDe($error));
 
         responderJson([
             'ok' => false,
@@ -390,7 +453,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     archivo, en cuyo caso borra la anterior y su carpeta vacía.
      * VINCULADO A: lo llama index.php en /usuarios/actualizar/{id} con POST;
      *     usa verificarTokenCsrf(), usuariosModel::actualizar(), actualizarClave(),
-     *     almacenFotosModel::validar(), guardar() y eliminar().
+     *     usuariosModel::validarFoto(), guardar() y eliminar().
      * SI SE ALTERA: el campo clave vacío debe seguir significando "no
      *     cambiar", porque en la edición no es obligatorio.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -402,7 +465,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             if ($json) {
-                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 405);
+                $this->responderErrorTraducido(self::CLAVE_SESION, 405);
             }
             $this->irAUsuarios();
             return;
@@ -410,9 +473,20 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if (!verificarTokenCsrf($_POST['csrf_token'] ?? null)) {
             if ($json) {
-                $this->responderErrorTraducido(errorAplicacionModel::SESION_EXPIRADA, 403);
+                $this->responderErrorTraducido(self::CLAVE_SESION, 403);
             }
             $this->volverAlFormulario('editar', [], []);
+            return;
+        }
+
+        // Solo el superadministrador edita usuarios. Sin esto un rol bajo
+        // podia reescribir el rol y la clave de cualquiera, incluido el
+        // superadmin, y escalar privilegios.
+        if (!$this->esSuperadmin()) {
+            if ($json) {
+                $this->responderErrorTraducido(self::CLAVE_SOLO_SUPERADMIN, 403);
+            }
+            $this->irAUsuarios();
             return;
         }
 
@@ -421,7 +495,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         if ($usuario === null) {
             if ($json) {
-                $this->responderErrorTraducido(errorAplicacionModel::USUARIO_NO_EXISTE, 404);
+                $this->responderErrorTraducido(self::CLAVE_USUARIO_NO_EXISTE, 404);
             }
             flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'El usuario no existe.']);
             $this->irAUsuarios();
@@ -431,7 +505,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         $valores = [];
 
         try {
-            [$errores, $valores] = $this->validardatos(false, $idUsuario);
+            [$errores, $valores] = $this->validarDatos(false, $idUsuario);
 
             if ($errores !== []) {
                 $valores['id_usuario'] = $idUsuario;
@@ -439,13 +513,16 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 return;
             }
 
-            // Sin foto nueva se conserva la que ya tenía el usuario
             $fotoAnterior = (string)($usuario['foto_usuario'] ?? '');
+            $fotoSubida = $_FILES['foto_usuario'] ?? [];
 
-            almacenFotosModel::validar($_FILES['foto_usuario'] ?? []);
+            usuariosModel::validarFoto($fotoSubida);
 
-            $foto = $hayFotoNueva = almacenFotosModel::hayArchivo($_FILES['foto_usuario'] ?? [])
-                ? almacenFotosModel::guardar($_FILES['foto_usuario'], $idUsuario)
+            // Si venía con la foto por defecto no tenía carpeta propia y hay que
+            // crearla; si ya tenía foto real, guardarFoto() reutiliza la
+            // carpeta existente y solo reemplaza el archivo.
+            $foto = usuariosModel::hayFotoSubida($fotoSubida)
+                ? usuariosModel::guardarFoto($fotoSubida, $idUsuario, $valores['nick_name'])
                 : $fotoAnterior;
 
             usuariosModel::actualizar(
@@ -456,16 +533,16 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 $foto
             );
 
-            // Con la nueva ya guardada y registrada, la anterior sobra
-            if ($hayFotoNueva && $fotoAnterior !== '' && $fotoAnterior !== $foto) {
-                almacenFotosModel::eliminar($fotoAnterior);
+            // Con la nueva ya registrada, la anterior sobra
+            if (usuariosModel::hayFotoSubida($fotoSubida) && $fotoAnterior !== '' && $fotoAnterior !== $foto) {
+                usuariosModel::eliminarFoto($fotoAnterior);
             }
 
             // Clave vacía = mantener la actual
             if ($valores['clave'] !== '' && !usuariosModel::actualizarClave($idUsuario, $valores['clave'])) {
-                throw new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, 'actualizarClave devolvio false', 500);
+                throw new RuntimeException(self::CLAVE_ERROR_GUARDADO . '|actualizarClave devolvio false', 500);
             }
-        } catch (errorAplicacionModel $error) {
+        } catch (RuntimeException $error) {
             $valores['id_usuario'] = $idUsuario;
             $this->responderFallo($json, 'editar', $error, $valores);
             return;
@@ -475,7 +552,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             $this->responderFallo(
                 $json,
                 'editar',
-                new errorAplicacionModel(errorAplicacionModel::ERROR_DE_GUARDADO, $error->getMessage(), 500),
+                new RuntimeException(self::CLAVE_ERROR_GUARDADO . '|' . $error->getMessage(), 500),
                 $valores
             );
             return;
@@ -503,7 +580,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: borra el usuario recibido por POST, salvo que sea el mismo
      *     que está en sesión; también elimina su foto y su carpeta.
      * VINCULADO A: lo llama index.php en /usuarios/eliminar con POST; usa
-     *     verificarTokenCsrf(), usuariosModel::find(), usuariosModel::eliminar() y`n     *     almacenFotosModel::eliminar().
+     *     verificarTokenCsrf(), usuariosModel::find(), usuariosModel::eliminar() y`n     *     usuariosModel::eliminarFoto().
      * SI SE ALTERA: la protección del usuario en sesión no debe quitarse;
      *     borrarse a sí mismo deja el panel sin administrador.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -558,7 +635,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
         // La foto y su carpeta se van con el usuario: si no, quedan ocupando
         // espacio en el servidor para siempre.
-        almacenFotosModel::eliminar((string)($usuario['foto_usuario'] ?? ''));
+        usuariosModel::eliminarFoto((string)($usuario['foto_usuario'] ?? ''));
 
         flashMensaje('mensaje', [
             'tipo' => 'success',
@@ -627,7 +704,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             }
 
             usuariosModel::eliminar($idUsuario);
-            almacenFotosModel::eliminar((string)($usuario['foto_usuario'] ?? ''));
+            usuariosModel::eliminarFoto((string)($usuario['foto_usuario'] ?? ''));
             $borrados++;
         }
 
@@ -703,7 +780,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
     /**
      * ====================ENCABEZADO====================
-     * FUNCIÓN: validardatos() | ROL: controlador (privado)
+     * FUNCIÓN: validarDatos() | ROL: controlador (privado)
      * ==================================================
      * =====================DETALLES=====================
      * QUÉ HACE: limpia y valida los campos del formulario; devuelve los
@@ -712,13 +789,13 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     usuariosModel::existeNick() para el índice único de nick_name.
      * SI SE ALTERA: si agregás un campo, agregarlo también a $errores,
      *     a $valores y al input de la vista, o el dato se pierde.
-     * LÍMITES: no valida foto_usuario; esa la valida almacenFotosModel::validar() con
+     * LÍMITES: no valida foto_usuario; esa la valida usuariosModel::validarFoto() con
      *     $_FILES porque es una subida de archivo, no un texto.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
      * ==================================================
      */
-    private function validardatos(bool $claveObligatoria, ?int $ignorarId = null): array {
+    private function validarDatos(bool $claveObligatoria, ?int $ignorarId = null): array {
         $errores = [];
 
         $tipo = trim($_POST['tipo_usuario'] ?? '');
@@ -763,7 +840,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 'tipo_usuario' => $tipo,
                 'descripcion_usuario' => $descripcion,
                 'nick_name' => $nick,
-                'foto_usuario' => '', // la fija almacenFotosModel::guardar(); aquí nunca hay texto
+                'foto_usuario' => '', // la fija usuariosModel::guardarFoto(); aquí nunca hay texto
                 'clave' => $clave,
             ],
         ];
@@ -775,7 +852,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * ==================================================
      * =====================DETALLES=====================
      * QUÉ HACE: guarda errores y valores en sesión y vuelve al formulario.
-     * VINCULADO A: lo llaman guardar() y actualizar() cuando validardatos()
+     * VINCULADO A: lo llaman guardar() y actualizar() cuando validarDatos()
      *     encuentra fallos; los lee crear() y editar() con flashMensaje().
      * SI SE ALTERA: redirige y corta con exit; si dejara de cortar, la
      *     acción seguiría escribiendo en la base con datos inválidos.
