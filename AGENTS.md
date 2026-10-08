@@ -2,13 +2,37 @@
 
 **Identidad:** panel admin de delivery (Nicaragua). MVC propio en PHP 8.2, sin framework, sin Composer. PostgreSQL `thimpsonexpress` vía PDO en `Configuracion/conexion.php`. **La base tiene una sola tabla: `usuarios`.**
 
+> ## ⚠️ Recordatorio: 2 cosas esperando al usuario
+>
+> Last checked **2026-10-08**. El usuario pidió que se le recuerden en cada sesión nueva. Si las resolvés, **borrá esta caja**.
+>
+> ### 1. Auditoría de usuarios — falta tu OK
+> **Bloqueada a propósito:** sería la **primera DDL del proyecto** y no hay migraciones versionadas. `AGENTS.md` prohíbe cambiar el schema sin preguntar, así que no se puede cerrar sola.
+>
+> Propuesta que quedó sobre la mesa:
+> ```sql
+> auditoria_usuarios(
+>   id, id_usuario, accion,
+>   datos_antes jsonb, datos_despues jsonb,
+>   id_usuario_accion, ip, creado_en
+> )
+> ```
+> + un `auditoriaModel`, invocado desde los 4 actions (`guardar`, `actualizar`, `eliminar`, `toggleEstado`).
+> Nunca se registra `clave_usuario` ni el hash.
+>
+> ### 2. PAT de GitHub sin rotar — solo puede hacerlo el usuario
+> Un token personal se usó para pushear y quedó embebido en la URL remota. Ya se sacó de `.git/config` y se movió a Windows Credential Manager, así que **el repositorio está limpio**, pero **el token sigue vigente** y hay que revocarlo:
+> 1. GitHub → *Settings* → *Developer settings* → *Personal access tokens*
+> 2. Revocar el token viejo
+> 3. Después: `gh auth login`
+
 ---
 
 ## Comandos verificables
 
 | Acción | Comando |
 |--------|---------|
-| Lint PHP | `Get-ChildItem -Recurse -Filter *.php \| ForEach-Object { php -l $_.FullName }` (26 archivos) |
+| Lint PHP | `Get-ChildItem -Recurse -Filter *.php \| ForEach-Object { php -l $_.FullName }` (21 archivos) |
 | Higiene del proyecto | `.\scripts\higiene.ps1` (5 chequeos: lint, rutas muertas, includes, huérfanos, métodos) |
 | Smoke test HTTP | `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/3-ThimpsonExpressPanelAdministrativo/<ruta>` |
 | Imágenes huérfanas | `php scripts/limpiar-fotos-huerfanas.php` |
@@ -115,7 +139,7 @@ git show 95caa1f:Vistas/Riders/index.php
 
 | Qué | Dónde | Por qué sigue |
 |-----|-------|---------------|
-| Sin auditoría | — | Requiere crear tabla; es decisión de arquitectura (ver abajo). |
+| Sin auditoría | — | Ver la caja de recordatorio arriba. Bloqueada hasta que el usuario dé el OK. |
 | Credenciales de desarrollo en el repo | `Configuracion/conexion.php` | Convención del proyecto. Mover a variables de entorno antes de producción. |
 | Sin tests, sin CI | — | No hay framework de pruebas instalado. |
 | Paginación solo en el cliente | DataTables en `pieAdmin.php:70` | Con 10k+ filas conviene pasar a `serverSide`. Ojo: los botones de la tabla apuntan con `form="form-eliminar-{id}"` a formularios ocultos que se renderizan en PHP **fuera** de la tabla; con `serverSide` esas filas no tendrían su formulario y el borrado fallaría en silencio. Hay que reestructurar el borrado antes. |
