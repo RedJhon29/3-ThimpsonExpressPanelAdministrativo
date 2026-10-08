@@ -769,19 +769,6 @@ img { max-width: 100%; height: auto; }
     color: var(--muted);
 }
 
-.usuario-foto-previa {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.usuario-foto-imagen {
-    width: 56px;
-    height: 56px;
-    object-fit: cover;
-    border: 1px solid var(--border);
-}
-
 /* El input file nativo pinta un botón del sistema: se homogenea con el tema */
 .usuario-campo-foto {
     padding: 8px 10px;
@@ -854,9 +841,12 @@ img { max-width: 100%; height: auto; }
 }
 
 /* --- Vista previa de la foto (ambos modales) --- */
-/* Alta: una sola caja. Edición: dos lado a lado, la anterior y la nueva. */
+/* Alta: una sola caja. Edición: dos lado a lado, la anterior y la nueva.
+   El orden horizontal lo fija el HTML: "foto actual" va primero y
+   "foto nueva" después, así que la nueva queda a la derecha. */
 .usuario-foto-previa {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 16px;
     padding: 12px;
