@@ -157,7 +157,10 @@ if ($controller === null) {
     http_response_code(404);
     $pageTitle = '404 - No encontrado';
     $activeMenu = '';
+    // El sidebar se incluye como en cualquier otra vista: pieAdmin cierra
+    // el <main> y el <div class="admin-main"> que abre la barra lateral.
     include VIEW_PATH . '/Plantillas/encabezadoAdmin.php';
+    include VIEW_PATH . '/Plantillas/barraLateralAdmin.php';
     include VIEW_PATH . '/Errores/404.php';
     include VIEW_PATH . '/Plantillas/pieAdmin.php';
     exit;
