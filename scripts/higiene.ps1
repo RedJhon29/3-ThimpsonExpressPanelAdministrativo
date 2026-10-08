@@ -57,15 +57,28 @@ Write-Host "  $($includes.Count) includes revisados."
 # 4. Archivos huérfanos en Vistas/, Modelos/ y Controladores/
 Write-Host "`n[4/5] Archivos huérfanos..." -ForegroundColor Yellow
 $todosLosPhp = Get-ChildItem -Path $raiz -Recurse -Filter *.php | Where-Object { $_.FullName -notmatch '\\vendor\\' }
-$contenidoTotal = ($todosLosPhp | Get-Content -Raw) -join "`n"
 $carpetas = @('Vistas', 'Modelos', 'Controladores')
 foreach ($carpeta in $carpetas) {
     $archivos = Get-ChildItem -Path "$raiz\$carpeta" -Recurse -Filter *.php
     foreach ($archivo in $archivos) {
-        $nombre = $archivo.BaseName
-        # Un archivo es huérfano si su nombre no aparece en ningún otro archivo
-        $referencias = ($contenidoTotal | Select-String -Pattern ([regex]::Escape($nombre)) -AllMatches).Matches.Count
-        if ($referencias -le 1) {
+        # Se busca por ruta y no por BaseName: un nombre genérico como
+        # "index" o "detail" aparece en cualquier parte del código, así
+        # que compararlo solo tapaba los archivos que nadie referencia.
+        if ($carpeta -eq 'Vistas') {
+            # Una vista se incluye por su ruta: VIEW_PATH . '/Carpeta/archivo.php'
+            $rutaRelativa = $archivo.FullName.Substring(("$raiz\Vistas\").Length).Replace('\', '/')
+            $patron = [regex]::Escape($rutaRelativa)
+        } else {
+            # Modelos y controladores llegan por el autoload, que resuelve
+            # por nombre de clase, así que basta con que la clase se nombre.
+            $patron = '\b' + [regex]::Escape($archivo.BaseName) + '\b'
+        }
+
+        # El propio archivo se excluye: su banner menciona su ruta y su clase
+        $otros = $todosLosPhp | Where-Object { $_.FullName -ne $archivo.FullName }
+        $referencias = ($otros | Get-Content -Raw | Select-String -Pattern $patron -AllMatches).Matches.Count
+
+        if ($referencias -eq 0) {
             $problemas += "HUÉRFANO: $($archivo.FullName) no se referencia en ningún otro archivo"
         }
     }

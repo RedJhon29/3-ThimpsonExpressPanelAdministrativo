@@ -83,9 +83,7 @@ Para un módulo: `usuariosModel::MODULO_IMAGENES = 'usuarios'` es el puente entr
 7. **Sin `echo` sin escapar.** `htmlspecialchars()` en todo dato de BD o de `$_GET`/`$_POST`.
 8. **Sin acciones destructivas por GET.**
 
-**Verificación:** `.\scripts\higiene.ps1` antes de cada commit.
-
-> **Falla conocida del chequeo 4:** busca el archivo por `BaseName`, así que genéricos como `index.php` o `detail.php` nunca se marcan como huérfanos aunque no los referencie nadie. Verificar a mano las vistas de `Vistas/Pedidos/` y `Vistas/Riders/`.
+**Verificación:** `.\scripts\higiene.ps1` antes de cada commit. El chequeo 4 busca huérfanos **por ruta** (`Vistas/Carpeta/archivo.php`) y, en modelos y controladores, **por nombre de clase**, que es como los resuelve el autoload. Antes comparaba por `BaseName`, así que `index.php` y `detail.php` nunca se marcaban aunque nadie los referenciara. Si se cambia ese chequeo, probar con un archivo huérfano de nombre genérico.
 
 ---
 
@@ -95,16 +93,33 @@ DataTables pagina, busca y ordena **en el cliente** (`pieAdmin.php:70`), y funci
 
 ---
 
+## Módulos pendientes de reconstruir
+
+Las vistas de **Pedidos** y **Riders** se borraron: quedaban huérfanas, usaban variables que ya no existen y abrirlas daba error fatal. Se reconstruyen de a poco cuando toque.
+
+| Quiero construir | Qué falta |
+|---|---|
+| Conductores / Riders | tabla en la BD, modelo, controlador, ruta en `$routes`, vistas, y un `MODULO_IMAGENES` en `imagenesModel::MODULOS` |
+| Pedidos | lo mismo, más lo que sea dominio de pedidos |
+| Socios-conductores / Negocios | idem, ya reservados en la lista de módulos |
+
+Si querés recuperar el código viejo como referencia está en el commit `95caa1f`:
+
+```powershell
+git show 95caa1f:Vistas/Riders/index.php
+```
+
+---
+
 ## Deuda conocida (verificada, no arreglar sin decisión)
 
 | Qué | Dónde | Por qué sigue |
 |-----|-------|---------------|
-| **5 vistas huérfanas** | `Vistas/Pedidos/index.php`, `Pedidos/detail.php`, `Riders/index.php`, `Riders/detail.php`, `Riders/tracking.php` | No hay ruta ni controlador que las alcance. Usan variables que no existen (`$riders`), así que abrir una daría error fatal. Los modelos `Pedido` y `Motorizado` se borraron en `c679d96`. Decidir: borrar o conectar con datos reales. |
-| `--warning` y `--bg-tertiary` sin definir | solo en esas 5 vistas huérfanas (9 y 2 usos) | No afectan código vivo. Se resuelven al borrar o conectar las vistas. |
 | Sin auditoría | — | Requiere crear tabla; es decisión de arquitectura (ver abajo). |
 | Credenciales de desarrollo en el repo | `Configuracion/conexion.php` | Convención del proyecto. Mover a variables de entorno antes de producción. |
 | Sin tests, sin CI | — | No hay framework de pruebas instalado. |
-| Paginación solo en el cliente | DataTables en `pieAdmin.php:70` | Con 10k+ filas conviene pasar a `serverSide`. Ojo: los botones de la tabla apuntan con `form="form-eliminar-{id}"` a formularios ocultos que se renderizan en PHP **fuera** de la tabla; con `serverSide` esas filas no tendrían su formulario y el borrado fallaría en silencio. |
+| Paginación solo en el cliente | DataTables en `pieAdmin.php:70` | Con 10k+ filas conviene pasar a `serverSide`. Ojo: los botones de la tabla apuntan con `form="form-eliminar-{id}"` a formularios ocultos que se renderizan en PHP **fuera** de la tabla; con `serverSide` esas filas no tendrían su formulario y el borrado fallaría en silencio. Hay que reestructurar el borrado antes. |
+| El topbar no muestra la foto | `Vistas/Plantillas/encabezadoAdmin.php` | Muestra las iniciales en una caja cuadrada, no `imagenesModel::url()`. Es consistente con el resto, no es un bug. |
 
 ---
 
