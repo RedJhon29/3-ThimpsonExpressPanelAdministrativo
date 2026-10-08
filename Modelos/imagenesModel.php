@@ -32,7 +32,7 @@ class imagenesModel {
     public const RUTA_BASE = 'Publico/Recursos/uploads';
 
     /** Imagen genérica cuando el usuario no sube ninguna. */
-    public const DEFAULT_GENERICA = 'Publico/Recursos/uploads/default/default.png';
+    public const DEFAULT_GENERICA = 'Publico/Recursos/uploads/default/default.jpg';
 
     /** MIME real del archivo -> extensión con que se guarda. */
     private const MIMES = [
