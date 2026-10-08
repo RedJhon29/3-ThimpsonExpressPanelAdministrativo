@@ -23,7 +23,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'Admin'; ?> — <?php echo APP_NAME; ?></title>
     <!-- Gestor de carga con fallback: debe ir antes de los recursos gestionados -->
-    <script src="<?php echo BASE_URL; ?>/Publico/Recursos/js/gestorPlugins.js"></script>
+    <script src="<?php echo urlAsset('Publico/Recursos/js/gestorPlugins.js'); ?>"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
@@ -69,6 +69,6 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
           data-local="<?php echo BASE_URL; ?>/Publico/Recursos/alertify/alertify.min.css">
     <!-- admin.css sin data-pasos: sin CDN alternativo y un error espurio
          durante la navegación generaba una alerta de fallo falsa -->
-    <link href="<?php echo BASE_URL; ?>/Publico/Recursos/css/admin.css" rel="stylesheet">
+    <link href="<?php echo urlAsset('Publico/Recursos/css/admin.css'); ?>" rel="stylesheet">
 </head>
 <body class="admin-body">

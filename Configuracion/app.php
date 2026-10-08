@@ -50,4 +50,32 @@ spl_autoload_register(function ($class) {
     }
 });
 
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: urlAsset() | ROL: helper de plantilla
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: arma la URL de un recurso local y le agrega ?v= con su
+ *     fecha de modificación, para que el navegador no sirva la copia
+ *     vieja después de editar el archivo.
+ * VINCULADO A: la llaman las plantillas en los <link> y <script> de
+ *     admin.css y gestorPlugins.js, los dos archivos que se editan a
+ *     mano; los recursos de terceros no la necesitan.
+ * SI SE ALTERA: sin el parámetro el problema reaparece en cada cambio
+ *     de estilo, y es difícil distinguir caché de un fix que no aplicó.
+ * LÍMITES: si el archivo no existe devuelve la URL sin versión, para
+ *     que un 404 siga diciendo qué ruta falta y no enmascare el error.
+ * FECHA: 2026-10-08 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function urlAsset(string $rutaRelativa): string
+{
+    $relativa = ltrim($rutaRelativa, '/');
+    $url = BASE_URL . '/' . $relativa;
+    $archivo = BASE_PATH . '/' . $relativa;
+
+    return is_file($archivo) ? $url . '?v=' . filemtime($archivo) : $url;
+}
+
 /*===========FIN DEL FRAGMENTO DE CÓDIGO============*/

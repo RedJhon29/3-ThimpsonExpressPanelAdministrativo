@@ -877,6 +877,14 @@ img { max-width: 100%; height: auto; }
     background: var(--surface-1);
 }
 
+/* El avatar es circular por diseño: el de la tabla y los de la vista
+   previa comparten esta clase. El reset global de admin.css:47 aplica
+   border-radius con !important, asi que el 50% de arriba nunca llegaba
+   a verse y las fotos salían cuadradas. */
+.usuario-foto-imagen {
+    border-radius: 50% !important;
+}
+
 .usuario-foto-etiqueta {
     font-size: 11.5px;
     color: var(--muted);
