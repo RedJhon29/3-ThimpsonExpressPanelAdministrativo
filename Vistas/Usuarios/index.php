@@ -129,18 +129,19 @@ $valoresEditar = $modalAbierto === 'editar' ? $repintados : [];
                                 <td><?php echo htmlspecialchars($u['descripcion_usuario']); ?></td>
                                 <td><?php echo htmlspecialchars($u['nick_name']); ?></td>
                                 <td class="usuario-celda-foto">
-                                    <?php if (!empty($u['foto_usuario'])): ?>
-                                        <a href="<?php echo htmlspecialchars(BASE_URL . '/' . $u['foto_usuario']); ?>"
-                                           target="_blank"
-                                           rel="noopener noreferrer"
-                                           title="Ver foto de <?php echo htmlspecialchars($u['nick_name']); ?>">
-                                            <img src="<?php echo htmlspecialchars(BASE_URL . '/' . $u['foto_usuario']); ?>"
-                                                 alt="Foto de <?php echo htmlspecialchars($u['nick_name']); ?>"
-                                                 class="usuario-foto-imagen">
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="usuario-sin-foto">—</span>
-                                    <?php endif; ?>
+                                    <?php
+                                    // imagenesModel::url() arma la ruta y cae al
+                                    // default si el registro no tiene imagen.
+                                    $fotoUrl = imagenesModel::url((string)($u['foto_usuario'] ?? ''));
+                                    ?>
+                                    <a href="<?php echo htmlspecialchars($fotoUrl); ?>"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       title="Ver foto de <?php echo htmlspecialchars($u['nick_name']); ?>">
+                                        <img src="<?php echo htmlspecialchars($fotoUrl); ?>"
+                                             alt="Foto de <?php echo htmlspecialchars($u['nick_name']); ?>"
+                                             class="usuario-foto-imagen">
+                                    </a>
                                 </td>
                                 <td>
                                     <?php

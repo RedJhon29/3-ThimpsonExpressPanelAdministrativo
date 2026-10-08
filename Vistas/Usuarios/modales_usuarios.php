@@ -151,7 +151,7 @@ $idDe = static function (string $campo) use ($prefijoId): string {
         <div class="usuario-foto-previa mt-2" id="<?php echo $idDe('foto_usuario-previa'); ?>">
             <?php if ($previaMostrarDefault): ?>
                 <div class="usuario-foto-caja" id="<?php echo $idDe('foto_usuario-nueva'); ?>">
-                    <img src="<?php echo htmlspecialchars(BASE_URL . '/' . usuariosModel::FOTO_POR_DEFECTO); ?>"
+                    <img src="<?php echo htmlspecialchars(imagenesModel::url('')); ?>"
                          alt="Foto por defecto que tendrá el usuario"
                          class="usuario-foto-imagen">
                     <span class="usuario-foto-etiqueta">Foto por defecto</span>

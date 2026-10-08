@@ -247,7 +247,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     guarda la foto en la carpeta propia del id que le tocó.
      * VINCULADO A: lo llama index.php en la ruta /usuarios/guardar con
      *     POST; usa verificarTokenCsrf(), usuariosModel::crear(),
-     *     usuariosModel::establecerFoto() y usuariosModel::validarFoto() y guardar().
+     *     usuariosModel::establecerFoto() y imagenesModel::validar() y guardar().
      * SI SE ALTERA: si falla la foto se deshace el alta con usuariosModel::eliminar();
      *     no debe quedar un usuario creado que no se pidió.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -294,7 +294,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
             // La foto se valida antes de tocar la base: un archivo inválido no
             // debe dejar un usuario creado a medias.
-            usuariosModel::validarFoto($_FILES['foto_usuario'] ?? []);
+            $fotoSubida = $_FILES['foto_usuario'] ?? [];
+            imagenesModel::validar($fotoSubida);
 
             // Primero el usuario, porque su id es el nombre de la carpeta de la foto.
             $idUsuario = usuariosModel::crear(
@@ -308,12 +309,9 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
                 throw new RuntimeException(self::CLAVE_ERROR_GUARDADO . '|usuariosModel::crear devolvio null', 500);
             }
 
-            // Con foto sube la que eligió el operador; sin foto se copia la
-            // del default para que la tabla nunca muestre un cuadro vacío.
-            $fotoSubida = $_FILES['foto_usuario'] ?? [];
-            $rutaFoto = usuariosModel::hayFotoSubida($fotoSubida)
-                ? usuariosModel::guardarFoto($fotoSubida, $idUsuario, $valores['nick_name'])
-                : usuariosModel::usarFotoPorDefecto($idUsuario, $valores['nick_name']);
+            // En el alta nunca hay foto previa, así que sin subida se
+            // copia la del default y no se borra nada anterior.
+            $rutaFoto = $this->resolverFoto($fotoSubida, $idUsuario, $valores['nick_name'], '');
 
             usuariosModel::establecerFoto($idUsuario, $rutaFoto);
         } catch (RuntimeException $error) {
@@ -386,6 +384,84 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
 
     /**
      * ====================ENCABEZADO====================
+     * FUNCIÓN: motivoBloqueoBorrado() | ROL: controlador (privado)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: revisa si un usuario se puede borrar y devuelve el texto
+     *     del motivo, o cadena vacía si no hay impedimento.
+     * VINCULADO A: la llaman eliminar() y eliminarVarios(); revisa id
+     *     válido, rol de la sesión, existencia del registro y si es el
+     *     superadministrador, que siempre se conserva.
+     * SI SE ALTERA: es la única fuente de las reglas de borrado. Si
+     *     relajas una acá, habilita el borrado tanto en el formulario
+     *     individual como en el por lote.
+     * LÍMITES: no borra nada; solo informa. Quien llama decide.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private function motivoBloqueoBorrado(int $idUsuario): string
+    {
+        if ($idUsuario <= 0) {
+            return 'Usuario no válido.';
+        }
+
+        if (!$this->esSuperadmin()) {
+            return 'Solo el superadministrador puede eliminar usuarios.';
+        }
+
+        if ($this->esElPropio($idUsuario)) {
+            return 'No podés eliminar tu propio usuario.';
+        }
+
+        $usuario = usuariosModel::find($idUsuario);
+
+        if ($usuario === null) {
+            return 'El usuario no existe.';
+        }
+
+        // El superadmin se conserva siempre: no se borra, solo se edita
+        // o se desactiva, para no dejar el panel sin administrador.
+        if ($usuario['tipo_usuario'] === 'superadmin') {
+            return 'El superadministrador no se puede eliminar: solo editar o desactivar.';
+        }
+
+        return '';
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: resolverFoto() | ROL: controlador (privado)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: decide qué ruta de imagen queda guardada. Si se subió
+     *     un archivo devuelve la ruta nueva; si no, devuelve la anterior
+     *     o, en el alta, la copia de la imagen por defecto.
+     * VINCULADO A: la llaman guardar() y actualizar(); delega el trabajo
+     *     de disco en imagenesModel.
+     * SI SE ALTERA: es el único punto que decide qué imagen queda, así
+     *     que un cambio acá afecta por igual al alta y a la edición.
+     * LÍMITES: no borra la imagen anterior; eso lo hace el llamador
+     *     después de que la nueva ya está registrada en la base.
+     * FECHA: 2026-10-07 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private function resolverFoto(array $archivo, int $idUsuario, string $nick, string $fotoAnterior): string
+    {
+        if (imagenesModel::existeArchivo($archivo)) {
+            return imagenesModel::guardar($archivo, usuariosModel::MODULO_IMAGENES, $idUsuario, $nick);
+        }
+
+        if ($fotoAnterior !== '') {
+            return $fotoAnterior;
+        }
+
+        return imagenesModel::usarDefault(usuariosModel::MODULO_IMAGENES, $idUsuario, $nick);
+    }
+
+    /**
+     * ====================ENCABEZADO====================
      * FUNCIÓN: claveDe() | ROL: controlador (privado)
      * ==================================================
      * =====================DETALLES=====================
@@ -453,7 +529,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     archivo, en cuyo caso borra la anterior y su carpeta vacía.
      * VINCULADO A: lo llama index.php en /usuarios/actualizar/{id} con POST;
      *     usa verificarTokenCsrf(), usuariosModel::actualizar(), actualizarClave(),
-     *     usuariosModel::validarFoto(), guardar() y eliminar().
+     *     imagenesModel::validar(), guardar() y eliminar().
      * SI SE ALTERA: el campo clave vacío debe seguir significando "no
      *     cambiar", porque en la edición no es obligatorio.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -514,16 +590,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             }
 
             $fotoAnterior = (string)($usuario['foto_usuario'] ?? '');
-            $fotoSubida = $_FILES['foto_usuario'] ?? [];
-
-            usuariosModel::validarFoto($fotoSubida);
-
-            // Si venía con la foto por defecto no tenía carpeta propia y hay que
-            // crearla; si ya tenía foto real, guardarFoto() reutiliza la
-            // carpeta existente y solo reemplaza el archivo.
-            $foto = usuariosModel::hayFotoSubida($fotoSubida)
-                ? usuariosModel::guardarFoto($fotoSubida, $idUsuario, $valores['nick_name'])
-                : $fotoAnterior;
+            $foto = $this->resolverFoto($_FILES['foto_usuario'] ?? [], $idUsuario, $valores['nick_name'], $fotoAnterior);
 
             usuariosModel::actualizar(
                 $idUsuario,
@@ -534,8 +601,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             );
 
             // Con la nueva ya registrada, la anterior sobra
-            if (usuariosModel::hayFotoSubida($fotoSubida) && $fotoAnterior !== '' && $fotoAnterior !== $foto) {
-                usuariosModel::eliminarFoto($fotoAnterior);
+            if ($foto !== $fotoAnterior && $fotoAnterior !== '') {
+                imagenesModel::eliminar($fotoAnterior);
             }
 
             // Clave vacía = mantener la actual
@@ -580,7 +647,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      * QUÉ HACE: borra el usuario recibido por POST, salvo que sea el mismo
      *     que está en sesión; también elimina su foto y su carpeta.
      * VINCULADO A: lo llama index.php en /usuarios/eliminar con POST; usa
-     *     verificarTokenCsrf(), usuariosModel::find(), usuariosModel::eliminar() y`n     *     usuariosModel::eliminarFoto().
+     *     verificarTokenCsrf(), usuariosModel::find(), usuariosModel::eliminar()
+     *     e imagenesModel::eliminar().
      * SI SE ALTERA: la protección del usuario en sesión no debe quitarse;
      *     borrarse a sí mismo deja el panel sin administrador.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
@@ -593,49 +661,21 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         }
 
         $idUsuario = (int)($_POST['id_usuario'] ?? 0);
+        $motivo = $this->motivoBloqueoBorrado($idUsuario);
 
-        if ($idUsuario <= 0) {
-            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'Usuario no válido.']);
-            $this->irAUsuarios();
-            return;
-        }
-
-        // Solo el superadministrador borra usuarios
-        if (!$this->esSuperadmin()) {
-            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'Solo el superadministrador puede eliminar usuarios.']);
-            $this->irAUsuarios();
-            return;
-        }
-
-        if ($this->esElPropio($idUsuario)) {
-            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'No podés eliminar tu propio usuario.']);
-            $this->irAUsuarios();
-            return;
-        }
-
-        // El superadmin se conserva siempre: no se borra, solo se edita
-        // o se desactiva, para no dejar el panel sin administrador.
-        $objetivo = usuariosModel::find($idUsuario);
-
-        if ($objetivo === null) {
-            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'El usuario no existe.']);
-            $this->irAUsuarios();
-            return;
-        }
-
-        if ($objetivo['tipo_usuario'] === 'superadmin') {
-            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => 'El superadministrador no se puede eliminar: solo editar o desactivar.']);
+        if ($motivo !== '') {
+            flashMensaje('mensaje', ['tipo' => 'error', 'texto' => $motivo]);
             $this->irAUsuarios();
             return;
         }
 
         // Se lee la foto antes de borrar la fila: después ya no está
-        $usuario = $objetivo;
+        $usuario = usuariosModel::find($idUsuario);
         usuariosModel::eliminar($idUsuario);
 
         // La foto y su carpeta se van con el usuario: si no, quedan ocupando
         // espacio en el servidor para siempre.
-        usuariosModel::eliminarFoto((string)($usuario['foto_usuario'] ?? ''));
+        imagenesModel::eliminar((string)($usuario['foto_usuario'] ?? ''));
 
         flashMensaje('mensaje', [
             'tipo' => 'success',
@@ -685,26 +725,17 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
         foreach ($idsSolicitados as $idCrudo) {
             $idUsuario = (int)$idCrudo;
 
-            // El propio usuario y los ids inválidos nunca se borran
-            if ($idUsuario <= 0 || $this->esElPropio($idUsuario)) {
+            // Las mismas reglas que rigen el borrado individual: el propio
+            // usuario, los ids inválidos y los superadmin quedan afuera.
+            if ($this->motivoBloqueoBorrado($idUsuario) !== '') {
                 $omitidos++;
                 continue;
             }
 
             $usuario = usuariosModel::find($idUsuario);
-            if ($usuario === null) {
-                $omitidos++;
-                continue;
-            }
-
-            // El superadmin no se borra en lote tampoco: se omite y se avisa
-            if ($usuario['tipo_usuario'] === 'superadmin') {
-                $omitidos++;
-                continue;
-            }
 
             usuariosModel::eliminar($idUsuario);
-            usuariosModel::eliminarFoto((string)($usuario['foto_usuario'] ?? ''));
+            imagenesModel::eliminar((string)($usuario['foto_usuario'] ?? ''));
             $borrados++;
         }
 
@@ -789,7 +820,7 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
      *     usuariosModel::existeNick() para el índice único de nick_name.
      * SI SE ALTERA: si agregás un campo, agregarlo también a $errores,
      *     a $valores y al input de la vista, o el dato se pierde.
-     * LÍMITES: no valida foto_usuario; esa la valida usuariosModel::validarFoto() con
+     * LÍMITES: no valida foto_usuario; esa la valida imagenesModel::validar() con
      *     $_FILES porque es una subida de archivo, no un texto.
      * FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.

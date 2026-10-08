@@ -27,13 +27,18 @@ screenshots/
 *.tmp
 *.temp
 
-# Fotos de usuarios: son contenido de runtime, no se versionan.
-# default/ si se versiona porque es un asset del proyecto: sin esa imagen
-# el alta de un usuario sin foto no tiene con que copiar. El asterisco
-# delante del directorio es necesario: sin el, git no puede re-incluir
-# nada dentro de una carpeta excluida.
-Publico/Recursos/uploads/usuarios/*
-!Publico/Recursos/uploads/usuarios/default/
+# Imágenes subidas por los usuarios: son contenido de runtime y no se
+# versionan. Viven en Publico/Recursos/uploads/ porque es la única
+# carpeta estática que el .htaccess raíz deja servir.
+#
+# Se versionan dos cosas de ahí: default/ con la imagen por defecto
+# (sin ella el alta de un registro sin foto falla en un clon nuevo) y
+# el .htaccess que impide ejecutar scripts dentro de la carpeta.
+# El asterisco delante del directorio es necesario: sin él, git no
+# puede re-incluir nada dentro de una carpeta excluida.
+Publico/Recursos/uploads/*
+!Publico/Recursos/uploads/default/
+!Publico/Recursos/uploads/.htaccess
 
 # Herramienta de pruebas E2E
 .playwright-mcp/
