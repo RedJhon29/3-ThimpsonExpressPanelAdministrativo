@@ -39,6 +39,8 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
     private const CLAVE_CLAVE_VACIA       = 'clave_vacia';
     private const CLAVE_FOTO_PESADA       = 'foto_pesada';
     private const CLAVE_FOTO_TIPO         = 'foto_tipo_invalido';
+    private const CLAVE_FOTO_EXTENSION    = 'foto_extension_invalida';
+    private const CLAVE_FOTO_CONTENIDO    = 'foto_contenido_invalido';
     private const CLAVE_FOTO_NO_RECIBIDA  = 'foto_no_recibida';
     private const CLAVE_FOTO_NO_GUARDADA  = 'foto_no_guardada';
     private const CLAVE_FOTO_CARPETA      = 'foto_carpeta';
@@ -92,7 +94,15 @@ private const TIPOS = ['superadmin', 'admin', 'operador', 'lector'];
             ],
             self::CLAVE_FOTO_TIPO => [
                 'texto' => 'Ese archivo no es una imagen válida.',
-                'sugerencia' => 'Subí una foto en formato PNG, JPEG o WEBP.',
+                'sugerencia' => 'Subí una foto en formato PNG, JPG, JPEG o WEBP.',
+            ],
+            self::CLAVE_FOTO_EXTENSION => [
+                'texto' => 'Ese formato de archivo no está permitido.',
+                'sugerencia' => 'Solo se aceptan fotos en formato PNG, JPG, JPEG o WEBP.',
+            ],
+            self::CLAVE_FOTO_CONTENIDO => [
+                'texto' => 'El archivo no contiene una foto válida.',
+                'sugerencia' => 'Parece estar renombrado: su contenido no corresponde a una imagen. Elegí el archivo original de tu foto.',
             ],
             self::CLAVE_FOTO_NO_RECIBIDA => [
                 'texto' => 'No se recibió la foto.',

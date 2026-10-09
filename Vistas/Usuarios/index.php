@@ -432,29 +432,240 @@ form.querySelector('[name="foto_usuario"]').value = '';
         });
     }
 
+// =========================================================================
+// Validación de la foto elegida, antes de subir nada.
+//
+// El atributo accept del input solo oculta opciones en el diálogo del
+// sistema: con "Todos los archivos" o arrastrando y soltando igual entra
+// un PDF. Por eso acá se revisa la firma binaria real del archivo, la
+// extensión y el peso, y cada caso falla con su propia alerta.
+// =========================================================================
+
+var FOTO_EXTENSIONES_PERMITIDAS = ['png', 'jpg', 'jpeg', 'webp'];
+var FOTO_TAMANO_MAXIMO = 2097152;   // 2 MB exactos
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: obtenerExtension() | ROL: helper JS
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: saca la extensión en minúsculas del nombre del archivo.
+ * VINCULADO A: la invocan revisarArchivoFoto() y la validación de envío.
+ * SI SE ALTERA: si devuelve mal, un PDF con extensión en mayúscula
+ *     se colaría por el filtro de formatos.
+ * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function obtenerExtension(nombreArchivo) {
+    var partes = String(nombreArchivo || '').split('.');
+    return partes.length > 1 ? partes.pop().toLowerCase() : '';
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: formatearPeso() | ROL: helper JS
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: presenta los bytes como MB con coma decimal (es-419).
+ * VINCULADO A: la invoca revisarArchivoFoto() para el mensaje de peso.
+ * SI SE ALTERA: si no divide entre 1048576, la alerta mostraría bytes crudos.
+ * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function formatearPeso(bytes) {
+    return (bytes / (1024 * 1024)).toFixed(2).replace('.', ',') + ' MB';
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: leerFirmaBinaria() | ROL: helper JS
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: promises con los primeros 12 bytes del archivo, que dicen
+ *     qué es realmente y no lo que promete su extensión.
+ * VINCULADO A: la invocan revisarArchivoFoto() y la validación de envío;
+ *     su equivalente en PHP es leerBytesIniciales() de imagenesModel.
+ * SI SE ALTERA: si leyera menos bytes, la firma WEBP quedaría incompleta
+ *     y toda imagen .webp sería rechazada.
+ * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function leerFirmaBinaria(archivo) {
+    return new Promise(function (resolver) {
+        var lector = new FileReader();
+
+        lector.onload = function (evento) {
+            var buffer = new Uint8Array(evento.target.result);
+            resolver(Array.prototype.slice.call(buffer, 0, 12));
+        };
+        lector.onerror = function () { resolver([]); };
+        lector.readAsArrayBuffer(archivo.slice(0, 12));
+    });
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: firmaCoincideConFormato() | ROL: helper JS
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: compara los bytes de cabecera con la imagen que anuncia
+ *     la extensión, para que un PDF renombrado a .jpg no fool al filtro.
+ * VINCULADO A: la invoca revisarArchivoFoto(); comparte las firmas con
+ *     validarFirmaBinaria() en Modelos/imagenesModel.php.
+ * SI SE ALTERA: una firma mal puesta deja pasar un archivo disfrazado o
+ *     rechaza fotos legítimas; ambos falla en el modal de usuarios.
+ * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function firmaCoincideConFormato(bytes, extension) {
+    if (bytes.length < 4) { return false; }
+
+    var a = bytes[0], b = bytes[1], c = bytes[2], d = bytes[3];
+
+    if (extension === 'png') {
+        return a === 0x89 && b === 0x50 && c === 0x4E && d === 0x47;
+    }
+    if (extension === 'jpg' || extension === 'jpeg') {
+        return a === 0xFF && b === 0xD8 && c === 0xFF;
+    }
+    if (extension === 'webp') {
+        // RIFF????WEBP: hacen falta los 12 bytes para ver la etiqueta final
+        if (bytes.length < 12) { return false; }
+        var firma = String.fromCharCode.apply(null, bytes.slice(0, 4));
+        var tipo = String.fromCharCode.apply(null, bytes.slice(8, 12));
+        return firma === 'RIFF' && tipo === 'WEBP';
+    }
+    return false;
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: mostrarAvisoFoto() | ROL: helper JS
+ * ==================================================
+ * =====================DETALLES=====================
+* QUÉ HACE: levanta la SweetAlert de rechazo con su título y su
+ *     explicación, en el mismo estilo oscuro del resto del panel.
+ * VINCULADO A: la invocan revisarArchivoFoto() y la validación de envío.
+ * SI SE ALTERA: si pierde el customClass o el botón OK, la alerta pierde
+ *     el estilo y el usuario no tiene cómo cerrarla a mano.
+ * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function mostrarAvisoFoto(titulo, detalle) {
+    if (typeof Swal === 'undefined') { return; }
+
+    Swal.fire({
+        icon: 'error',
+        title: titulo,
+        html: detalle,
+        background: '#131517',
+        color: '#fff',
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+        buttonsStyling: false,
+        customClass: { popup: 'swal-aviso-usuario', confirmButton: 'swal-boton-ok' }
+    });
+}
+
+/**
+ * ====================ENCABEZADO====================
+ * FUNCIÓN: revisarArchivoFoto() | ROL: helper JS
+ * ==================================================
+ * =====================DETALLES=====================
+ * QUÉ HACE: junte las razones por las que el archivo no se acepta, o
+ *     devuelve vacío si pasa formato, contenido y peso.
+ * VINCULADO A: la invocan el listener del input file y el submit del
+ *     formulario; las mismas reglas rigen en imagenesModel::validar().
+ * SI SE ALTERA: si acepta un formato o un peso que el servidor no,
+ *     el usuario sube el archivo y recibe el error tarde y sin aviso previo.
+ * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+ * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+ * ==================================================
+ */
+function revisarArchivoFoto(archivo, bytes) {
+    var problemas = [];
+    var extension = obtenerExtension(archivo.name);
+
+    if (FOTO_EXTENSIONES_PERMITIDAS.indexOf(extension) === -1) {
+        problemas.push({
+            titulo: 'Formato de archivo no permitido',
+            detalle: extension
+                ? 'La extensión <strong>.' + extension + '</strong> no está entre las permitidas.'
+                : 'Ese archivo no tiene extensión.',
+            sugerencia: 'Solo se aceptan fotos en formato PNG, JPG, JPEG o WEBP.'
+        });
+    } else if (!firmaCoincideConFormato(bytes, extension)) {
+        problemas.push({
+            titulo: 'El archivo no contiene una foto',
+            detalle: 'Tiene extensión <strong>.' + extension + '</strong> pero su contenido no es una imagen de ese formato.',
+            sugerencia: 'Probablemente lo renombraste. Elegí el archivo original de tu foto.'
+        });
+    }
+
+    if (archivo.size > FOTO_TAMANO_MAXIMO) {
+        problemas.push({
+            titulo: 'La imagen es demasiado pesada',
+            detalle: 'Pesa <strong>' + formatearPeso(archivo.size) + '</strong> y el máximo permitido es 2 MB.',
+            sugerencia: 'Reducí el tamaño de la foto o elegí una imagen más liviana.'
+        });
+    }
+
+    return problemas;
+}
+
 // Vista previa de la foto elegida. En el alta reemplaza la del default;
-    // en la edición muestra la nueva al lado de la actual. El id del
-    // preview comparte prefijo: usuario-nuevo-foto_usuario-previa.
-    document.querySelectorAll('input.usuario-campo-foto').forEach(function (campo) {
-        var esEdicion = campo.id.indexOf('editar') !== -1;
-        var cajaNueva = document.getElementById(campo.id + '-nueva');
+// en la edición muestra la nueva al lado de la actual. El id del
+// preview comparte prefijo: usuario-nuevo-foto_usuario-previa.
+document.querySelectorAll('input.usuario-campo-foto').forEach(function (campo) {
+    var esEdicion = campo.id.indexOf('editar') !== -1;
+    var cajaNueva = document.getElementById(campo.id + '-nueva');
 
-        campo.addEventListener('change', function () {
-            var archivo = campo.files && campo.files[0];
+    campo.addEventListener('change', function () {
+        var archivo = campo.files && campo.files[0];
 
-            // Sin archivo elegido: en el alta se vuelve a mostrar el default
-            // y en la edicion queda solo la foto actual.
-            if (!archivo) {
-                if (cajaNueva) {
-                    cajaNueva.hidden = esEdicion;
-                    if (esEdicion) {
-                        cajaNueva.querySelector('img').removeAttribute('src');
-                    }
+        // Sin archivo elegido: en el alta se vuelve a mostrar el default
+        // y en la edicion queda solo la foto actual.
+        if (!archivo) {
+            if (cajaNueva) {
+                cajaNueva.hidden = esEdicion;
+                if (esEdicion) {
+                    cajaNueva.querySelector('img').removeAttribute('src');
+                }
+            }
+            return;
+        }
+
+        if (!cajaNueva) { return; }
+
+        leerFirmaBinaria(archivo).then(function (bytes) {
+            var problemas = revisarArchivoFoto(archivo, bytes);
+
+            if (problemas.length > 0) {
+                // Limpiar el input evita que el archivo rechazado quede
+                // seleccionado y se envie con el siguiente formulario.
+                campo.value = '';
+
+                if (esEdicion) {
+                    cajaNueva.hidden = true;
+                    cajaNueva.querySelector('img').removeAttribute('src');
+                }
+
+                if (problemas.length === 1) {
+                    mostrarAvisoFoto(problemas[0].titulo, problemas[0].detalle + '<div style="margin-top:10px;font-size:13.5px;opacity:0.85;line-height:1.45">' + problemas[0].sugerencia + '</div>');
+                } else {
+                    var detalle = problemas.map(function (problema) {
+                        return '<div style="margin-bottom:8px;font-size:13.5px;line-height:1.45"><strong>' + problema.titulo + '</strong><br>' + problema.detalle + '</div>';
+                    }).join('');
+
+                    mostrarAvisoFoto('No pudimos aceptar ese archivo', detalle);
                 }
                 return;
             }
-
-            if (!cajaNueva) { return; }
 
             var lector = new FileReader();
             lector.onload = function (evento) {
@@ -464,6 +675,7 @@ form.querySelector('[name="foto_usuario"]').value = '';
             lector.readAsDataURL(archivo);
         });
     });
+});
 
     // Solo el superadministrador crea y edita usuarios. El botón de alta y
     // los de editar se ocultan a los demás roles: el servidor igual los
@@ -610,6 +822,30 @@ form.querySelector('[name="foto_usuario"]').value = '';
 
     document.querySelectorAll('.form-usuario').forEach(function (formulario) {
         formulario.addEventListener('submit', function (evento) {
+            // Ultima barrera del lado del cliente: si el campo quedó con un
+            // archivo rechazado (por ejemplo porque la validación de arriba
+            // no llegó a correr), el formulario no se envía. El servidor
+            // igual valida todo; esto solo evita el viaje de ida y vuelta.
+            var campoFoto = formulario.querySelector('input[type="file"]');
+
+            if (campoFoto && campoFoto.files && campoFoto.files.length > 0) {
+                var pendientes = revisarArchivoFoto(
+                    campoFoto.files[0],
+                    leerFirmaBinaria(campoFoto.files[0])
+                );
+
+                if (pendientes.length > 0) {
+                    evento.preventDefault();
+                    campoFoto.value = '';
+
+                    mostrarAvisoFoto(
+                        pendientes[0].titulo,
+                        pendientes[0].detalle + '<div style="margin-top:10px;font-size:13.5px;opacity:0.85;line-height:1.45">' + pendientes[0].sugerencia + '</div>'
+                    );
+                    return;
+                }
+            }
+
             evento.preventDefault();
             enviarFormulario(formulario);
         });

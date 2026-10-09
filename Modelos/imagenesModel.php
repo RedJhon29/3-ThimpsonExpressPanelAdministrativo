@@ -44,6 +44,15 @@ class imagenesModel {
     /** 2 MB: por encima se rechaza antes de escribir en disco. */
     private const TAMANO_MAXIMO = 2097152;
 
+    /** Formatos que el usuario puede elegir en el campo file. */
+    public const EXTENSIONES_PERMITIDAS = ['png', 'jpg', 'jpeg', 'webp'];
+
+    /**
+     * Tope de peso expuesto a las vistas para que el filtro del navegador
+     * use el mismo número que valida() en el servidor.
+     */
+    public const TAMANO_MAXIMO_PUBLICO = 2097152;
+
     /**
      * Módulos que pueden usar este modelo. Evita que un controlador
      * escriba en una carpeta cualquiera con un nombre inventado.
@@ -123,6 +132,83 @@ class imagenesModel {
 
     /**
      * ====================ENCABEZADO====================
+     * FUNCIÓN: extensionPermitida() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: confirma que la extensión que envía el cliente sea una
+     *     de las cuatro autorizadas.
+     * VINCULADO A: la usan validar() y el filtro del input file en las
+     *     vistas; el attribute accept de modales_usuarios.php la replica.
+     * SI SE ALTERA: si se acepta una extensión nueva hay queReflectarla
+     *     también en self::EXTENSIONES_PERMITIDAS y en el accept del input.
+     * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    public static function extensionPermitida(string $extension): bool
+    {
+        return in_array(strtolower($extension), self::EXTENSIONES_PERMITIDAS, true);
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: leerBytesIniciales() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: lee los primeros bytes del archivo para comparar la
+     *     firma binaria real contra la extensión que dice el cliente.
+     * VINCULADO A: la invoca validar(); el equivalente del navegador vive
+     *     en leerFirmaBinaria() dentro de Vistas/Usuarios/index.php.
+     * SI SE ALTERA: una firma mal puesta deja pasar un archivo que no es
+     *     la imagen que su extensión anuncia.
+     * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private static function leerBytesIniciales(string $ruta, int $cantidad): string
+    {
+        $manejador = fopen($ruta, 'rb');
+
+        if ($manejador === false) {
+            return '';
+        }
+
+        $bytes = fread($manejador, $cantidad);
+        fclose($manejador);
+
+        return is_string($bytes) ? $bytes : '';
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: validarFirmaBinaria() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: exige que los bytes de cabecera coincidan con la imagen
+     *     que la extensión promete, para que un PDF renombrado a .jpg
+     *     no fool a finfo.
+     * VINCULADO A: la invocan validar() y guardar(); comparte las firmas
+     *     con leerFirmaBinaria() del lado del navegador.
+     * SI SE ALTERA: una firma incorrecta rechazaría imágenes legítimas o,
+     *     al revés, dejaría pasar un archivo disfrazado.
+     * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private static function validarFirmaBinaria(string $ruta, string $extension): bool
+    {
+        $firma = self::leerBytesIniciales($ruta, 12);
+
+        return match ($extension) {
+            'png'  => str_starts_with($firma, "\x89PNG\r\n\x1a\n"),
+            'jpg', 'jpeg' => str_starts_with($firma, "\xFF\xD8\xFF"),
+            'webp' => str_starts_with($firma, 'RIFF') && substr($firma, 8, 4) === 'WEBP',
+            default => false,
+        };
+    }
+
+    /**
+     * ====================ENCABEZADO====================
      * FUNCIÓN: validar() | ROL: modelo
      * ==================================================
      * =====================DETALLES=====================
@@ -151,10 +237,20 @@ class imagenesModel {
             throw new RuntimeException('foto_pesada|tamano ' . $archivo['size'] . ' bytes');
         }
 
+        $extension = strtolower(pathinfo($archivo['name'] ?? '', PATHINFO_EXTENSION));
+
+        if (!self::extensionPermitida($extension)) {
+            throw new RuntimeException('foto_extension_invalida|extension ' . $extension);
+        }
+
         $mime = (new finfo(FILEINFO_MIME_TYPE))->file($archivo['tmp_name']);
 
         if (!isset(self::MIMES[$mime])) {
             throw new RuntimeException('foto_tipo_invalido|mime ' . $mime);
+        }
+
+        if (!self::validarFirmaBinaria($archivo['tmp_name'], $extension)) {
+            throw new RuntimeException('foto_contenido_invalido|extension ' . $extension . ' no coincide con su contenido');
         }
     }
 
@@ -216,12 +312,78 @@ class imagenesModel {
         }
 
         $nombreArchivo = 'imagen_' . bin2hex(random_bytes(8)) . '.' . $extension;
+        $rutaDestino = $carpetaAbsoluta . '/' . $nombreArchivo;
 
-        if (!move_uploaded_file($archivo['tmp_name'], $carpetaAbsoluta . '/' . $nombreArchivo)) {
+        if (!move_uploaded_file($archivo['tmp_name'], $rutaDestino)) {
             throw new RuntimeException('foto_no_guardada|move_uploaded_file ' . $nombreArchivo, 500);
         }
 
+        // El archivo queda re-codificado por GD: al reconstruir la imagen
+        // se descartan la metadata y cualquier dato agregado despues del
+        // cierre de la imagen, que es donde se esconde codigo en un PNG
+        // renombrado. Si GD no logra, se borra y el alta falla.
+        self::recodificarImagen($rutaDestino, $extension);
+
         return $carpetaRelativa . '/' . $nombreArchivo;
+    }
+
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: recodificarImagen() | ROL: modelo
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: reconstruye la imagen guardada con GD para eliminar la
+     *     metadata y los datos agregados tras el cierre del archivo.
+     * VINCULADO A: la invoca guardar() justo después del
+     *     move_uploaded_file(); es la barrera que impide que un PNG
+     *     válido con código PHP pegado al final quede en el disco.
+     * SI SE ALTERA: sin esto vuelve a pasar un archivo con contenido
+     *     extra; el .htaccess de uploads/ sigue impidiendo ejecutarlo.
+     * LÍMITES: si GD no está disponible se deja el archivo como está
+     *     (finfo ya validó el tipo) y el alta continúa.
+     * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
+    private static function recodificarImagen(string $ruta, string $extension): void
+    {
+        if (!extension_loaded('gd')) {
+            return;
+        }
+
+        $contenido = file_get_contents($ruta);
+
+        if ($contenido === false) {
+            throw new RuntimeException('foto_no_guardada|lectura ' . basename($ruta), 500);
+        }
+
+        $origen = @imagecreatefromstring($contenido);
+
+        if ($origen === false) {
+            // GD no pudo reconstruirla: se descarta en vez de dejarla.
+            @unlink($ruta);
+            throw new RuntimeException('foto_contenido_invalido|GD no pudo reconstruir ' . $extension);
+        }
+
+        $ancho = imagesx($origen);
+        $alto = imagesy($origen);
+        $limpia = imagecreatetruecolor($ancho, $alto);
+
+        if ($extension === 'png') {
+            imagealphablending($limpia, false);
+            imagesavealpha($limpia, true);
+            imagecopy($limpia, $origen, 0, 0, 0, 0, $ancho, $alto);
+            $resultado = imagepng($limpia, $ruta);
+        } else {
+            $resultado = imagejpeg($limpia, $ruta, 90);
+        }
+
+        imagedestroy($limpia);
+        imagedestroy($origen);
+
+        if ($resultado === false) {
+            throw new RuntimeException('foto_no_guardada|re-codificacion ' . basename($ruta), 500);
+        }
     }
 
     /**

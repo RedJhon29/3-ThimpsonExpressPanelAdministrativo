@@ -144,7 +144,14 @@ $idDe = static function (string $campo) use ($prefijoId): string {
                id="<?php echo $idDe('foto_usuario'); ?>"
                name="foto_usuario"
                aria-describedby="<?php echo $idDe('foto_usuario-error'); ?>"
-               accept="image/png,image/jpeg,image/webp">
+               accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+               data-foto-maximo="<?php echo imagenesModel::TAMANO_MAXIMO_PUBLICO; ?>"
+               data-foto-formatos="png,jpg,jpeg,webp">
+        <!-- El atributo accept solo oculta opciones en el diálogo del sistema:
+             no impide elegir el archivo con "Todos los archivos" ni por
+             arrastrar y soltar. La validación real vive en
+             Vistas/Usuarios/index.php (firma binaria + peso) y en
+             imagenesModel::validar() en el servidor. -->
         <!-- Vista previa. En el alta arranca con la foto por defecto; al elegir
              un archivo la reemplaza. En la edición muestra la actual a la
              izquierda y, si se elige otra, la nueva a la derecha. -->

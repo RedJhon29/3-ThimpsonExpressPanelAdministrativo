@@ -840,6 +840,16 @@ img { max-width: 100%; height: auto; }
     border-radius: 6px !important;
 }
 
+/* Boton OK de las alertas de validacion de foto. Reutiliza el primario del
+   panel para que el cierre se lea como una accion afirmativa y no como otro
+   rechazo; sin esto el boton sale con el gris por defecto de SweetAlert. */
+.swal2-popup.swal-aviso-usuario .swal2-confirm.swal-boton-ok {
+    background-color: var(--primary) !important;
+    color: #131517 !important;
+    font-weight: 600;
+    min-width: 104px;
+}
+
 /* --- Vista previa de la foto (ambos modales) --- */
 /* Alta: una sola caja. Edición: dos lado a lado, la anterior y la nueva.
    El orden horizontal lo fija el HTML: "foto actual" va primero y
