@@ -406,7 +406,6 @@ function conectarAccionesUsuarios() {
             form.querySelector('[name="descripcion_usuario"]').value = boton.getAttribute('data-descripcion');
             form.querySelector('[name="nick_name"]').value = boton.getAttribute('data-nick');
             form.querySelector('[name="clave"]').value = '';
-form.querySelector('[name="foto_usuario"]').value = '';
 
             // La foto actual se pinta desde data-foto del boton que abrio
             // el modal. La nueva arranca oculta hasta que se elija archivo.
@@ -820,22 +819,34 @@ document.querySelectorAll('input.usuario-campo-foto').forEach(function (campo) {
             });
     };
 
+    /**
+     * ====================ENCABEZADO====================
+     * FUNCIÓN: barrera previa al envío de .form-usuario | ROL: vista (JS)
+     * ==================================================
+     * =====================DETALLES=====================
+     * QUÉ HACE: última revisión del cliente antes de subir. Resuelve la
+     *     lectura de la firma binaria del archivo y cancela el envío si
+     *     no pasa formato, contenido ni peso.
+     * VINCULADO A: la invocan los submit de #formNuevoUsuario y
+     *     #formEditarUsuario; delega el envío en enviarFormulario().
+     * SI SE ALTERA: pasar la firma sin await entrega una Promise en vez
+     *     de bytes y toda foto válida se rechaza por contenido.
+     * FECHA: 2026-10-16 | LUGAR: Ocotal, Nueva Segovia
+     * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+     * ==================================================
+     */
     document.querySelectorAll('.form-usuario').forEach(function (formulario) {
-        formulario.addEventListener('submit', function (evento) {
-            // Ultima barrera del lado del cliente: si el campo quedó con un
-            // archivo rechazado (por ejemplo porque la validación de arriba
-            // no llegó a correr), el formulario no se envía. El servidor
-            // igual valida todo; esto solo evita el viaje de ida y vuelta.
+        formulario.addEventListener('submit', async function (evento) {
+            evento.preventDefault();
+
+            // El servidor igual valida todo; esto solo evita el viaje de ida y vuelta.
             var campoFoto = formulario.querySelector('input[type="file"]');
 
             if (campoFoto && campoFoto.files && campoFoto.files.length > 0) {
-                var pendientes = revisarArchivoFoto(
-                    campoFoto.files[0],
-                    leerFirmaBinaria(campoFoto.files[0])
-                );
+                var archivo = campoFoto.files[0];
+                var pendientes = revisarArchivoFoto(archivo, await leerFirmaBinaria(archivo));
 
                 if (pendientes.length > 0) {
-                    evento.preventDefault();
                     campoFoto.value = '';
 
                     mostrarAvisoFoto(
@@ -846,7 +857,6 @@ document.querySelectorAll('input.usuario-campo-foto').forEach(function (campo) {
                 }
             }
 
-            evento.preventDefault();
             enviarFormulario(formulario);
         });
     });

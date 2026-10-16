@@ -341,7 +341,7 @@ class imagenesModel {
      *     extra; el .htaccess de uploads/ sigue impidiendo ejecutarlo.
      * LÍMITES: si GD no está disponible se deja el archivo como está
      *     (finfo ya validó el tipo) y el alta continúa.
-     * FECHA: 2026-10-09 | LUGAR: Ocotal, Nueva Segovia
+     * FECHA: 2026-10-16 | LUGAR: Ocotal, Nueva Segovia
      * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
      * ==================================================
      */
@@ -369,14 +369,21 @@ class imagenesModel {
         $alto = imagesy($origen);
         $limpia = imagecreatetruecolor($ancho, $alto);
 
-        if ($extension === 'png') {
+        // El volcado va fuera del condicional: si se quedara solo en la
+        // rama PNG, la imagen guardada saldia en negro del tamaño correcto
+        // en vez de la foto que subio el usuario.
+        if ($extension === 'png' || $extension === 'webp') {
             imagealphablending($limpia, false);
             imagesavealpha($limpia, true);
-            imagecopy($limpia, $origen, 0, 0, 0, 0, $ancho, $alto);
-            $resultado = imagepng($limpia, $ruta);
-        } else {
-            $resultado = imagejpeg($limpia, $ruta, 90);
         }
+
+        imagecopy($limpia, $origen, 0, 0, 0, 0, $ancho, $alto);
+
+        $resultado = match ($extension) {
+            'png'  => imagepng($limpia, $ruta),
+            'webp' => imagewebp($limpia, $ruta, 90),
+            default => imagejpeg($limpia, $ruta, 90),
+        };
 
         imagedestroy($limpia);
         imagedestroy($origen);
