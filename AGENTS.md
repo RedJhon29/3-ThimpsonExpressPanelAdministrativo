@@ -1,6 +1,6 @@
 # AGENTS.md — Thimpson Express Panel Administrativo
 
-**Identidad:** panel admin de delivery (Nicaragua). MVC propio en PHP 8.2, sin framework, sin Composer. PostgreSQL `thimpsonexpress` vía PDO en `Configuracion/conexion.php`. **La base tiene una sola tabla: `usuarios`.**
+**Identidad:** panel admin de delivery (Nicaragua). MVC propio en PHP 8.2, sin framework, sin Composer. PostgreSQL `thimpsonexpress` vía PDO en `Configuracion/conexion.php`. **La cadena de conexión vive en `.env` (`DATABASE_URL`), no en el código.** **La base tiene una sola tabla: `usuarios`.**
 
 > ## ⚠️ Recordatorio: 2 cosas esperando al usuario
 >
@@ -32,7 +32,9 @@
 
 | Acción | Comando |
 |--------|---------|
-| Lint PHP | `Get-ChildItem -Recurse -Filter *.php \| ForEach-Object { php -l $_.FullName }` (21 archivos) |
+| Lint PHP | `Get-ChildItem -Recurse -Filter *.php \| ForEach-Object { php -l $_.FullName }` (23 archivos) |
+| Conexión a la base | `php scripts/probar-conexion.php` (imprime host y versión, nunca la clave) |
+| Preparar un clon nuevo | `pwsh -File scripts/preparar-entorno.ps1` |
 | Higiene del proyecto | `.\scripts\higiene.ps1` (5 chequeos: lint, rutas muertas, includes, huérfanos, métodos) |
 | Smoke test HTTP | `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/3-ThimpsonExpressPanelAdministrativo/<ruta>` |
 | Imágenes huérfanas | `php scripts/limpiar-fotos-huerfanas.php` |
@@ -78,6 +80,28 @@ Para un módulo: `usuariosModel::MODULO_IMAGENES = 'usuarios'` es el puente entr
 
 ---
 
+## Base de datos
+
+Hay **dos** bases `thimpsonexpress` con el mismo contenido: la local (`127.0.0.1:5432`, PostgreSQL 16.15) y la de **Neon** (nube, PostgreSQL 16.15). El panel usa la que diga `.env`; sin `.env` cae a la local.
+
+| Elemento | Valor |
+|----------|-------|
+| Cadena | variable `DATABASE_URL` del archivo `.env` (raíz, **no versionado**) |
+| Plantilla | `.env.example` (versionada, solo marcadores) |
+| Lector | `Configuracion/entorno.php` → `cargarEntorno()` |
+| Consumidor | `Configuracion/conexion.php` → `obtenerConexion()` |
+| Neon (proyecto) | `young-pond-81729558`, región `aws-us-east-1`, endpoint directo `ep-long-dawn-b7ebfwl0` |
+| Neon (roles) | `thimpsonexpress_owner` (dueño) y `thimpson_app` (app: solo DML, sin `CREATEDB` ni superusuario) |
+| Respaldo local | `C:\Users\DELL\Documents\respaldos\thimpsonexpress_2026-10-30.dump` (formato custom) |
+
+- **Endpoint directo, no el pooler.** `PDO::ATTR_EMULATE_PREPARES => false` necesita prepared statements reales; el pooler en modo transacción los rompe.
+- **`.env` está en `.gitignore` (línea 48) y el `.htaccess` bloquea dotfiles.** Verificar con `git check-ignore -v .env` antes de cualquier commit.
+- **Un clon nuevo** ejecuta `pwsh -File scripts/preparar-entorno.ps1`: crea `.env` desde el ejemplo y prueba la conexión. Después hay que pegar la cadena real en `.env`.
+- **Réplica idéntica:** columnas, 5 índices, datos (mismo `md5` del hash) y secuencia en 5. Verificado 2026-10-30.
+- **`psql`/`pg_dump`/`pg_restore` no están en PATH**: usar `C:\Program Files\PostgreSQL\16\bin\`.
+
+---
+
 ## Seguridad
 
 - **Solo el `superadmin` puede crear, editar, cambiar estado y eliminar usuarios.** Un `lector` que haga POST directo a `/usuarios/guardar` o `/usuarios/actualizar` recibe **403**. Verificado.
@@ -102,7 +126,7 @@ Para un módulo: `usuariosModel::MODULO_IMAGENES = 'usuarios'` es el puente entr
 2. **Sin rutas muertas.** Cada entrada de `$routes` debe apuntar a un controlador y método existentes.
 3. **Sin includes rotos.**
 4. **Sin lógica duplicada.** Si dos sitios comparten markup, se extrae a un partial.
-5. **Sin secretos en código.** Credenciales solo en `Configuracion/conexion.php` (desarrollo) o variables de entorno (producción).
+5. **Sin secretos en código.** La cadena va en `.env` (`DATABASE_URL`), ignorado por git. `.env.example` solo lleva marcadores.
 6. **Sin SQL suelto en vistas.** Toda consulta va en un modelo, con prepared statements.
 7. **Sin `echo` sin escapar.** `htmlspecialchars()` en todo dato de BD o de `$_GET`/`$_POST`.
 8. **Sin acciones destructivas por GET.**
@@ -140,7 +164,7 @@ git show 95caa1f:Vistas/Riders/index.php
 | Qué | Dónde | Por qué sigue |
 |-----|-------|---------------|
 | Sin auditoría | — | Ver la caja de recordatorio arriba. Bloqueada hasta que el usuario dé el OK. |
-| Credenciales de desarrollo en el repo | `Configuracion/conexion.php` | Convención del proyecto. Mover a variables de entorno antes de producción. |
+| ~~Credenciales de desarrollo en el repo~~ | ~~`Configuracion/conexion.php`~~ | **Resuelto 2026-10-30**: la cadena vive en `.env` (ignorado) y `conexion.php` solo lee `DATABASE_URL`. |
 | Sin tests, sin CI | — | No hay framework de pruebas instalado. |
 | Paginación solo en el cliente | DataTables en `pieAdmin.php:70` | Con 10k+ filas conviene pasar a `serverSide`. Ojo: los botones de la tabla apuntan con `form="form-eliminar-{id}"` a formularios ocultos que se renderizan en PHP **fuera** de la tabla; con `serverSide` esas filas no tendrían su formulario y el borrado fallaría en silencio. Hay que reestructurar el borrado antes. |
 | El topbar no muestra la foto | `Vistas/Plantillas/encabezadoAdmin.php` | Muestra las iniciales en una caja cuadrada, no `imagenesModel::url()`. Es consistente con el resto, no es un bug. |
@@ -164,6 +188,10 @@ git show 95caa1f:Vistas/Riders/index.php
 |------|---------|
 | Constantes, autoload, `urlAsset()` | `Configuracion/app.php` |
 | Conexión PDO | `Configuracion/conexion.php` |
+| Carga de `.env` | `Configuracion/entorno.php` |
+| Plantilla de entorno | `.env.example` |
+| Prueba de conexión | `scripts/probar-conexion.php` |
+| Arranque de un clon | `scripts/preparar-entorno.ps1` |
 | CSRF, sesión, errores traducidos | `Configuracion/seguridad.php` |
 | Router + 11 rutas | `index.php` |
 | Plantillas | `Vistas/Plantillas/{encabezadoAdmin,barraLateralAdmin,pieAdmin}.php` |
@@ -177,5 +205,5 @@ git show 95caa1f:Vistas/Riders/index.php
 ## Notas operativas
 
 - Commits: Conventional Commits, prefijo en inglés, cuerpo en español. Rama única `main`.
-- Sin `.env` ni `README`. El login de desarrollo es `admin` / `Admin12345`.
+- `.env` no se versiona; `.env.example` sí. El login de desarrollo es `admin` / `Admin12345` — **cambiar antes de publicar el panel**, porque está escrito en un repo público.
 - Todo código nuevo lleva banner `ENCABEZADO/DETALLES/CUERPO` + `FIN`, en español.

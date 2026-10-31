@@ -5,36 +5,31 @@ ARCHIVO: Configuracion/conexion.php
 ==================================================*/
 
 /*=====================DETALLES=====================
-QUÉ HACE: entrega una conexión PDO única y reutilizable a la base
-    thimpsonexpress, con errores en excepción.
-VINCULADO A: aún sin consumidores; lo incluirán los Modelos con
-    require_once y llamarán obtenerConexion().
-SI SE ALTERA: cambiar credenciales o DSN deja el panel sin datos.
-LÍMITES: credenciales de desarrollo local escritas en el archivo.
-FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+QUÉ HACE: entrega una conexión PDO única y reutilizable
+    a la base indicada en DATABASE_URL.
+VINCULADO A: Configuracion/entorno.php y los Modelos.
+SI SE ALTERA: cambiar el DSN deja el panel sin datos.
+LÍMITES: sin .env cae a la base local de desarrollo.
+FECHA: 2026-10-30 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================*/
 
 /*================CUERPO DEL CÓDIGO=================*/
 
-define('SERVIDOR_BASE_DATOS', '127.0.0.1');
-define('PUERTO_BASE_DATOS', 5432);
-define('NOMBRE_BASE_DATOS', 'thimpsonexpress');
-define('USUARIO_BASE_DATOS', 'postgres');
-define('CLAVE_BASE_DATOS', 'postgres');
+require_once __DIR__ . '/entorno.php';
+cargarEntorno(dirname(__DIR__) . '/.env');
 
 /**
  * ====================ENCABEZADO====================
  * FUNCIÓN: obtenerConexion() | ROL: helper de acceso a datos
  * ==================================================
  * =====================DETALLES=====================
- * QUÉ HACE: abre la conexión en el primer llamado y reutiliza la
- *           misma instancia mientras vive la petición PHP.
- * VINCULADO A: exige la extensión pdo_pgsql y las constantes de
- *           este archivo; sin ellas lanza PDOException.
- * SI SE ALTERA: si deja de devolver PDO o de reutilizarla, cada
- *           consumidor tendría que abrir su propia conexión.
- * FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+ * QUÉ HACE: abre la conexión en el primer llamado y la
+ *           reutiliza mientras vive la petición.
+ * VINCULADO A: exige pdo_pgsql y DATABASE_URL.
+ * SI SE ALTERA: si no devuelve PDO, cada consumidor
+ *           tendría que abrir la suya.
+ * FECHA: 2026-10-30 | LUGAR: Ocotal, Nueva Segovia
  * ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
  * ==================================================
  */
@@ -47,15 +42,31 @@ function obtenerConexion(): PDO
         return $conexion;
     }
 
+    // Sin .env se usa la base local, para poder trabajar sin internet
+    $url = getenv('DATABASE_URL');
+    if ($url === false || trim($url) === '') {
+        $url = 'postgresql://postgres@127.0.0.1:5432/thimpsonexpress?sslmode=disable';
+    }
+    $url = trim($url);
+
+    $partes = parse_url($url);
+    if ($partes === false || !isset($partes['host'])) {
+        throw new RuntimeException('DATABASE_URL inválida: no se pudo leer el host.');
+    }
+
+    parse_str($partes['query'] ?? '', $consulta);
+    $modoSeguridad = $consulta['sslmode'] ?? 'require';
+
     $conexion = new PDO(
         sprintf(
-            'pgsql:host=%s;port=%d;dbname=%s',
-            SERVIDOR_BASE_DATOS,
-            PUERTO_BASE_DATOS,
-            NOMBRE_BASE_DATOS
+            'pgsql:host=%s;port=%d;dbname=%s;sslmode=%s;connect_timeout=10',
+            $partes['host'],
+            $partes['port'] ?? 5432,
+            ltrim($partes['path'] ?? '', '/'),
+            $modoSeguridad
         ),
-        USUARIO_BASE_DATOS,
-        CLAVE_BASE_DATOS,
+        rawurldecode($partes['user'] ?? ''),
+        rawurldecode($partes['pass'] ?? ''),
         [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

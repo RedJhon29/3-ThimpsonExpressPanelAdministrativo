@@ -42,3 +42,9 @@ Publico/Recursos/uploads/*
 
 # Herramienta de pruebas E2E
 .playwright-mcp/
+
+# Secretos de entorno: nunca versionar.
+# .env.example sí se versiona porque solo tiene marcadores.
+.env
+.env.*
+!.env.example
