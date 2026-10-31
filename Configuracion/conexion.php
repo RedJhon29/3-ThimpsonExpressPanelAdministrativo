@@ -42,8 +42,13 @@ function obtenerConexion(): PDO
         return $conexion;
     }
 
-    // Sin .env se usa la base local, para poder trabajar sin internet
+    /* ---------- CONEXIÓN REMOTA: NEON ---------- */
+    // La cadena completa y la clave viven en .env, que no se versiona.
     $url = getenv('DATABASE_URL');
+
+    /* ---------- CONEXIÓN LOCAL: RESPALDO DE DESARROLLO ---------- */
+    // Solo entra si falta el .env: el PostgreSQL local escucha en loopback,
+    // sin TLS y sin contraseña, para poder trabajar sin internet.
     if ($url === false || trim($url) === '') {
         $url = 'postgresql://postgres@127.0.0.1:5432/thimpsonexpress?sslmode=disable';
     }
@@ -55,6 +60,7 @@ function obtenerConexion(): PDO
     }
 
     parse_str($partes['query'] ?? '', $consulta);
+    // Neon exige TLS; la URL local lo desactiva con sslmode=disable.
     $modoSeguridad = $consulta['sslmode'] ?? 'require';
 
     $conexion = new PDO(
