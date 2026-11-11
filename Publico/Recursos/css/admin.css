@@ -284,15 +284,15 @@ img { max-width: 100%; height: auto; }
 }
 
 /* --- Botón de colapso del sidebar --- */
-/* Botón pegado al borde derecho del aside: viaja con el borde cuando el
-   ancho cambia. Solo escritorio: en el bloque responsive de abajo se
-   esconde en móvil, donde manda el off-canvas del #toggleSidebar. El
-   chevron rota 180° con el estado, así el ícono correcto no depende
-   de que el JS haya cargado. */
+/* Botón fijo en la esquina superior derecha, entre el sidebar y el
+   buscador. top/right con suficiente espacio para no solaparse con
+   el logo "T" del sidebar ni con el buscador del header en modo
+   expandido. En modo colapsado (admin-colapsado) el botón permanece
+   en su posición y no baja bajo el logo. */
 .sidebar-colapsar {
-    position: absolute;
+    position: fixed;
     top: 20px;
-    right: -14px;
+    right: 20px;
     z-index: 1001;
     width: 28px;
     height: 28px;
@@ -304,6 +304,11 @@ img { max-width: 100%; height: auto; }
     color: var(--muted);
     cursor: pointer;
     transition: background-color 0.15s ease-out, color 0.15s ease-out;
+}
+
+.sidebar-colapsar:hover {
+    background: var(--surface-2);
+    color: var(--foreground);
 }
 
 .sidebar-colapsar:hover {
