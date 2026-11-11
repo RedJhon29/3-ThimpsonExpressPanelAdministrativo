@@ -27,9 +27,10 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 <!-- Sidebar -->
 <aside class="admin-sidebar" id="adminSidebar">
-    <!-- Colapso/expandir: pegado al borde derecho, solo escritorio.
-         El chevron rota 180° con CSS cuando body lleva .admin-colapsado
-         y el estado persistido lo aplica el script que sigue al aside. -->
+    <!-- Colapso/expandir: hamburguesa dentro del sidebar, separada
+         del borde derecho; solo escritorio. El estado persistido lo
+         aplica el script que sigue al aside y el ícono no cambia con
+         el estado: la forma de la hamburguesa vale para ambos. -->
     <button type="button" class="sidebar-colapsar" id="colapsarSidebar"
             aria-controls="adminSidebar" aria-expanded="true"
             aria-label="Colapsar menú lateral"
@@ -188,7 +189,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <header class="admin-topbar">
         <div class="d-flex align-items-center gap-3 admin-topbar-izq">
             <button class="btn btn-ghost d-lg-none p-1" id="toggleSidebar" style="color:var(--muted);">
-                <i class="bi bi-list fs-4"></i>
+                <i class="bi bi-chevron-left fs-4"></i>
             </button>
             <div class="topbar-search">
                 <i class="bi bi-search"></i>

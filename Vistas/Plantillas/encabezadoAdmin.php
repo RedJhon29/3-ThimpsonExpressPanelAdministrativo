@@ -22,6 +22,11 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'Admin'; ?> — <?php echo APP_NAME; ?></title>
+    <!-- Favicon: la T del logo en primary. El .ico cubre los navegadores
+         sin soporte de SVG; declarar el icono elimina el 404 de
+         /favicon.ico que pedía el navegador al no haber ninguno. -->
+    <link rel="icon" href="<?php echo urlAsset('Publico/Recursos/img/favicon.ico'); ?>" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="<?php echo urlAsset('Publico/Recursos/img/favicon.svg'); ?>">
     <!-- Gestor de carga con fallback: debe ir antes de los recursos gestionados -->
     <script src="<?php echo urlAsset('Publico/Recursos/js/gestorPlugins.js'); ?>"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">

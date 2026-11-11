@@ -32,7 +32,7 @@
 
 | Acción | Comando |
 |--------|---------|
-| Lint PHP | `Get-ChildItem -Recurse -Filter *.php \| ForEach-Object { php -l $_.FullName }` (23 archivos) |
+| Lint PHP | `Get-ChildItem -Recurse -Filter *.php \| ForEach-Object { php -l $_.FullName }` (24 archivos) |
 | Conexión a la base | `php scripts/probar-conexion.php` (imprime host y versión, nunca la clave) |
 | Preparar un clon nuevo | `pwsh -File scripts/preparar-entorno.ps1` |
 | Higiene del proyecto | `.\scripts\higiene.ps1` (5 chequeos: lint, rutas muertas, includes, huérfanos, métodos) |
@@ -117,7 +117,7 @@ Hay **dos** bases `thimpsonexpress` con el mismo contenido: la local (`127.0.0.1
 - **El reset global de `admin.css:49` aplica `border-radius: var(--radius) !important` a todo.** Con `--radius: 0` aplasta *todos* los radios. Para dejar un componente circular hay que declarar su radio con `!important` (patrón ya usado en los iconos de SweetAlert y en `.usuario-foto-imagen`). **No borrar el reset**: afecta a todo el panel.
 - `urlAsset('Publico/Recursos/css/admin.css')` versiona el archivo con `filemtime()`. Los recursos propios **deben** pasar por ahí; los de terceros no.
 - `--primary-foreground` es el token para texto sobre `--primary`.
-- **Sidebar colapsable (solo escritorio, ≥992px):** la clase `admin-colapsado` va en `<body>`; todo su CSS vive dentro de `@media (min-width: 992px)` para no tocar el off-canvas del móvil. El estado se persiste en `localStorage` con la key `panel.sidebar.colapsado`, que está **escrita en dos sitios** (script anti-parpadeo de `barraLateralAdmin.php` y `prepararColapsoSidebar()` en `pieAdmin.php`): si se cambia una, se cambian ambas. Las etiquetas de los ítems viven solo en `span.sidebar-etiqueta` (única fuente del tooltip y del `aria-label` en modo colapsado); los submenús futuros deben salir como flyout, el mismo patrón del tooltip (`container: 'body'`).
+- **Sidebar colapsable (solo escritorio, ≥992px):** la clase `admin-colapsado` va en `<body>`; todo su CSS vive dentro de `@media (min-width: 992px)` para no tocar el off-canvas del móvil. El estado se persiste en `localStorage` con la key `panel.sidebar.colapsado`, que está **escrita en dos sitios** (script anti-parpadeo de `barraLateralAdmin.php` y `prepararColapsoSidebar()` en `pieAdmin.php`): si se cambia una, se cambian ambas. Las etiquetas de los ítems viven solo en `span.sidebar-etiqueta` (única fuente del tooltip y del `aria-label` en modo colapsado); los submenús futuros deben salir como flyout, el mismo patrón del tooltip (`container: 'body'`). El botón es una **hamburguesa** (`bi-list`, 28×28) arriba a la derecha, separada ~12px del borde (anclada con `left: calc(100% - 40px)` para que se deslice con el ancho); en modo colapsado baja **centrado bajo la cabecera** como ítem de riel de 44px (`top: 76px`, `left: calc(50% - 22px)`) y el nav reserva su renglón con `padding-top: 52px` — **si cambia el alto de la cabecera (68px) o el ancho del riel, hay que recalcular esos tres números juntos**.
 
 ---
 
@@ -200,6 +200,7 @@ git show 95caa1f:Vistas/Riders/index.php
 | Gestión de imágenes | `Modelos/imagenesModel.php` |
 | CRUD de usuarios | `Modelos/usuariosModel.php`, `Controladores/usuariosController.php` |
 | Conteos del dashboard | `Modelos/panelModel.php` |
+| Favicon (T en ámbar) | `Publico/Recursos/img/favicon.svg` + `.ico`; regenerar con `php scripts/generar-favicon.php` (misma rejilla 64 en ambos) |
 
 ---
 
