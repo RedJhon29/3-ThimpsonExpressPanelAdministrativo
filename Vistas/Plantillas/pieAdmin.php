@@ -34,8 +34,8 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 FUNCIÓN: inicializarPanel() | ROL: plantilla (JS)
 ==================================================
 =====================DETALLES=====================
-QUÉ HACE: cablea el sidebar, Select2, DataTables, el toast
-    y la alerta de cierre de sesión tras cargar las libs.
+QUÉ HACE: cablea el sidebar (off-canvas y colapso), Select2,
+    DataTables, el toast y la alerta de cierre de sesión.
 VINCULADO A: lo ejecuta gestorPlugins.alListo() con la
     cadena de scripts de este mismo pie.
 SI SE ALTERA: si cambia el orden de la cadena o un init,
@@ -52,6 +52,9 @@ function inicializarPanel() {
     document.getElementById('closeSidebar')?.addEventListener('click', function() {
         document.getElementById('adminSidebar').classList.remove('show');
     });
+
+    // Colapso de escritorio: solo iconos, tooltips y estado persistido.
+    prepararColapsoSidebar();
 
     // Abre el modal de Configuraciones. Va con guarda porque el boton
     // existe en todas las vistas pero bootstrap puede no haber cargado.
@@ -106,7 +109,7 @@ SI SE ALTERA: si DataTables cambia sus clases, revisar el
     selector o los campos vuelven a quedar sin identificar.
 FECHA: 2026-10-05 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
-==================================================*/
+*/
 function etiquetarCamposDataTables() {
     var campos = document.querySelectorAll(
         '.dataTables_wrapper input.form-control, .dataTables_wrapper select.form-select'
@@ -116,6 +119,151 @@ function etiquetarCamposDataTables() {
         if (!campo.id) { campo.id = 'dtCampo' + indice; }
         if (!campo.name) { campo.name = 'campo' + indice; }
     });
+}
+
+/*====================ENCABEZADO====================
+FUNCIÓN: prepararColapsoSidebar() | ROL: plantilla (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: cablea #colapsarSidebar, sincroniza admin-colapsado en
+    <body> con localStorage y enciende los tooltips al colapsar.
+VINCULADO A: la llama inicializarPanel(); usa .sidebar-link,
+    .sidebar-config y .sidebar-etiqueta de barraLateralAdmin.php.
+SI SE ALTERA: key y breakpoint deben coincidir con el script
+    anti-parpadeo de barraLateralAdmin.php; sin Bootstrap, title nativo.
+FECHA: 2026-11-10 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+*/
+function prepararColapsoSidebar() {
+    var boton = document.getElementById('colapsarSidebar');
+    if (!boton) { return; }
+
+    var CLAVE = 'panel.sidebar.colapsado';
+    var cuerpo = document.body;
+    var conBootstrap = typeof bootstrap !== 'undefined' && typeof bootstrap.Tooltip === 'function';
+    var etiquetas = [];
+    var titulosOriginales = [];
+    var ariaOriginales = [];
+    var tooltips = [];
+
+    // Ítems que pierden su etiqueta al colapsar: los mismos que
+    // necesitan tooltip y nombre accesible. El texto sale de
+    // .sidebar-etiqueta para no duplicar la etiqueta en el HTML.
+    var items = Array.prototype.slice.call(
+        document.querySelectorAll('.sidebar-link, .sidebar-config')
+    );
+
+    items.forEach(function (item) {
+        var etiqueta = item.querySelector('.sidebar-etiqueta');
+        var texto = etiqueta ? etiqueta.textContent.trim() : '';
+        etiquetas.push(texto);
+        titulosOriginales.push(item.getAttribute('title') || '');
+        ariaOriginales.push(item.getAttribute('aria-label') || '');
+        if (conBootstrap && texto) {
+            // container:'body' para que el aside no recorte el tooltip
+            // y placement a la derecha, donde está el contenido.
+            tooltips.push(new bootstrap.Tooltip(item, {
+                title: texto,
+                placement: 'right',
+                container: 'body'
+            }));
+        } else {
+            tooltips.push(null);
+        }
+    });
+
+    /*====================ENCABEZADO====================
+    FUNCIÓN: leerPreferencia() | interna de prepararColapsoSidebar()
+    ==================================================
+    =====================DETALLES=====================
+    QUÉ HACE: lee la preferencia de colapso guardada; devuelve
+        false si el navegador no tiene localStorage.
+    */
+    function leerPreferencia() {
+        try { return localStorage.getItem(CLAVE) === '1'; }
+        catch (error) { return false; }
+    }
+
+    /*====================ENCABEZADO====================
+    FUNCIÓN: aplicarColapso() | interna de prepararColapsoSidebar()
+    ==================================================
+    =====================DETALLES=====================
+    QUÉ HACE: vuelca el estado en la clase de <body>, en los
+        atributos del botón, en los tooltips/aria de los ítems y
+        en localStorage cuando guardar es true.
+    SI SE ALTERA: sin Bootstrap el title nativo reemplaza al
+        tooltip estilizado para no dejar ítems mudos.
+    */
+    function aplicarColapso(colapsar, guardar) {
+        cuerpo.classList.toggle('admin-colapsado', colapsar);
+        boton.setAttribute('aria-expanded', colapsar ? 'false' : 'true');
+        boton.title = colapsar ? 'Expandir menú lateral' : 'Colapsar menú lateral';
+        boton.setAttribute('aria-label', boton.title);
+
+        items.forEach(function (item, indice) {
+            var texto = etiquetas[indice];
+            var tituloOriginal = titulosOriginales[indice];
+            var ariaOriginal = ariaOriginales[indice];
+            var tooltip = tooltips[indice];
+
+            // Nombre accesible: al colapsar, la etiqueta visible
+            // desaparece y el ícono solo no nombra el enlace.
+            if (colapsar && texto) {
+                item.setAttribute('aria-label', texto);
+            } else if (ariaOriginal) {
+                item.setAttribute('aria-label', ariaOriginal);
+            } else {
+                item.removeAttribute('aria-label');
+            }
+
+            if (tooltip) {
+                if (colapsar) {
+                    // Sin title nativo mientras hay tooltip estilizado:
+                    // si no, el navegador pinta los dos encima.
+                    item.removeAttribute('title');
+                    tooltip.enable();
+                } else {
+                    tooltip.hide();
+                    tooltip.disable();
+                    if (tituloOriginal) { item.setAttribute('title', tituloOriginal); }
+                    else { item.removeAttribute('title'); }
+                }
+            } else if (colapsar && texto) {
+                // Respaldo sin Bootstrap: tooltip nativo del navegador.
+                item.setAttribute('title', texto);
+            } else if (tituloOriginal) {
+                item.setAttribute('title', tituloOriginal);
+            } else {
+                item.removeAttribute('title');
+            }
+        });
+
+        // Solo el click del usuario escribe la preferencia: la carga
+        // inicial y los cambios de breakpoint aplican, no guardan.
+        if (guardar) {
+            try { localStorage.setItem(CLAVE, colapsar ? '1' : '0'); }
+            catch (error) { /* sin localStorage: queda para esta página */ }
+        }
+    }
+
+    boton.addEventListener('click', function () {
+        aplicarColapso(!cuerpo.classList.contains('admin-colapsado'), true);
+    });
+
+    // Estado inicial: respeta lo persistido solo en escritorio, donde
+    // el colapso aplica; en móvil manda el off-canvas con etiquetas.
+    var esEscritorio = !window.matchMedia || window.matchMedia('(min-width: 992px)').matches;
+    aplicarColapso(leerPreferencia() && esEscritorio, false);
+
+    // Al cruzar 992px se re-sincroniza: al entrar a móvil se apagan los
+    // tooltips (la etiqueta vuelve a estar visible) y al volver a
+    // escritorio reaparece el estado persistido.
+    if (window.matchMedia) {
+        var pantallaEscritorio = window.matchMedia('(min-width: 992px)');
+        pantallaEscritorio.addEventListener('change', function () {
+            aplicarColapso(leerPreferencia() && pantallaEscritorio.matches, false);
+        });
+    }
 }
 
 /*====================ENCABEZADO====================

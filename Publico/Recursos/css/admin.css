@@ -41,6 +41,8 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     --font-sans: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --radius: 0px;
+    --sidebar-ancho: 280px;
+    --sidebar-ancho-colapsado: 76px;
 }
 
 *, *::before, *::after {
@@ -96,8 +98,11 @@ img { max-width: 100%; height: auto; }
 
 /* --- Sidebar --- */
 .admin-sidebar {
-    width: 280px;
-    min-height: 100vh;
+    width: var(--sidebar-ancho);
+    /* Alto cerrado: el scroll pasó al .sidebar-nav para que la cabecera
+       y el pie queden fijos y el botón de colapso pueda sobresalir del
+       borde derecho sin que un overflow del aside lo recorte. */
+    height: 100vh;
     background-color: var(--surface-1);
     border-right: 1px solid var(--border);
     color: var(--foreground);
@@ -105,7 +110,6 @@ img { max-width: 100%; height: auto; }
     top: 0;
     left: 0;
     z-index: 1000;
-    overflow-y: auto;
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
@@ -152,7 +156,11 @@ img { max-width: 100%; height: auto; }
 
 .sidebar-nav {
     padding: 8px 0;
-    flex: 1;
+    flex: 1 1 0;
+    /* Sin min-height:0 el flex no deja encoger al nav y su overflow
+       nunca se activa: aquí vive ahora el scroll del sidebar. */
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .sidebar-section {
@@ -276,6 +284,91 @@ img { max-width: 100%; height: auto; }
     background: rgba(255, 255, 255, 0.05);
 }
 
+/* --- Botón de colapso del sidebar --- */
+/* Pegado al borde derecho del aside: viaja con el borde cuando el
+   ancho cambia. Solo escritorio: en el bloque responsive de abajo se
+   esconde en móvil, donde manda el off-canvas del #toggleSidebar. El
+   chevron rota 180° con el estado, así el ícono correcto no depende
+   de que el JS haya cargado. */
+.sidebar-colapsar {
+    position: absolute;
+    top: 20px;
+    right: -14px;
+    z-index: 1001;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out;
+}
+
+.sidebar-colapsar:hover {
+    background: var(--surface-2);
+    color: var(--foreground);
+}
+
+.sidebar-colapsar i {
+    font-size: 14px;
+    line-height: 1;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.admin-colapsado .sidebar-colapsar i {
+    transform: rotate(180deg);
+}
+
+/* --- Sidebar colapsado: solo iconos --- */
+/* Todo el estado visual del colapso vive dentro de min-width: 992px
+   para no tocar el off-canvas del móvil: debajo de ese ancho el
+   sidebar se muestra completo con etiquetas, tenga o no la clase. */
+@media (min-width: 992px) {
+    body.admin-colapsado .admin-sidebar {
+        width: var(--sidebar-ancho-colapsado);
+    }
+
+    body.admin-colapsado .admin-main {
+        margin-left: var(--sidebar-ancho-colapsado);
+    }
+
+    body.admin-colapsado .sidebar-marca,
+    body.admin-colapsado .sidebar-etiqueta,
+    body.admin-colapsado .sidebar-section-title {
+        display: none;
+    }
+
+    /* El logo queda centrado y cada ítem se vuelve un botón cuadrado
+       de 44px centrado en el ancho colapsado: mismo objetivo táctil
+       que tienen las filas expandidas. */
+    body.admin-colapsado .sidebar-header {
+        justify-content: center;
+    }
+
+    body.admin-colapsado .sidebar-link,
+    body.admin-colapsado .sidebar-config {
+        width: 44px;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        justify-content: center;
+    }
+}
+
+/* --- Tooltip de los ítems colapsados --- */
+/* Bootstrap inyecta el tooltip en <body> (container:'body' se pasa
+   en pieAdmin.php) para que el aside no lo recorte. Se alinea al
+   tema del panel en vez del negro por defecto de Bootstrap. */
+.tooltip {
+    --bs-tooltip-bg: var(--surface-3);
+    --bs-tooltip-color: var(--foreground);
+    --bs-tooltip-opacity: 1;
+}
+
 /* --- Modal de Configuraciones --- */
 /* Usa la clase modal-xl de Bootstrap (1140px). No se reescribe el ancho
    a mano: antesponia max-width y terminaba mas angosto que modal-lg.
@@ -328,12 +421,14 @@ img { max-width: 100%; height: auto; }
 /* Columna flex para que .admin-content crezca y empuje el footer al
    fondo con su margin-top:auto, igual que hace .sidebar-footer. */
 .admin-main {
-    margin-left: 280px;
+    margin-left: var(--sidebar-ancho);
     flex: 1;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: var(--background);
+    /* En sincronía con la transición de width del sidebar. */
+    transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- Footer --- */
@@ -1111,7 +1206,7 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 991.98px) {
     .admin-sidebar {
         transform: translateX(-100%);
-        width: 280px;
+        width: var(--sidebar-ancho);
     }
     .admin-sidebar.show {
         transform: translateX(0);
@@ -1120,6 +1215,11 @@ img { max-width: 100%; height: auto; }
         margin-left: 0;
     }
     .topbar-search {
+        display: none;
+    }
+    /* El colapso es un modo de escritorio: en móvil el sidebar es
+       off-canvas y este botón no aplica. */
+    .sidebar-colapsar {
         display: none;
     }
 }

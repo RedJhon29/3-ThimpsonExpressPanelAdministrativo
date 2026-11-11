@@ -113,10 +113,11 @@ Hay **dos** bases `thimpsonexpress` con el mismo contenido: la local (`127.0.0.1
 
 ## CSS
 
-- Tokens del proyecto en `Publico/Recursos/css/admin.css` (26 definidos).
-- **El reset global de `admin.css:47` aplica `border-radius: var(--radius) !important` a todo.** Con `--radius: 0` aplasta *todos* los radios. Para dejar un componente circular hay que declarar su radio con `!important` (patrón ya usado en los iconos de SweetAlert y en `.usuario-foto-imagen`). **No borrar el reset**: afecta a todo el panel.
+- Tokens del proyecto en `Publico/Recursos/css/admin.css` (28 definidos; incluye `--sidebar-ancho` y `--sidebar-ancho-colapsado`).
+- **El reset global de `admin.css:49` aplica `border-radius: var(--radius) !important` a todo.** Con `--radius: 0` aplasta *todos* los radios. Para dejar un componente circular hay que declarar su radio con `!important` (patrón ya usado en los iconos de SweetAlert y en `.usuario-foto-imagen`). **No borrar el reset**: afecta a todo el panel.
 - `urlAsset('Publico/Recursos/css/admin.css')` versiona el archivo con `filemtime()`. Los recursos propios **deben** pasar por ahí; los de terceros no.
 - `--primary-foreground` es el token para texto sobre `--primary`.
+- **Sidebar colapsable (solo escritorio, ≥992px):** la clase `admin-colapsado` va en `<body>`; todo su CSS vive dentro de `@media (min-width: 992px)` para no tocar el off-canvas del móvil. El estado se persiste en `localStorage` con la key `panel.sidebar.colapsado`, que está **escrita en dos sitios** (script anti-parpadeo de `barraLateralAdmin.php` y `prepararColapsoSidebar()` en `pieAdmin.php`): si se cambia una, se cambian ambas. Las etiquetas de los ítems viven solo en `span.sidebar-etiqueta` (única fuente del tooltip y del `aria-label` en modo colapsado); los submenús futuros deben salir como flyout, el mismo patrón del tooltip (`container: 'body'`).
 
 ---
 
@@ -137,7 +138,7 @@ Hay **dos** bases `thimpsonexpress` con el mismo contenido: la local (`127.0.0.1
 
 ## Paginación
 
-DataTables pagina, busca y ordena **en el cliente** (`pieAdmin.php:70`), y funciona: con 29 usuarios muestra «Mostrando 1 a 10 de 29» con páginas 1·2·3 y opciones de 10/25/50/100 filas. No hace falta tocarlo salvo que la tabla supere los miles de registros.
+DataTables pagina, busca y ordena **en el cliente** (`pieAdmin.php:75`), y funciona: con 29 usuarios muestra «Mostrando 1 a 10 de 29» con páginas 1·2·3 y opciones de 10/25/50/100 filas. No hace falta tocarlo salvo que la tabla supere los miles de registros.
 
 ---
 
@@ -166,7 +167,7 @@ git show 95caa1f:Vistas/Riders/index.php
 | Sin auditoría | — | Ver la caja de recordatorio arriba. Bloqueada hasta que el usuario dé el OK. |
 | ~~Credenciales de desarrollo en el repo~~ | ~~`Configuracion/conexion.php`~~ | **Resuelto 2026-10-30**: la cadena vive en `.env` (ignorado) y `conexion.php` solo lee `DATABASE_URL`. |
 | Sin tests, sin CI | — | No hay framework de pruebas instalado. |
-| Paginación solo en el cliente | DataTables en `pieAdmin.php:70` | Con 10k+ filas conviene pasar a `serverSide`. Ojo: los botones de la tabla apuntan con `form="form-eliminar-{id}"` a formularios ocultos que se renderizan en PHP **fuera** de la tabla; con `serverSide` esas filas no tendrían su formulario y el borrado fallaría en silencio. Hay que reestructurar el borrado antes. |
+| Paginación solo en el cliente | DataTables en `pieAdmin.php:75` | Con 10k+ filas conviene pasar a `serverSide`. Ojo: los botones de la tabla apuntan con `form="form-eliminar-{id}"` a formularios ocultos que se renderizan en PHP **fuera** de la tabla; con `serverSide` esas filas no tendrían su formulario y el borrado fallaría en silencio. Hay que reestructurar el borrado antes. |
 | El topbar no muestra la foto | `Vistas/Plantillas/encabezadoAdmin.php` | Muestra las iniciales en una caja cuadrada, no `imagenesModel::url()`. Es consistente con el resto, no es un bug. |
 
 ---
@@ -195,7 +196,7 @@ git show 95caa1f:Vistas/Riders/index.php
 | CSRF, sesión, errores traducidos | `Configuracion/seguridad.php` |
 | Router + 11 rutas | `index.php` |
 | Plantillas | `Vistas/Plantillas/{encabezadoAdmin,barraLateralAdmin,pieAdmin}.php` |
-| Tokens CSS | `Publico/Recursos/css/admin.css:23-43` (los 3 de DataTables en `539-541`, los 2 de la rueda en `1226-1227`) |
+| Tokens CSS | `Publico/Recursos/css/admin.css:23-45` (los 3 de DataTables en `678-680`, los 2 de la rueda en `1336-1337`) |
 | Gestión de imágenes | `Modelos/imagenesModel.php` |
 | CRUD de usuarios | `Modelos/usuariosModel.php`, `Controladores/usuariosController.php` |
 | Conteos del dashboard | `Modelos/panelModel.php` |

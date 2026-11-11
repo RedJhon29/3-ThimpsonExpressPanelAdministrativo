@@ -4,19 +4,22 @@ ARCHIVO: Vistas/Plantillas/barraLateralAdmin.php
 ==================================================-->
 
 <!--=====================DETALLES=====================
-QUÉ HACE: pinta el sidebar con sus categorías y marca el ítem activo
-    según $activeMenu; añade el botón de apagado y overlay del topbar.
+QUÉ HACE: pinta el sidebar, marca el ítem activo según $activeMenu
+    y trae el botón de colapso con su script de estado persistido.
 VINCULADO A: lo incluye el controlador después de
     encabezadoAdmin.php y antes de la vista; lo cierra pieAdmin.php.
-SI SE ALTERA: una key nueva de $activeMenu debe existir aquí para
-    que se resalte.
+SI SE ALTERA: la key panel.sidebar.colapsado y el breakpoint 992px
+    deben coincidir con prepararColapsoSidebar() de pieAdmin.php; la
+    etiqueta de cada ítem vive solo en .sidebar-etiqueta.
 LÍMITES: solo hay dos vistas, Dashboard y Usuarios. Las otras
     categorías se conservan como títulos vacíos para cuando existan
     sus rutas: los enlaces que había ahí apuntan a rutas inexistentes.
-    El pie tiene Configuraciones como botón sin href y todavía sin
-    acción: /configuraciones no tiene ruta y un enlace ahí daría 404.
-    La salida de sesión vive en #logoutBtn del topbar.
-FECHA: 2026-10-02 | LUGAR: Ocotal, Nueva Segovia
+    En modo colapsado (solo escritorio) los submenús futuros deben
+    salir como flyout, el patrón del tooltip de cada .sidebar-link. El
+    pie tiene Configuraciones sin href todavía: /configuraciones no
+    tiene ruta y un enlace ahí daría 404. La salida de sesión vive en
+    #logoutBtn del topbar.
+FECHA: 2026-11-10 | LUGAR: Ocotal, Nueva Segovia
 ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 ==================================================-->
 
@@ -24,10 +27,20 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
 
 <!-- Sidebar -->
 <aside class="admin-sidebar" id="adminSidebar">
+    <!-- Colapso/expandir: pegado al borde derecho, solo escritorio.
+         El chevron rota 180° con CSS cuando body lleva .admin-colapsado
+         y el estado persistido lo aplica el script que sigue al aside. -->
+    <button type="button" class="sidebar-colapsar" id="colapsarSidebar"
+            aria-controls="adminSidebar" aria-expanded="true"
+            aria-label="Colapsar menú lateral"
+            title="Colapsar menú lateral">
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+    </button>
+
     <!-- Logo -->
     <div class="sidebar-header">
         <div class="sidebar-logo">T</div>
-        <div>
+        <div class="sidebar-marca">
             <div class="sidebar-brand-text">Thimpson Express</div>
             <div class="sidebar-brand-sub">Panel Admin</div>
         </div>
@@ -42,10 +55,10 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
         <div class="sidebar-section">
             <span class="sidebar-section-title">Operaciones</span>
             <a href="<?php echo BASE_URL; ?>/dashboard" class="sidebar-link <?php echo ($activeMenu ?? '') === 'dashboard' ? 'active' : ''; ?>">
-                <i class="bi bi-grid-1x2"></i> Dashboard
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i><span class="sidebar-etiqueta">Dashboard</span>
             </a>
             <a href="<?php echo BASE_URL; ?>/usuarios" class="sidebar-link <?php echo ($activeMenu ?? '') === 'usuarios' ? 'active' : ''; ?>">
-                <i class="bi bi-people-fill"></i> Usuarios
+                <i class="bi bi-people-fill" aria-hidden="true"></i><span class="sidebar-etiqueta">Usuarios</span>
             </a>
         </div>
 
@@ -73,10 +86,44 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
              se puede pulsar, pero todavia no hace nada. -->
         <button type="button" id="botonConfiguraciones" class="sidebar-config"
                 title="Configuraciones (próximamente)">
-            <i class="bi bi-wrench"></i> Configuraciones
+            <i class="bi bi-wrench" aria-hidden="true"></i><span class="sidebar-etiqueta">Configuraciones</span>
         </button>
     </div>
 </aside>
+
+<!-- Estado colapsado persistido: se aplica durante el parseo para que
+     la primera pintura ya venga con el ancho final y no haya parpadeo. -->
+<script>
+/*====================ENCABEZADO====================
+FUNCIÓN: colapso persistido (IIFE) | ROL: plantilla (JS)
+==================================================
+=====================DETALLES=====================
+QUÉ HACE: aplica el colapso guardado durante el parseo, antes
+    de la primera pintura, para evitar el parpadeo.
+VINCULADO A: escribe la clase admin-colapsado de admin.css; la
+    sincroniza después prepararColapsoSidebar() de pieAdmin.php.
+SI SE ALTERA: si cambia la key o el breakpoint hay que tocar
+    también prepararColapsoSidebar() de pieAdmin.php.
+FECHA: 2026-11-10 | LUGAR: Ocotal, Nueva Segovia
+ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
+=================================================*/
+(function () {
+    try {
+        var escritorio = !window.matchMedia || window.matchMedia('(min-width: 992px)').matches;
+        if (escritorio && localStorage.getItem('panel.sidebar.colapsado') === '1') {
+            document.body.classList.add('admin-colapsado');
+            var boton = document.getElementById('colapsarSidebar');
+            if (boton) {
+                boton.setAttribute('aria-expanded', 'false');
+                boton.setAttribute('aria-label', 'Expandir menú lateral');
+                boton.title = 'Expandir menú lateral';
+            }
+        }
+    } catch (error) {
+        /* Sin localStorage (modo privado): el panel abre expandido. */
+    }
+})();
+</script>
 
 <!-- Modal: Configuraciones -->
 <!-- Es un modal largo con cuerpo desplazable y lo abre el boton
