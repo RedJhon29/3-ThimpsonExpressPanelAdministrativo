@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <!-- Favicon Thimpson Express: la T del logo sobre --primary.
+         Misma rejilla 64 que scripts/generar-favicon.php, para que el
+         .ico y este SVG se vean iguales. Esquinas rectas: --radius: 0px. -->
+    <rect width="64" height="64" fill="#FBB03B"/>
+    <rect x="12" y="15" width="40" height="10" fill="#000000"/>
+    <rect x="27" y="25" width="10" height="24" fill="#000000"/>
+</svg>

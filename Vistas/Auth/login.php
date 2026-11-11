@@ -22,6 +22,11 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'Iniciar Sesión'; ?> — <?php echo APP_NAME; ?></title>
+    <!-- Favicon: la T del logo en primary. Igual que en
+         encabezadoAdmin.php: el .ico cubre los navegadores sin SVG y
+         declarar el icono elimina el 404 de /favicon.ico. -->
+    <link rel="icon" href="<?php echo urlAsset('Publico/Recursos/img/favicon.ico'); ?>" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="<?php echo urlAsset('Publico/Recursos/img/favicon.svg'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
