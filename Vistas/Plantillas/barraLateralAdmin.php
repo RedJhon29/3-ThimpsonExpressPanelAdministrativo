@@ -35,7 +35,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
             aria-controls="adminSidebar" aria-expanded="true"
             aria-label="Colapsar menú lateral"
             title="Colapsar menú lateral">
-        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        <i class="bi bi-list" aria-hidden="true"></i>
     </button>
 
     <!-- Logo -->
@@ -189,7 +189,7 @@ ESCRITO POR: ING. DENIS MANUEL LÓPEZ MOLINA.
     <header class="admin-topbar">
         <div class="d-flex align-items-center gap-3 admin-topbar-izq">
             <button class="btn btn-ghost d-lg-none p-1" id="toggleSidebar" style="color:var(--muted);">
-                <i class="bi bi-chevron-left fs-4"></i>
+                <i class="bi bi-list fs-4"></i>
             </button>
             <div class="topbar-search">
                 <i class="bi bi-search"></i>
